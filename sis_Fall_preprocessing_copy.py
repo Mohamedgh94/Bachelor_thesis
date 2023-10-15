@@ -85,8 +85,8 @@ def process_subject(subject_id):
 def normalize_and_encode(all_data):
     try:
         scaler = StandardScaler()
-        sensor_cols = ['ADXL345_x', 'ADXL345_y', 'ADXL345_z', 'ITG3200_x', 'ITG3200_y', 'ITG3200_z', 'MMA8451Q_x', 'MMA8451Q_y', 'MMA8451Q_z']
-        all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
+        all_data.iloc[:, :-5].columns
+        #all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
         all_data[sensor_cols] = all_data[sensor_cols].astype(float)
 
         all_data[sensor_cols] = scaler.fit_transform(all_data[sensor_cols])
@@ -98,9 +98,9 @@ def normalize_and_encode(all_data):
             le = LabelEncoder()
             all_data[col] = le.fit_transform(all_data[col])
             label_encoders[col] = le  # Store the encoder
-            joblib.dump(scaler, 'scaler.pkl')
+            
     except Exception as e:
-        logging.error(f"Error in normalize_and_encode: {e}")
+        print(f"Error in normalize_and_encode: {e}")
         return None
 
 def extract_features(segment):
