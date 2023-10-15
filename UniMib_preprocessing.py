@@ -6,10 +6,10 @@ from pandas import read_csv
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 
-""" # Pfad zur .mat-Datei
-mat_file_path = "/Users/mohamadghajar/Downloads/UniMiB-SHAR/data/full_data.mat"
-output_directory = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/untitled folder 2'
-# Laden Sie die .mat-Datei
+ # Pfad zur .mat-Datei
+mat_file_path = "/data/datasets/act_datasets/UniMiB-SHAR/data/full_data.mat"
+output_directory = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
+
 import scipy.io
 
 # Load the dataset
@@ -76,10 +76,10 @@ for subject_folder in os.listdir(output_directory):
         if not os.listdir(subject_path):
             empty_folders_check.append(subject_folder)
 
-empty_folders_check """
+empty_folders_check 
+"""
 
-
-DATA_DIR = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/untitled folder 2'
+DATA_DIR = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
 SUBJECT_IDS = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
 
 WINDOW_SIZE = 200
@@ -255,3 +255,4 @@ def main():
 
 if __name__ == '__main__':
     main()        
+ """   
