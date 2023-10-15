@@ -87,7 +87,7 @@ STRIDE = 50
 SOFT_BIOMETRICS= ['age', 'height', 'weight', 'gender']
 
 def get_person_info(subject_id):
-    file_path = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/subjects_info.csv'  
+    file_path = '/data/malghaja/Bachelor_thesis/subjects_info.csv'  
     person_info = pd.read_csv(file_path)
     
     # Filter the DataFrame based on the Subject_ID
