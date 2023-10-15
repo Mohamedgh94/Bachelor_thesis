@@ -142,7 +142,11 @@ def label_encode(df, subject_info):
         if col in df.columns and col in subject_info.columns:
             df[col] = df[col].astype(str)
             df[col] = le.fit_transform(df[col])
-
+def rearrange_columns(df):
+    cols = list(df.columns)
+    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender']]
+    cols.extend(['person_id', 'age', 'height', 'weight', 'gender'])
+    return df[cols]
 def split_and_save(df):
     X = df.iloc[:,:-5]
     y = df[['subject_id', 'age', 'height', 'weight', 'gender']]
@@ -196,7 +200,9 @@ def main():
     feature_df = all_data.groupby('subject_id').apply(lambda segment: extract_features(segment, sensor_cols))
     all_data = pd.merge(all_data, feature_df, on='subject_id', how='left')
     all_data = remove_original_sensor_data(all_data) 
-
+    all_data =  rearrange_columns(all_data)
+    
+    return df[cols]
     print(all_data.head())
     print(all_data.info())
     print(all_data.describe())
