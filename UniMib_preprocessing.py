@@ -5,7 +5,7 @@ import os
 from pandas import read_csv
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
-
+"""
  # Pfad zur .mat-Datei
 mat_file_path = "/data/datasets/act_datasets/UniMiB-SHAR/data/full_data.mat"
 output_directory = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
@@ -255,4 +255,4 @@ def main():
 
 if __name__ == '__main__':
     main()        
- """   
+   
