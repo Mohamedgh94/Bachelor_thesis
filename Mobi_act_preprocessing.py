@@ -202,7 +202,6 @@ def main():
     all_data = remove_original_sensor_data(all_data) 
     all_data =  rearrange_columns(all_data)
     
-    return df[cols]
     print(all_data.head())
     print(all_data.info())
     print(all_data.describe())
