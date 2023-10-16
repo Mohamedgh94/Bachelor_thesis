@@ -144,8 +144,8 @@ def label_encode(df, subject_info):
             df[col] = le.fit_transform(df[col])
 def rearrange_columns(df):
     cols = list(df.columns)
-    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender']]
-    cols.extend(['person_id', 'age', 'height', 'weight', 'gender'])
+    cols = [col for col in cols if col not in ['subject_id', 'age', 'height', 'weight', 'gender']]
+    cols.extend(['subject_id', 'age', 'height', 'weight', 'gender'])
     return df[cols]
 def split_and_save(df):
     X = df.iloc[:,:-5]
