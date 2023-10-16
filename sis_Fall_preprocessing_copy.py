@@ -89,7 +89,7 @@ def normalize_and_encode(all_data):
         #all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
         #all_data[cols_to_normalize] = all_data[sensor_cols].astype(float)
 
-        all_data[cols_to_normalize] = scaler.fit_transform(all_data[sensor_cols])
+        all_data[cols_to_normalize] = scaler.fit_transform(all_data[cols_to_normalize])
 
         # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
