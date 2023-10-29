@@ -22,7 +22,9 @@ class GatedTransformer(nn.Module):
         print(f"After embedding shape: {x.shape}")  # Debugging line
         
         for encoder in self.encoders:
+            x = x.transpose(0, 1)
             x = encoder(x)
+            x = x.transpose(1, 0)
             print(f"After encoder shape: {x.shape}")  # Debugging line
         
         #x = x.mean(dim=1)
