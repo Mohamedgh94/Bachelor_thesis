@@ -14,7 +14,7 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.attention = nn.MultiheadAttention(d_model, num_heads)
         
-     def forward(self, q, k, v):
+    def forward(self, q, k, v):
         # Transpose q, k, v to [batch_size, seq_len, d_model]
         q = q.transpose(0, 1)
         k = k.transpose(0, 1)
@@ -32,4 +32,4 @@ class MultiHeadAttention(nn.Module):
 
         # Multihead Attention
         output, _ = self.attention(q, k, v)
-        return output
+        return output 
