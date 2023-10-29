@@ -15,6 +15,7 @@ class MultiHeadAttention(nn.Module):
         self.attention = nn.MultiheadAttention(d_model, num_heads)
         
     def forward(self, q, k, v):
+        print(q.shape)
         q = self.q_linear(q)
         k = self.k_linear(k)
         v = self.v_linear(v)
