@@ -10,6 +10,7 @@ from encoder import EncoderLayer
 class GatedTransformer(nn.Module):
     def __init__(self, input_dim=45, d_model=512, num_heads=8, d_ff=2048, num_layers=6):
         super(GatedTransformer, self).__init__()
+        print(f'self.embedding.weight.shape',self.embedding.weight.shape)
         self.embedding = nn.Linear(input_dim , d_model )
         self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
         self.classifier = nn.Linear(d_model, 5)  # 5 outputs for person, age, height, weight, and gender
