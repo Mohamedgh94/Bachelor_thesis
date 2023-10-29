@@ -21,7 +21,7 @@ class SaveAndLoadModel:
         print(type(self.epochs))
         
         for epoch in range(epochs):
-            print(f'batch type','train loader type',type(batch),type(train_loader))
+            print(f'batch type','train loader type',type(train_loader))
             for batch in train_loader:
                 inputs, labels = batch
                 #print(f'inputs.shape, labels.shape',inputs.shape, labels.shape)
