@@ -10,15 +10,15 @@ class Main:
     def __init__(self, model, loss_fn):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
-        self.model = model
         self.loss_fn = loss_fn
         self.get_file_paths()
         self.get_hyperparameters()
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.model_saver = SaveAndLoadModel(self.model,loss_fn=self.loss_fn ,optimizer_class= torch.optim.Adam,epochs=self.epochs ,model_path= self.model_path)
+        self.model_saver = SaveAndLoadModel(self.model, loss_fn=self.loss_fn, optimizer_class=torch.optim.Adam, epochs=self.epochs, model_path=self.model_path)
         self.train_loader = DataLoader(IMUDataset(self.train_csv), batch_size=self.batch_size, shuffle=True)
         self.valid_loader = DataLoader(IMUDataset(self.valid_csv), batch_size=self.batch_size, shuffle=False)
         self.test_loader = DataLoader(IMUDataset(self.test_csv), batch_size=self.batch_size, shuffle=False)
+
         
     def get_file_paths(self):
         self.train_csv = input("Enter the path to the training CSV file: ")
