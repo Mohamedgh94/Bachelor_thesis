@@ -27,6 +27,7 @@ class SaveAndLoadModel:
         print(f'batch type','train loader type',type(train_loader))
         for batch in train_loader:
             inputs, labels = batch
+            inputs, labels = inputs.to(self.device), labels.to(self.device)
             #print(f'inputs.shape, labels.shape',inputs.shape, labels.shape)
             labels = torch.argmax(labels, dim=1)
             self.optimizer.zero_grad()
@@ -52,6 +53,7 @@ class SaveAndLoadModel:
         with torch.no_grad():
             for batch in valid_loader:
                 inputs, labels = batch
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
                 labels = torch.argmax(labels, dim=1)
                 outputs = self.model(inputs)
                 loss = self.loss_fn(outputs, labels)
@@ -73,6 +75,7 @@ class SaveAndLoadModel:
         with torch.no_grad():
             for batch in test_loader:
                 inputs, labels = batch
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
                 outputs = self.model(inputs)
                 _, predicted = torch.max(outputs.data, dim=1)
                 all_outputs.extend(predicted.cpu().numpy())
