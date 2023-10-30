@@ -3,6 +3,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+import time
+
 class SaveAndLoadModel:
     def __init__(self, model, loss_fn, optimizer_class, epochs,model_path="model.pth"):
         self.model = model
