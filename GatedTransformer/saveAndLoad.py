@@ -6,12 +6,13 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 import time
 
 class SaveAndLoadModel:
-    def __init__(self, model, loss_fn, optimizer_class, epochs,model_path="model.pth"):
+    def __init__(self, model, loss_fn, optimizer_class, epochs,model_path="model.pth",  device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")):
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer_class(self.model.parameters())
         self.epochs = epochs
         self.model_path = model_path
+        self.device = device
 
       
     def train(self, train_loader, epochs = 10):
