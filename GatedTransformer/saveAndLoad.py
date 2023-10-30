@@ -13,6 +13,7 @@ class SaveAndLoadModel:
 
       
     def train(self, train_loader, epochs = 10):
+        trainings_start_time = time.time()
         #optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)  
         self.model.train()
         total_loss = 0
@@ -41,9 +42,12 @@ class SaveAndLoadModel:
         train_accuracy = 100 * corect / total        
         avg_loss = total_loss / len(train_loader)
         print(f"Epoch {epoch+1}, Train Loss: {avg_loss}, train_accuracy: {train_accuracy}")
+        trainigend_time = time.time()
+        print(f'training time',trainigend_time-trainings_start_time)
         return avg_loss, train_accuracy
 
     def validate(self, valid_loader):
+        validation_start_time = time.time()
         self.model.eval()
         total_loss = 0
         with torch.no_grad():
@@ -58,9 +62,12 @@ class SaveAndLoadModel:
                 corect += (predicted == labels).sum().item()
         valid_accuracy = 100 * corect / total
         avg_loss = total_loss / len(valid_loader)
+        validationend_time = time.time()
+        print(f'validation time',validationend_time-validation_start_time)
         return avg_loss, valid_accuracy
 
     def test(self, test_loader):
+        teststart_time = time.time()
         self.model.eval()
         all_outputs = []
         all_labels = []
@@ -76,6 +83,8 @@ class SaveAndLoadModel:
         precision = precision_score(all_labels, all_outputs, average="weighted")
         recall = recall_score(all_labels, all_outputs, average="weighted")
         metrics = {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall}
+        testend_time = time.time()
+        print(f'test time',testend_time-teststart_time)
         return metrics
 
     def train_and_validate(self, train_loader, valid_loader, epochs):
