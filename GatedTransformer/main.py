@@ -32,6 +32,7 @@ class Main:
         self.epochs = int(input("Enter the number of epochs: "))
 
     def run(self):
+        print("Running on device:", self.device)
         print("What would you like to do?")
         print("1: Train and Validate")
         print("2: Train, Validate, and Test")
