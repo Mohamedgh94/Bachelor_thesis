@@ -16,8 +16,11 @@ class MultiHeadAttention(nn.Module):
         
     def forward(self, q, k, v):
          # Transpose q, k, v to [batch_size, seq_len, d_model]
+        print(f"q shape: {q.shape}")
         q = q.transpose(0, 1)
+        print(f"k shape: {k.shape}")
         k = k.transpose(0, 1)
+        print(f"v shape: {v.shape}")
         v = v.transpose(0, 1)
          # Apply linear transformations
         q = self.q_linear(q)
