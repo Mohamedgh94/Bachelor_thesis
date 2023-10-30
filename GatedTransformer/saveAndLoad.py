@@ -21,27 +21,24 @@ class SaveAndLoadModel:
         total = 0
         print(type(self.epochs))
         
-        for epoch in range(epochs):
-            print(f'batch type','train loader type',type(train_loader))
-            for batch in train_loader:
-                inputs, labels = batch
-                #print(f'inputs.shape, labels.shape',inputs.shape, labels.shape)
-                labels = torch.argmax(labels, dim=1)
-                self.optimizer.zero_grad()
-                outputs = self.model(inputs)
-                
-                _, predicted = torch.max(outputs, dim=1)
-                #print(f'predicted.shape, labels.shape',predicted.shape, labels.shape)  
-                loss = self.loss_fn(outputs, labels)
-                loss.backward()
-                self.optimizer.step()
-                total_loss += loss.item()
-            
-                total += labels.size(0)
-                corect += (predicted == labels).sum().item()
+        
+        print(f'batch type','train loader type',type(train_loader))
+        for batch in train_loader:
+            inputs, labels = batch
+            #print(f'inputs.shape, labels.shape',inputs.shape, labels.shape)
+            labels = torch.argmax(labels, dim=1)
+            self.optimizer.zero_grad()
+            outputs = self.model(inputs)
+            _, predicted = torch.max(outputs, dim=1)
+            #print(f'predicted.shape, labels.shape',predicted.shape, labels.shape)  
+            loss = self.loss_fn(outputs, labels)
+            loss.backward()
+            self.optimizer.step()
+            total_loss += loss.item()  
+            total += labels.size(0)
+            corect += (predicted == labels).sum().item()
         train_accuracy = 100 * corect / total        
         avg_loss = total_loss / len(train_loader)
-        print(f"Epoch {epoch+1}, Train Loss: {avg_loss}, train_accuracy: {train_accuracy}")
         trainigend_time = time.time()
         print(f'training time',trainigend_time-trainings_start_time)
         return avg_loss, train_accuracy
