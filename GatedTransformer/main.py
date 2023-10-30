@@ -14,7 +14,7 @@ class Main:
         self.get_file_paths()
         self.get_hyperparameters()
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.model_saver = SaveAndLoadModel(self.model, loss_fn=self.loss_fn, optimizer_class=torch.optim.Adam, epochs=self.epochs, model_path=self.model_path)
+        self.model_saver = SaveAndLoadModel(self.model,loss_fn=self.loss_fn ,optimizer_class= torch.optim.Adam,epochs=self.epochs ,model_path= self.model_path, device=self.device)
         self.train_loader = DataLoader(IMUDataset(self.train_csv), batch_size=self.batch_size, shuffle=True)
         self.valid_loader = DataLoader(IMUDataset(self.valid_csv), batch_size=self.batch_size, shuffle=False)
         self.test_loader = DataLoader(IMUDataset(self.test_csv), batch_size=self.batch_size, shuffle=False)
