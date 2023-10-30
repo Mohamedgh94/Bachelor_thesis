@@ -1,4 +1,3 @@
-
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
@@ -9,6 +8,8 @@ from GatedTransformer import GatedTransformer
 
 class Main:
     def __init__(self, model, loss_fn):
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model = model.to(self.device)
         self.model = model
         self.loss_fn = loss_fn
         self.get_file_paths()
@@ -67,6 +68,7 @@ if __name__ == "__main__":
     model = GatedTransformer(input_dim, d_model, num_heads, d_ff, num_layers)
 
     loss_fn = torch.nn.CrossEntropyLoss()
+    print("CUDA available:", torch.cuda.is_available())
 
     # Initialize the MainController
     controller = Main(model, loss_fn)
