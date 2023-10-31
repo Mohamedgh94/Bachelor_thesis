@@ -24,8 +24,8 @@ class IMUDataset(Dataset):
 
 
 # Create instances of the IMUDataset class for each dataset
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_valid_data.csv")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/tsample.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/vsample.csv")
 test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_test_data.csv")
 
 # Create DataLoader instances
