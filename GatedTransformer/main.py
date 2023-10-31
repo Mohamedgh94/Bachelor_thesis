@@ -15,9 +15,10 @@ class Main:
         self.loss_fn = loss_fn
         self.get_file_paths()
         self.get_hyperparameters()
-        summary(self.model, input_size=(self.batch_size, 45))  # Replace 45 with the actual input dimension if it's different
+        #summary(self.model, input_size=(self.batch_size, 45)) 
         
         print(f'Total number of trainable parameters: {sum(p.numel() for p in self.model.parameters() if p.requires_grad)}')
+
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.model_saver = SaveAndLoadModel(self.model,loss_fn=self.loss_fn ,optimizer_class= torch.optim.Adam,epochs=self.epochs ,model_path= self.model_path, device=self.device)
         self.train_loader = DataLoader(IMUDataset(self.train_csv), batch_size=self.batch_size, shuffle=True)
