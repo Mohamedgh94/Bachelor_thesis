@@ -13,6 +13,8 @@ class SaveAndLoadModel:
         self.epochs = epochs
         self.model_path = model_path
         self.device = device
+        total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        print(f"Total number of trainable parameters: {total_params}")
 
       
     def train(self, train_loader, epochs = 10):
@@ -83,6 +85,11 @@ class SaveAndLoadModel:
                 _, predicted = torch.max(outputs.data, dim=1)
                 all_outputs.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
+            
+        all_labels = np.array(all_labels).reshape(-1).astype(int)
+        all_outputs = np.array(all_outputs).reshape(-1).astype(int)
+        print("all_outputs shape:", np.array(all_outputs).shape, " type:", type(all_outputs))
+        print("all_labels shape:", np.array(all_labels).shape, " type:", type(all_labels))   
         accuracy = accuracy_score(all_labels, all_outputs)
         f1 = f1_score(all_labels, all_outputs, average="weighted")   
         precision = precision_score(all_labels, all_outputs, average="weighted")
