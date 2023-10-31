@@ -8,7 +8,7 @@ from GatedTransformer import GatedTransformer
 
 class Main:
     def __init__(self, model, loss_fn):
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
         self.loss_fn = loss_fn
         self.get_file_paths()
