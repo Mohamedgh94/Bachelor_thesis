@@ -22,10 +22,10 @@ class SaveAndLoadModel:
         total_loss = 0
         corect = 0
         total = 0
-        print(type(self.epochs))
         
         
-        print(f'batch type','train loader type',type(train_loader))
+        
+        print(f'train loader type',type(train_loader))
         for batch in train_loader:
             inputs, labels = batch
             inputs, labels = inputs.to(self.device), labels.to(self.device)
@@ -51,6 +51,8 @@ class SaveAndLoadModel:
         validation_start_time = time.time()
         self.model.eval()
         total_loss = 0
+        corect = 0 
+        total = 0
         with torch.no_grad():
             for batch in valid_loader:
                 inputs, labels = batch
