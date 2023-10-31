@@ -15,14 +15,14 @@ class GatedTransformer(nn.Module):
         self.classifier = nn.Linear(d_model, 5)  # 5 outputs for person, age, height, weight, and gender
 
     def forward(self, x):  # Unindented to match with __init__
-        print(f"Input shape: {x.shape}")  # Debugging line
+        #print(f"Input shape: {x.shape}")  # Debugging line
         x = self.embedding(x)
         #print(f"After embedding shape: {x.shape}")  # Debugging line
         x = x.unsqueeze(0)  # Introduce a sequence length dimension of 1
         #print(f"After unsqueeze shape: {x.shape}")  # Debugging line
         for encoder in self.encoders:
             x = encoder(x)
-            print(f"After encoder shape: {x.shape}")  # Debugging line
+            #print(f"After encoder shape: {x.shape}")  # Debugging line
         x = x.squeeze(0)  # Remove the sequence length dimension
         # print(f"After squeeze shape: {x.shape}")  # Debugging line
         x = self.classifier(x)
