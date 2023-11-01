@@ -87,6 +87,8 @@ class SaveAndLoadModel:
                 outputs = self.model(inputs)
                 print("Batch Output Shape:", outputs.shape)
                 _, predicted = torch.max(outputs.data, dim=1)
+                flat_labels = labels.view(-1)
+                flat_predicted = predicted.view(-1)
                 print("Before: ", len(all_outputs), len(all_labels))
                 all_outputs.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
