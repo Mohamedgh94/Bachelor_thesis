@@ -82,13 +82,20 @@ class SaveAndLoadModel:
             for batch in test_loader:
                 inputs, labels = batch
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
+                print("Batch Input Shape:", inputs.shape)
+                print("Batch Labels Shape:", labels.shape)
                 outputs = self.model(inputs)
+                print("Batch Output Shape:", outputs.shape)
                 _, predicted = torch.max(outputs.data, dim=1)
+                print("Before: ", len(all_outputs), len(all_labels))
                 all_outputs.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
+                print("After: ", len(all_outputs), len(all_labels))
             
-        all_labels = np.array(all_labels).reshape(-1).astype(int)
-        all_outputs = np.array(all_outputs).reshape(-1).astype(int)
+        all_labels = np.array(all_labels).reshape(-1)
+        all_outputs = np.array(all_outputs).reshape(-1)
+        all_labels = all_labels.astype(int)
+        all_outputs = all_outputs.astype(int)
         print("all_outputs shape:", np.array(all_outputs).shape, " type:", type(all_outputs))
         print("all_labels shape:", np.array(all_labels).shape, " type:", type(all_labels))   
         accuracy = accuracy_score(all_labels, all_outputs)
