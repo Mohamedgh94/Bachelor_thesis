@@ -13,7 +13,7 @@ print(f'validation subjects: {dfv["person_id"].unique()}')
 import pandas as pd
 from sklearn.model_selection import train_test_split
 df = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
-print(f'validation subjects: {dfv["person_id"].unique()}')
+print(f'validation subjects: {df["person_id"].unique()}')
 unique_person_ids = df['person_id'].unique()
 X = df.iloc[:,:-5]
 y = df.iloc[:,-5:]
