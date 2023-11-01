@@ -90,7 +90,7 @@ class SaveAndLoadModel:
                 if debug:
                     
                     print("Batch Output Shape:", outputs.shape)
-                _, predicted = outputs.argmax(dim=1)
+                predicted = outputs.argmax(dim=1)
                 #flat_labels = labels.argmax(dim=1)
                 #flat_predicted = predicted.view(-1)
                 print("Before: ", len(all_outputs), len(all_labels))
