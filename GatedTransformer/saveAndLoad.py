@@ -73,7 +73,7 @@ class SaveAndLoadModel:
         print(f'validation time',validationend_time-validation_start_time)
         return avg_loss, valid_accuracy
 
-    def test(self, test_loader,debug=False):
+    def test(self, test_loader,debug=true):
         teststart_time = time.time()
         self.model.eval()
         all_outputs = []
@@ -91,11 +91,14 @@ class SaveAndLoadModel:
                     
                     print("Batch Output Shape:", outputs.shape)
                 predicted = outputs.argmax(dim=1)
-                #flat_labels = labels.argmax(dim=1)
-                #flat_predicted = predicted.view(-1)
-                #print("Before: ", len(all_outputs), len(all_labels))
+                flat_labels = labels.argmax(dim=1)
+                if debug:
+                    print("predicted shape:", predicted.shape)
+                    print("flat_labels shape:", flat_labels.shape)
+                    #flat_predicted = predicted.view(-1)
+                    #print("Before: ", len(all_outputs), len(all_labels))
                 all_outputs.extend(predicted.cpu().numpy())
-                all_labels.extend(labels.cpu().numpy())
+                all_labels.extend(flat_labels.cpu().numpy())
                 if debug:
                     print("After: ", len(all_outputs), len(all_labels))
             
