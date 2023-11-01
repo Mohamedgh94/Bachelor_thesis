@@ -115,6 +115,7 @@ class SaveAndLoadModel:
         precision = precision_score(all_labels, all_outputs, average="weighted")
         recall = recall_score(all_labels, all_outputs, average="weighted")
         metrics = {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall}
+        print(f"Test Accuracy: {accuracy}, F1: {f1}, Precision: {precision}, Recall: {recall}")
         testend_time = time.time()
         print(f'test time',testend_time-teststart_time)
         return metrics
