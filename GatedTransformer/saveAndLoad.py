@@ -73,7 +73,7 @@ class SaveAndLoadModel:
         print(f'validation time',validationend_time-validation_start_time)
         return avg_loss, valid_accuracy
 
-    def test(self, test_loader):
+    def test(self, test_loader,debug=False):
         teststart_time = time.time()
         self.model.eval()
         all_outputs = []
@@ -82,24 +82,31 @@ class SaveAndLoadModel:
             for batch in test_loader:
                 inputs, labels = batch
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                print("Batch Input Shape:", inputs.shape)
-                print("Batch Labels Shape:", labels.shape)
+                if debug:
+                    
+                    print("Batch Input Shape:", inputs.shape)
+                    print("Batch Labels Shape:", labels.shape)
                 outputs = self.model(inputs)
-                print("Batch Output Shape:", outputs.shape)
-                _, predicted = torch.max(outputs.data, dim=1)
-                flat_labels = labels.view(-1)
-                flat_predicted = predicted.view(-1)
+                if debug:
+                    
+                    print("Batch Output Shape:", outputs.shape)
+                _, predicted = outputs.argmax(dim=1)
+                #flat_labels = labels.argmax(dim=1)
+                #flat_predicted = predicted.view(-1)
                 print("Before: ", len(all_outputs), len(all_labels))
                 all_outputs.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
-                print("After: ", len(all_outputs), len(all_labels))
+                if debug:
+                    print("After: ", len(all_outputs), len(all_labels))
             
         all_labels = np.array(all_labels).reshape(-1)
         all_outputs = np.array(all_outputs).reshape(-1)
         all_labels = all_labels.astype(int)
         all_outputs = all_outputs.astype(int)
-        print("all_outputs shape:", np.array(all_outputs).shape, " type:", type(all_outputs))
-        print("all_labels shape:", np.array(all_labels).shape, " type:", type(all_labels))   
+        if debug:
+            
+            print("all_outputs shape:", np.array(all_outputs).shape, " type:", type(all_outputs))
+            print("all_labels shape:", np.array(all_labels).shape, " type:", type(all_labels))   
         accuracy = accuracy_score(all_labels, all_outputs)
         f1 = f1_score(all_labels, all_outputs, average="weighted")   
         precision = precision_score(all_labels, all_outputs, average="weighted")
