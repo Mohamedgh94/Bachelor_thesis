@@ -73,7 +73,7 @@ class SaveAndLoadModel:
         print(f'validation time',validationend_time-validation_start_time)
         return avg_loss, valid_accuracy
 
-    def test(self, test_loader,debug=true):
+    def test(self, test_loader,debug= True):
         teststart_time = time.time()
         self.model.eval()
         all_outputs = []
