@@ -93,7 +93,7 @@ class SaveAndLoadModel:
                 predicted = outputs.argmax(dim=1)
                 #flat_labels = labels.argmax(dim=1)
                 #flat_predicted = predicted.view(-1)
-                print("Before: ", len(all_outputs), len(all_labels))
+                #print("Before: ", len(all_outputs), len(all_labels))
                 all_outputs.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
                 if debug:
