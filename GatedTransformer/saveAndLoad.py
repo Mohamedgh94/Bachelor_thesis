@@ -1,8 +1,9 @@
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader
-import pandas as pd
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+import pandas as pd
 import numpy as np
 import time
 
@@ -73,7 +74,7 @@ class SaveAndLoadModel:
         print(f'validation time',validationend_time-validation_start_time)
         return avg_loss, valid_accuracy
 
-    def test(self, test_loader,debug= True):
+    def test(self, test_loader,debug= False):
         teststart_time = time.time()
         self.model.eval()
         all_outputs = []
@@ -118,7 +119,7 @@ class SaveAndLoadModel:
         print(f"Test Accuracy: {accuracy}, F1: {f1}, Precision: {precision}, Recall: {recall}")
         testend_time = time.time()
         print(f'test time',testend_time-teststart_time)
-        return metrics
+        return metrics, all_labels, all_outputs
 
     def train_and_validate(self, train_loader, valid_loader, epochs):
         for epoch in range(epochs):
@@ -128,7 +129,7 @@ class SaveAndLoadModel:
 
         torch.save(self.model.state_dict(), self.model_path)
         print(f"Model saved to {self.model_path}")
-
+        """
     def train_validate_and_test(self, train_loader, valid_loader, test_loader, epochs):
         self.train_and_validate(train_loader, valid_loader, epochs)
         metrics = self.test(test_loader)
@@ -137,7 +138,25 @@ class SaveAndLoadModel:
         df = pd.DataFrame([metrics], columns=metrics.keys())
         df.to_excel("results.xlsx", index=False)
         print("Results saved to results.xlsx")
-
+        """
+    def train_validate_and_test(self, train_loader, valid_loader, test_loader, epochs):
+        self.train_and_validate(train_loader, valid_loader, epochs)
+        metrics, y_true, y_pred = self.test(test_loader)
+        cm = confusion_matrix(y_true, y_pred)
+        cm_df = pd.DataFrame(cm, index=[f'Actual {i}' for i in range(len(cm))], columns=[f'Predicted {i}' for i in range(len(cm))])
+        with pd.ExcelWriter("results.xlsx") as writer:
+            df_metrics = pd.DataFrame([metrics], columns=metrics.keys())
+            df_metrics.to_excel(writer, sheet_name='Metrics', index=False)
+            # Save the confusion matrix
+            cm_df.to_excel(writer, sheet_name='Confusion Matrix')
+            plt.figure(figsize=(10, 7))
+            sns.heatmap(cm, annot=True, fmt='g', cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.ylabel('Actual Label')
+            plt.xlabel('Predicted Label')
+            plt.savefig('confusion_matrix.png')
+            plt.close()
+            print("Results and confusion matrix saved to results.xlsx")
     def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
