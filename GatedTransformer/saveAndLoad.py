@@ -104,7 +104,8 @@ class SaveAndLoadModel:
                 all_labels.extend(flat_labels.cpu().numpy())
                 if debug:
                     print("After: ", len(all_outputs), len(all_labels))
-            
+        print('all_labels : 'all_labels.shape )  
+        print('all_outputs :' all_outputs.shape)
         all_labels = np.array(all_labels).reshape(-1)
         all_outputs = np.array(all_outputs).reshape(-1)
         all_labels = all_labels.astype(int)
