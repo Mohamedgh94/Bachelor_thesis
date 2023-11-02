@@ -11,7 +11,7 @@ print(f'validation subjects: {dfv["person_id"].unique()}')
 """
 from PIL import Image
 
-image = Image.open('/data/malghaja/Bachelor_thesis/GatedTransformer/ confusion_matrix.png')
+image = Image.open('/data/malghaja/Bachelor_thesis/GatedTransformer/confusion_matrix.png')
 image.show()
 """
 import pandas as pd
