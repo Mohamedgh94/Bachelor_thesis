@@ -9,7 +9,11 @@ print(f'test subjects: {dftest["person_id"].unique()}')
 dfv = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 print(f'validation subjects: {dfv["person_id"].unique()}')
 """
+from PIL import Image
 
+image = Image.open('/data/malghaja/Bachelor_thesis/GatedTransformer/ confusion_matrix.png')
+image.show()
+"""
 import pandas as pd
 from sklearn.model_selection import train_test_split
 df = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
@@ -43,3 +47,4 @@ print(len(test_data.columns.to_list()))
 train_data.to_csv('v_data.csv')
 test_data.to_csv('vv_data.csv')
 valid_data.to_csv('vvv_data.csv')
+"""
