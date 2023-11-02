@@ -3,6 +3,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+import seaborn as sns
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import time
