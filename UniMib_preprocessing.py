@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 from pandas import read_csv
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, MinMaxScaler,LabelEncoder
 from sklearn.model_selection import train_test_split
 """
  # Pfad zur .mat-Datei
@@ -79,7 +79,7 @@ for subject_folder in os.listdir(output_directory):
 empty_folders_check 
 """
 
-DATA_DIR = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
+DATA_DIR = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/untitled folder 2'
 SUBJECT_IDS = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
 
 WINDOW_SIZE = 200
@@ -87,7 +87,7 @@ STRIDE = 50
 SOFT_BIOMETRICS= ['age', 'height', 'weight', 'gender']
 
 def get_person_info(subject_id):
-    file_path = '/data/malghaja/Bachelor_thesis/subjects_info.csv'  
+    file_path = '/Users/mohamadghajar/Desktop/GatedTransformer/Bachelor_thesis/subjects_info.csv'  
     person_info = pd.read_csv(file_path)
     
     # Filter the DataFrame based on the Subject_ID
@@ -151,6 +151,7 @@ def process_subject(subject_id):
 def normalize_and_encode(all_data):
     try:
         scaler = StandardScaler()
+        
         sensor_cols = all_data.iloc[:, :-5].columns
         #all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
         all_data[sensor_cols] = all_data[sensor_cols].astype(float)
@@ -160,18 +161,18 @@ def normalize_and_encode(all_data):
         # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
         label_encoders = {}  
-        for col in ['person_id'] + SOFT_BIOMETRICS:
+        for col in ['person_id','gender']: 
             le = LabelEncoder()
             all_data[col] = le.fit_transform(all_data[col])
             label_encoders[col] = le  # Store the encoder
-            
+        return all_data        
     except Exception as e:
         print(f"Error in normalize_and_encode: {e}")
         return None
 
 def extract_features(segment):
     features = []
-    sensor_cols = ['accel_x', 'accel_y', 'accel_z', 'timestamp', 'time_instants', 'signal_magnitude']
+    sensor_cols = ['accel_x', 'accel_y', 'accel_z']
     for col in segment.columns:
         if col in  sensor_cols:
             features.append(segment[col].mean())
@@ -188,7 +189,7 @@ def extract_features(segment):
     return pd.Series(features, index=feature_names).astype('float32')  
 
 def remove_original_sensor_data(df):
-    sensor_cols = ['accel_x', 'accel_y', 'accel_z', 'timestamp', 'time_instants', 'signal_magnitude']
+    sensor_cols = ['accel_x', 'accel_y', 'accel_z','timestamp','time_instants',	'signal_magnitude']
     return df.drop(columns=sensor_cols)
 
 def rearrange_columns(df):
@@ -202,17 +203,31 @@ def split_and_save_data(X, y):
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
+        print (X.columns, y.columns)
+        unique_person_ids = y['person_id'].unique()
         # Split the data into training and validation sets
-        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify= y['person_id'])
+        train_ids, temp_ids = train_test_split(unique_person_ids, test_size=0.3, random_state=42)
+        valid_ids, test_ids = train_test_split(temp_ids, test_size=0.5, random_state=42)
 
-        # Split the temp data into validation and test sets
-        X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp['person_id'])
+        # Filter y based on the train, validation, and test ids and get indices for X
+        train_indices = y.index[y['person_id'].isin(train_ids)].tolist()
+        valid_indices = y.index[y['person_id'].isin(valid_ids)].tolist()
+        test_indices = y.index[y['person_id'].isin(test_ids)].tolist()
+
+        # Use the indices to filter X
+        X_train = X.iloc[train_indices]
+        y_train = y.iloc[train_indices]
+        X_valid = X.iloc[valid_indices]
+        y_valid = y.iloc[valid_indices]
+        X_test = X.iloc[test_indices]
+        y_test = y.iloc[test_indices]
+
         print('Splitting complete.')
-        # Now, concatenate the X and y DataFrames for each split and save them to CSV
+
+        # Concatenate the features and labels for each dataset
         train_data = pd.concat([X_train, y_train], axis=1)
         valid_data = pd.concat([X_valid, y_valid], axis=1)
         test_data = pd.concat([X_test, y_test], axis=1)
-
         train_data.to_csv('Unimib_train_data.csv', index=False)
         valid_data.to_csv('Unimib_valid_data.csv', index=False)
         test_data.to_csv('Unimib_test_data.csv', index=False)
@@ -239,14 +254,17 @@ def main():
         all_data = pd.merge(all_data, feature_df, on='person_id', how='left')
         all_data = remove_original_sensor_data(all_data) 
         all_data = rearrange_columns(all_data)
-        print(all_data.head())
+        #xxy = all_data.to_csv('ta.csv', index=False)
+        
+        print(all_data['gender'].value_counts())
+        all_data['gender'] = all_data['gender'].str.strip().str.upper()
+        print(all_data['gender'].value_counts())
+        print('Normalizing and encoding...')
+        all_data = normalize_and_encode(all_data)
+        print('Normalization and encoding complete.')
+        print(all_data['gender'].value_counts())
         X = all_data.iloc[:, :-5]
         y = all_data[['person_id', 'age', 'height', 'weight', 'gender']]
-        print('Normalizing and encoding...')
-        normalize_and_encode(all_data)
-        print('Normalization and encoding complete.')
-        print(all_data.head())
-        
       
         split_and_save_data(X, y)
 
