@@ -1,4 +1,4 @@
-import torch
+""" import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -29,3 +29,33 @@ class LossFunction:
 
     def compute_loss(self, outputs, labels):
         return self.loss_fn(outputs, labels)
+ """
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from IMUDataset import num_person_ids,num_ages,num_heights,num_weights,num_genders
+class MultiTaskLossFunction:
+    def __init__(self):
+        self.loss_fns = {
+            'person_id': nn.CrossEntropyLoss(),
+            'age': nn.MSELoss(),
+            'height': nn.MSELoss(),
+            'weight': nn.MSELoss(),
+            'gender': nn.CrossEntropyLoss(),
+        }
+    
+    def compute_loss(self, outputs_dict, labels_dict):
+       
+        total_loss = 0
+        for task, output in outputs_dict.items():
+            labels = labels_dict[task]
+            loss_fn = self.loss_fns[task]
+            
+            if task in ['age', 'height', 'weight']:
+                #loss_fn = nn.MSELoss()
+                #labels = labels.float().view(-1, 1)
+                output = output.squeeze(-1)
+            loss = loss_fn(output, labels)
+            total_loss += loss
+        return total_loss
