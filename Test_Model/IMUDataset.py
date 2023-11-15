@@ -42,9 +42,9 @@ class IMUDataset(Dataset):
 
 
 
-train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/GatedTransformer/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/GatedTransformer/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset = IMUDataset("/Users/mohamadghajar/Desktop/GatedTransformer/Bachelor_thesis/Unimib_test_data.csv")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
 
 combined_categories = IMUDataset.get_combined_categories(train_dataset,valid_dataset,test_dataset)
 global num_person_ids 
