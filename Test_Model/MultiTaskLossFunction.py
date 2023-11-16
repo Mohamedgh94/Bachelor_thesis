@@ -53,6 +53,9 @@ class MultiTaskLossFunction:
        
         total_loss = 0
         for task, output in outputs_dict.items():
+            # Skip the 'gated' output if it does not have corresponding labels
+            if task == 'gated':  
+                continue
             labels = labels_dict[task]
             loss_fn = self.loss_fns[task]
             
