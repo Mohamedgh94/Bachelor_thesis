@@ -24,7 +24,7 @@ class SaveAndLoadModel:
 
     
    
-         
+    """   
     def train(self, train_loader, valid_loader, epochs=10, patience=3):
         multi_task_loss_fn = MultiTaskLossFunction() 
         self.model.train()
@@ -101,44 +101,71 @@ class SaveAndLoadModel:
                     break
         print(f'Training completed.')        
         return accuracy        
-        
-    """ def train(self, train_loader, valid_loader, epochs=10, patience=3):
-        multi_task_loss_fn = MultiTaskLossFunction()
+        """ 
+    def train(self, train_loader, valid_loader, epochs=10, patience=3):
+        multi_task_loss_fn = MultiTaskLossFunction() 
         optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        scheduler = ReduceLROnPlateau(optimizer, 'min', patience=patience, factor=0.1, verbose=True)
+        scheduler = ReduceLROnPlateau(optimizer, 'min', patience=2, factor=0.1, verbose=True)
         best_val_loss = float('inf')
         no_improvement_count = 0
+
+        # Initialize lists to store losses for monitoring
+        train_losses = []
+        valid_losses = []
 
         for epoch in range(epochs):
             self.model.train()
             epoch_loss = 0
+            # ... (rest of your training loop code) ...
+            epoch_loss = 0
+            correct_predictions = {task: 0 for task in ['person_id', 'gender']}
+            total_predictions = {task: 0 for task in ['person_id', 'gender']}
+            regression_outputs = {task: [] for task in ['age', 'height', 'weight']}
+            regression_labels = {task: [] for task in ['age', 'height', 'weight']}
             for batch_idx, (inputs, labels_dict) in enumerate(train_loader):
                 inputs = inputs.to(self.device)
                 labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
 
                 optimizer.zero_grad()
                 outputs_dict = self.model(inputs)
-                loss = 0 
+
+                loss = 0
                 for task, output in outputs_dict.items():
-                    #print(labels_dict[task])
-                    #labels = labels_dict[task]
-                    loss = multi_task_loss_fn.compute_loss(outputs_dict, {task: labels for task, labels in labels_dict.items() if task != 'gated'})
-                # Compute the total loss for all tasks
-                loss = multi_task_loss_fn.compute_loss(outputs_dict, labels_dict)
-            
+                    if task == 'gated':
+                        continue
+                    labels = labels_dict[task]
+                    if task in ['age', 'height', 'weight']:
+                        loss += multi_task_loss_fn.loss_fns[task](output.squeeze(), labels.float())
+                        regression_outputs[task].append(outputs_dict[task].detach().cpu().numpy())
+                        regression_labels[task].append(labels_dict[task].detach().cpu().numpy())
+                    elif task in ['person_id', 'gender']:
+                        loss += multi_task_loss_fn.loss_fns[task](output, labels.long())
+                        _, predicted = torch.max(output, 1)
+                        correct_predictions[task] += (predicted == labels).sum().item()
+                        total_predictions[task] += labels.size(0)
+
                 loss.backward()
                 optimizer.step()
                 epoch_loss += loss.item()
 
-                if (batch_idx + 1) % 10 == 0:
+                # Print batch loss and accuracy
+                if (batch_idx + 1) % 10 == 0:  # Print every 10 batches.
                     print(f'Epoch {epoch+1}, Batch {batch_idx+1}, Loss: {loss.item()}')
 
-        avg_loss = epoch_loss / len(train_loader)
-        print(f'Epoch {epoch+1}, Avg Loss: {avg_loss}')
 
+            # Calculate and store the average training loss for the epoch
+            avg_train_loss = epoch_loss / len(train_loader)
+            train_losses.append(avg_train_loss)
+
+        # Validation after each epoch
         val_loss = self.validate(valid_loader)
+        valid_losses.append(val_loss)  # Store the validation loss for monitoring
         scheduler.step(val_loss)
 
+        # Print out the losses to monitor them
+        print(f'Epoch {epoch+1}/{epochs} \t Training Loss: {avg_train_loss} \t Validation Loss: {val_loss}')
+
+        # Check for early stopping and overfitting
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             no_improvement_count = 0
@@ -148,9 +175,15 @@ class SaveAndLoadModel:
             no_improvement_count += 1
             if no_improvement_count >= patience:
                 print(f'Early stopping triggered after {epoch+1} epochs.')
-                return
+                
 
-    print(f'Training completed.') """
+        # Check for signs of overfitting
+        if train_losses[-1] < valid_losses[-1]:
+            print("Warning: Potential overfitting detected. Training loss is lower than validation loss.")
+
+        print(f'Training completed.')
+        return best_val_loss  # It might be better to return best_val_loss instead of accuracy
+
 
         
     
