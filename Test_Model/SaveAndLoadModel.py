@@ -164,6 +164,10 @@ class SaveAndLoadModel:
                 inputs = inputs.to(self.device)
                 labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
                 outputs_dict = self.model(inputs)
+                for task, output in outputs_dict.items():
+                    if task == 'gated':
+                        continue
+                    labels = labels_dict[task]
                 loss =multi_task_loss_fn.compute_loss(outputs_dict, labels_dict)
                 total_loss += loss.item()
 
