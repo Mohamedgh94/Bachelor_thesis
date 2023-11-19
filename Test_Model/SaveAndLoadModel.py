@@ -217,6 +217,8 @@ class SaveAndLoadModel:
                 inputs = inputs.to(self.device)
                 outputs_dict = self.model(inputs)
                 for task, output in outputs_dict.items():
+                    if task == 'gated':
+                        continue
                     predicted = output.argmax(dim=1) if task in ['person_id', 'gender'] else output.squeeze()
                     labels = labels_dict[task]
                     all_outputs.setdefault(task, []).extend(predicted.cpu().numpy())
