@@ -155,10 +155,17 @@ def split_and_save(df):
     train_data = pd.concat([X_train, y_train], axis=1)
     valid_data = pd.concat([X_valid, y_valid], axis=1)
     test_data = pd.concat([X_test, y_test], axis=1)
+    train_shuffled  = train_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    valid_shuffled  = valid_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    test_shuffled  = test_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    train_shuffled.to_csv('mobiact_train.csv', index=False)
+    valid_shuffled.to_csv('mobiact_valid.csv', index=False)
+    test_shuffled.to_csv('mobiact_test.csv', index=False)
+    """
     train_data.to_csv('mobiact_train.csv', index=False)
     valid_data.to_csv('mobiact_valid.csv', index=False)
     test_data.to_csv('mobiact_test.csv', index=False)
-
+    """
 
 def process_file_parallel(act):
     """Ein Wrapper f  r die process_file-Funktion f  r Parallelisierung."""
