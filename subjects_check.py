@@ -1,3 +1,16 @@
+import pandas as pd
+valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv')
+valid_shuffeld  = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
+valid_shuffeld.to_csv('Unimib_valid_data.csv ', index=False)
+print(f'validation data shuffeld complete')
+test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_test_data.cs')
+test_shuffeld  = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
+test_shuffeld.to_csv('Unimib_test_data.csv', index=False)
+print(f'test data shuffeld complete')
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_train_data.csv')
+train_shuffeld  = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
+train_shuffeld.to_csv('Unimib_train_data.csv', index=False)
+print(f'train data shuffeld complete')
 """
 import pandas as pd
 
@@ -9,13 +22,16 @@ print(f'test subjects: {dftest["person_id"].unique()}')
 dfv = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 print(f'validation subjects: {dfv["person_id"].unique()}')
 """
+"""
 from PIL import Image
 
 image = Image.open('/data/malghaja/Bachelor_thesis/GatedTransformer/confusion_matrix.png')
 image.show()
 """
+"""
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
 df = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 print(f'validation subjects: {df["person_id"].unique()}')
 unique_person_ids = df['person_id'].unique()
