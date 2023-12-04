@@ -192,7 +192,7 @@ def extract_features(segment):
     return pd.Series(features, index=feature_names).astype('float32')  
 
 def remove_original_sensor_data(df):
-    sensor_cols = ['accel_x', 'accel_y', 'accel_z','timestamp','time_instants',	'signal_magnitude']
+    sensor_cols = ['accel_x', 'accel_y', 'accel_z','timestamp','time_instants',	'signal_magnitude','segment_id_x','segment_id_y']
     return df.drop(columns=sensor_cols)
 
 def rearrange_columns(df):
