@@ -112,12 +112,15 @@ def process_file(file_path, subject_id):
     segments = []  # Define a list for the segments
     try:
         # Read the data in chunks and process each chunk individually
+        segment_id = 0
         for chunk in pd.read_csv(file_path, header=0, chunksize=1000):  # Use chunksize to reduce memory usage
             
 
             # Apply sliding window segmentation
             for i in range(0, len(chunk) - WINDOW_SIZE + 1, STRIDE):
                 segment = chunk.iloc[i:i + WINDOW_SIZE].copy()  # Create a segment
+                segment['segment_id'] = segment_id 
+                segment_id += 1
                 segments.append(segment)  # Add the segment to the list
         
         # Add the person ID and soft biometric labels
@@ -248,7 +251,7 @@ def main():
         all_data = pd.concat(all_segments, axis=0, ignore_index=True)
         
         print('Extracting features...')
-        feature_df = all_data.groupby('person_id').apply(lambda segment: extract_features(segment))
+        feature_df = all_data.groupby(['person_id','segment_id']).apply(lambda segment: extract_features(segment))
         feature_df.reset_index(inplace=True)
         print('Feature extraction complete.')
         all_data = pd.merge(all_data, feature_df, on='person_id', how='left')
