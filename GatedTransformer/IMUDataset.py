@@ -44,12 +44,22 @@ class IMUDataset(Dataset):
             # Convert sets back to lists
         combined_categories = {key: list(values) for key, values in combined_categories.items()}
         return combined_categories
-
+    @staticmethod    
+    def calculate_class_weights(class_counts):
+        total_samples = sum(class_counts)
+        num_classes = len(class_counts)
+        weights = torch.zeros(num_classes)
+        for class_idx, count in enumerate(class_counts):
+            weights[class_idx] = total_samples / (num_classes * count)
+        return weights
 # Create instances of the IMUDataset class for each dataset
 train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
 valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
 test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
-
+global person_id_weights
+global gender_weights
+person_id_weights = IMUDataset.calculate_class_weights(train_dataset['person_id'].value_counts())
+gender_weights = IMUDataset.calculate_class_weights(train_dataset['gender'].value_counts())
 combined_categories = IMUDataset.get_combined_categories(train_dataset,valid_dataset,test_dataset)
 global num_person_ids 
 global num_ages
