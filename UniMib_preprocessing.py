@@ -234,7 +234,7 @@ def split_and_save_data(X, y):
         pipeline = Pipeline(steps=steps)
 
         # Apply the pipeline to your training data
-        X_train_resampled, y_train_resampled = pipeline.fit_resample(X_train, y_train)
+        X_train_resampled, y_train_resampled = pipeline.fit_resample(X_train, y_train['person_id'])
         
 
         print('Splitting complete.')
