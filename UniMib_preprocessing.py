@@ -5,6 +5,9 @@ import os
 from pandas import read_csv
 from sklearn.preprocessing import StandardScaler, MinMaxScaler,LabelEncoder
 from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.pipeline import Pipeline
 """
  # Pfad zur .mat-Datei
 mat_file_path = "/data/datasets/act_datasets/UniMiB-SHAR/data/full_data.mat"
@@ -225,10 +228,22 @@ def split_and_save_data(X, y):
         X_test = X.iloc[test_indices]
         y_test = y.iloc[test_indices]
 
+        over = SMOTE(sampling_strategy=0.5)  # Adjust as needed
+        under = RandomUnderSampler(sampling_strategy=0.8)  # Adjust as needed
+        steps = [('o', over), ('u', under)]
+        pipeline = Pipeline(steps=steps)
+
+        # Apply the pipeline to your training data
+        X_train_resampled, y_train_resampled = pipeline.fit_resample(X_train, y_train)
+        
+
         print('Splitting complete.')
 
         # Concatenate the features and labels for each dataset
-        train_data = pd.concat([X_train, y_train], axis=1)
+        #train_data = pd.concat([X_train, y_train], axis=1)
+        train_data = pd.concat([X_train_resampled, y_train_resampled], axis=1)
+        train_class_counts = train_data['person_id'].value_counts()
+        print(f"Train class counts:\n{train_class_counts}")
         valid_data = pd.concat([X_valid, y_valid], axis=1)
         test_data = pd.concat([X_test, y_test], axis=1)
         train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
