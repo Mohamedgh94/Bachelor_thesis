@@ -170,7 +170,7 @@ from loss import MultiTaskLossFunction
 class SaveAndLoadModel:
     def __init__(self, model, loss_fn, optimizer_class, epochs, model_path="model.pth", device=None):
         self.model = model
-        self.loss_fn = MultiTaskLossFunction() # This should be an instance of MultiTaskLossFunction
+        self.loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) # This should be an instance of MultiTaskLossFunction
         self.optimizer = optimizer_class(self.model.parameters())
         self.epochs = epochs
         self.model_path = model_path
@@ -215,7 +215,7 @@ class SaveAndLoadModel:
      """
     
     def train(self, train_loader, epochs=10):
-        multi_task_loss_fn = MultiTaskLossFunction() 
+        multi_task_loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) 
         trainings_start_time = time.time()
         self.model.train()
     
@@ -264,7 +264,7 @@ class SaveAndLoadModel:
         print(f'Training completed in {training_end_time - trainings_start_time}s')
 
     def validate(self, valid_loader):
-        multi_task_loss_fn = MultiTaskLossFunction() 
+        multi_task_loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) 
         self.model.eval()
         total_loss = 0
         with torch.no_grad():
