@@ -179,21 +179,52 @@ def validate(model, valid_loader, device):
     return avg_loss
 
 #################################################
+from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, precision_recall_fscore_support
+
 def test(model, test_loader, device):
     model.eval()
-    total_loss = 0
+    age_preds, age_targets = [], []
+    height_preds, height_targets = [], []
+    weight_preds, weight_targets = [], []
+    gender_preds, gender_targets = [], []
+    
     with torch.no_grad():
         for features, labels in test_loader:
             features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
 
-            predictions = model(features)
-            targets = (labels['age'], labels['height'], labels['weight'], labels['gender'])
-            loss = combined_loss(predictions, targets)
+            age_pred, height_pred, weight_pred, gender_pred = model(features)
+            age_targets += labels['age'].tolist()
+            height_targets += labels['height'].tolist()
+            weight_targets += labels['weight'].tolist()
+            gender_targets += labels['gender'].tolist()
 
-            total_loss += loss.item()
+            age_preds += age_pred.squeeze().tolist()
+            height_preds += height_pred.squeeze().tolist()
+            weight_preds += weight_pred.squeeze().tolist()
+            gender_preds += gender_pred.argmax(dim=1).tolist()
 
-    avg_loss = total_loss / len(test_loader)
-    return avg_loss
+    # Regression Metrics
+    mse_age = mean_squared_error(age_targets, age_preds)
+    mae_age = mean_absolute_error(age_targets, age_preds)
+    mse_height = mean_squared_error(height_targets, height_preds)
+    mae_height = mean_absolute_error(height_targets, height_preds)
+    mse_weight = mean_squared_error(weight_targets, weight_preds)
+    mae_weight = mean_absolute_error(weight_targets, weight_preds)
+
+    # Classification Metrics
+    accuracy_gender = accuracy_score(gender_targets, gender_preds)
+    precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='binary')
+
+    metrics = {
+        'mse_age': mse_age, 'mae_age': mae_age,
+        'mse_height': mse_height, 'mae_height': mae_height,
+        'mse_weight': mse_weight, 'mae_weight': mae_weight,
+        'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender,
+        'recall_gender': recall_gender, 'f1_gender': f1_gender
+    }
+    
+    return metrics
+
 
 
 def main():
@@ -221,7 +252,9 @@ def main():
        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
 
     # Test the model
-    test_loss = test(model, test_loader, device)
-    print(f'Test Loss: {test_loss}')
+    test_metrics = test(model, test_loader, device)
+    print("Test Metrics:")
+    for metric, value in test_metrics.items():
+        print(f"{metric}: {value}")
 if __name__ == "__main__":
     main()
