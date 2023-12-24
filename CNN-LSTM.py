@@ -69,8 +69,12 @@ class CNNLSTM(nn.Module):
         # Convolutional layers
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
+        #new
+        self.dropout1 = nn.Dropout(0.5)
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
-
+        #new
+        self.relu2 = nn.ReLU()
+        self.dropout2 = nn.Dropout(0.5)
         # LSTM layer
         self.lstm = nn.LSTM(input_size=128, hidden_size=hidden_size, num_layers=2, batch_first=True)
 
@@ -88,9 +92,12 @@ class CNNLSTM(nn.Module):
         # Convolutional layers
        # print(f'x.shape before',x.shape)
         x = self.relu(self.conv1(x))
+        #new
+        x  = self.dropout1(x)
         #print(f'x.shape after',x.shape)
         x = self.relu(self.conv2(x))
-
+         #new
+        x  = self.dropout2(x)
         x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
         x = x.permute(0, 2, 1)
         # LSTM layer
