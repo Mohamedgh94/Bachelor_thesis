@@ -54,9 +54,9 @@ test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
 
 
 # Create DataLoader instances
-train_loader = DataLoader(train_dataset, batch_size=1028, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=1028, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=1028, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=512, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
 
 
 ##############
@@ -75,8 +75,16 @@ class CNNLSTM(nn.Module):
         #new
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(0.5)
+        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
+        self.relu3 = nn.ReLU()
+        self.dropout3 = nn.Dropout(0.5)
         # LSTM layer
-        self.lstm = nn.LSTM(input_size=128, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=128, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm2 = nn.LSTM(input_size= 256 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
+
+        #
+        self.fc1 = nn.Linear(hidden_size,256)
+        self.fc2 = nn.Linear(256,128)
 
         # Output heads
         self.fc_age = nn.Linear(hidden_size, num_classes['age'])
@@ -88,21 +96,35 @@ class CNNLSTM(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = x.permute(0, 2, 1)
+        # Assuming x is of shape (batch_size, channels, sequence_length)
+    
         # Convolutional layers
-       # print(f'x.shape before',x.shape)
-        x = self.relu(self.conv1(x))
-        #new
-        x  = self.dropout1(x)
-        #print(f'x.shape after',x.shape)
-        x = self.relu(self.conv2(x))
-         #new
-        x  = self.dropout2(x)
+        x = self.conv1(x)  # First convolution
+        x = self.relu(x)   # Apply ReLU
+        x = self.dropout1(x)  # Apply dropout
+
+        x = self.conv2(x)  # Second convolution
+        x = self.relu2(x)  # Apply ReLU
+        x = self.dropout2(x)  # Apply dropout
+
+        x = self.conv3(x)  # Third convolution
+        x = self.relu3(x)  # Apply ReLU
+        x = self.dropout3(x)  # Apply dropout
+
+        # Global Max Pooling
         x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
-        x = x.permute(0, 2, 1)
-        # LSTM layer
-        x, _ = self.lstm(x)
-        x = x[:, -1, :]
+        x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
+
+        # LSTM layers
+        x, _ = self.lstm1(x)
+        x, _ = self.lstm2(x)
+        x = x[:, -1, :]  # Get the last time step's output
+
+        # Dense layers
+        x = self.fc1(x)   # First dense layer
+        x = F.relu(x)     # Apply ReLU
+        x = self.fc2(x)   # Second dense layer
+        x = F.relu(x)     # Apply ReLU
 
         # Output heads with activation functions
         age = self.fc_age(x)
@@ -250,9 +272,10 @@ def check_gender_predictions(model, test_loader, device):
 
 
 
-
+import time
 
 def main():
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print (f'Using device: {device}')
     hidden_size = 128  # Example hidden size, this can be tuned
@@ -269,12 +292,14 @@ def main():
 
     # Training and Validation Loop
     num_epochs = 10
+    start_time = time.time()
     for epoch in range(num_epochs):
        print(f'training ', epoch)
        train_loss = train(model, train_loader, optimizer, device)
        print(f'Epoch, {epoch+1}/{num_epochs},  Training Loss: {train_loss}')
        valid_loss = validate(model, valid_loader, device)
        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
+       print(f'Epoch {epoch+1} trainng time {time.time() - start_time}')
 
     # Test the model
     test_metrics = test(model, test_loader, device)
