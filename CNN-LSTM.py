@@ -96,8 +96,8 @@ class CNNLSTM(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        # Assuming x is of shape (batch_size, channels, sequence_length)
-    
+        
+        x = x.permute(0, 2, 1)
         # Convolutional layers
         x = self.conv1(x)  # First convolution
         x = self.relu(x)   # Apply ReLU
