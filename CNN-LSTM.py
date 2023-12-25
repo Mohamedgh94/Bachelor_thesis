@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -232,6 +232,24 @@ def test(model, test_loader, device):
     
     return metrics
 
+def check_gender_predictions(model, test_loader, device):
+    model.eval()
+    all_preds = []
+    all_labels = []
+    with torch.no_grad():
+        for features, labels in test_loader:
+            features = features.to(device)
+            labels = labels['gender'].to(device)
+            predictions = model(features)
+            gender_pred = predictions[3]  # Assuming gender is the fourth output
+            gender_pred = torch.argmax(gender_pred, dim=1)
+            all_preds.extend(gender_pred.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    return all_preds, all_labels
+
+
+
 
 
 def main():
@@ -260,6 +278,8 @@ def main():
 
     # Test the model
     test_metrics = test(model, test_loader, device)
+    gender_preds, gender_labels = check_gender_predictions(model, test_loader, device)
+    print("Gender Predictions:", np.unique(gender_preds, return_counts=True))
     print("Test Metrics:")
     for metric, value in test_metrics.items():
         print(f"{metric}: {value}")
