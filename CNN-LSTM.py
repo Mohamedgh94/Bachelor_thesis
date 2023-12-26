@@ -5,7 +5,11 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
+import logging
 
+
+logging.basicConfig(filename='cnn_lstm_log.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class IMUDataset(Dataset):
@@ -48,19 +52,19 @@ class IMUDataset(Dataset):
 
 
 
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
-#train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
-#valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
-#test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")
+#train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+#valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+#test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
+valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
+test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")
 
 
 
 # Create DataLoader instances
-train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=512, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=2056, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=2056, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=2056, shuffle=False)
 
 
 ##############
@@ -101,6 +105,7 @@ class CNNLSTM(nn.Module):
         # Activation function for gender
         self.softmax = nn.Softmax(dim=1)
 
+        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
     def forward(self, x):
 
         x = x.permute(0, 2, 1)
@@ -142,7 +147,23 @@ class CNNLSTM(nn.Module):
 
         return age, height, weight, gender
 ########################################################################
-    import torch.nn.functional as F
+    
+def __repr__(self):
+        # String representation of your model
+        representation = "CNNLSTM(\n"
+        # Add details about each layer, hyperparameters, etc.
+        representation += f"\tInput Size: {self.input_size}\n"
+        representation += f"\tHidden Size: {self.hidden_size}\n"
+        representation += f"\tNumber of Classes: {self.num_classes}\n"
+        # Add details for each layer
+        representation += f"\tConv1: {self.conv1}\n"
+        representation += f"\tConv2: {self.conv2}\n"
+        # Continue for other layers...
+        representation += ")"
+        return representation
+
+    
+    
 
 def combined_loss(predictions, targets):
     # Unpack predictions
@@ -196,6 +217,7 @@ def train(model, train_loader, optimizer, device):
         total_loss += loss.item()
 
     avg_loss = total_loss / len(train_loader)
+    logging.info(f"Training - Epoch Loss: {avg_loss}")
     return avg_loss
 
 ##############################################
@@ -213,6 +235,7 @@ def validate(model, valid_loader, device):
             total_loss += loss.item()
 
     avg_loss = total_loss / len(valid_loader)
+    logging.info(f"Validation - Epoch Loss: {avg_loss}")
     return avg_loss
 
 #################################################
