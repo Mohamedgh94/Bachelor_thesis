@@ -1,4 +1,4 @@
-import pandas as pd
+""" import pandas as pd
 valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_train.csv')
 valid_shuffeld  = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
 valid_shuffeld.to_csv('mobiact_train.csv ', index=False)
@@ -10,7 +10,44 @@ print(f'test data shuffeld complete')
 train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_valid.csv')
 train_shuffeld  = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
 train_shuffeld.to_csv('mobiact_valid.csv', index=False)
-print(f'validation data shuffeld complete')
+print(f'validation data shuffeld complete') """
+
+import pandas as pd
+import matplotlib.pyplot as plt
+data_train = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
+data_valid = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_valid_data.csv')
+data_test = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
+print(f'train Data subjects :')
+
+for person_id in data_train['person_id'].unique():
+    # Extract data for the current person ID
+    person_data = data_train[data_train['person_id'] == person_id].iloc[0]
+    age = person_data['age']
+    height = person_data['height']
+    weight = person_data['weight']
+    gender = person_data['gender']
+    print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
+print(f'valid Data subjects :')
+
+for person_id in data_valid['person_id'].unique():
+    # Extract data for the current person ID
+    person_data = data_valid[data_valid['person_id'] == person_id].iloc[0]
+    age = person_data['age']
+    height = person_data['height']
+    weight = person_data['weight']
+    gender = person_data['gender']
+    print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
+print(f'Test Data subjects :')
+for person_id in data_test['person_id'].unique():
+    # Extract data for the current person ID
+    person_data = data_test[data_test['person_id'] == person_id].iloc[0]
+    age = person_data['age']
+    height = person_data['height']
+    weight = person_data['weight']
+    gender = person_data['gender']
+
+    # Print or process the data as needed
+    print(f" Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
 """
 import pandas as pd
 
