@@ -48,9 +48,13 @@ class IMUDataset(Dataset):
 
 
 
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+#train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+#valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+#test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
+valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
+test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")
+
 
 
 # Create DataLoader instances
@@ -78,9 +82,11 @@ class CNNLSTM(nn.Module):
         self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.5)
+
+        #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=128, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size= 256 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
+        self.lstm1 = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
 
         #
         self.fc1 = nn.Linear(hidden_size,256)
@@ -96,7 +102,7 @@ class CNNLSTM(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        
+
         x = x.permute(0, 2, 1)
         # Convolutional layers
         x = self.conv1(x)  # First convolution
@@ -115,8 +121,10 @@ class CNNLSTM(nn.Module):
         x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
         x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
 
+        #x = self.fc_intermediate(x)
         # LSTM layers
         x, _ = self.lstm1(x)
+        #x = self.fc_intermediate(x)
         x, _ = self.lstm2(x)
         x = x[:, -1, :]  # Get the last time step's output
 
