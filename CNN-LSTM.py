@@ -236,6 +236,7 @@ def validate(model, valid_loader, device):
 
     avg_loss = total_loss / len(valid_loader)
     logging.info(f"Validation - Epoch Loss: {avg_loss}")
+    
     return avg_loss
 
 #################################################
@@ -301,16 +302,18 @@ def check_gender_predictions(model, test_loader, device):
 
     return all_preds, all_labels
 
-
+def load_model(self):
+        self.model.load_state_dict(torch.load(self.model_path))
+        print(f"Model loaded from {self.model_path}")
 
 import time
 
-def main():
+def main(self):
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print (f'Using device: {device}')
     hidden_size = 128  # Example hidden size, this can be tuned
-    input_size = 15
+    input_size = 45
     num_classes = {
         'age': 1,  # Regression (assuming age is a continuous value)
         'height': 1,  # Regression
@@ -331,7 +334,8 @@ def main():
        valid_loss = validate(model, valid_loader, device)
        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
        print(f'Epoch {epoch+1} trainng time {time.time() - start_time}')
-
+    torch.save(self.model.state_dict(), self.model_path)
+    print(f"Model saved to {self.model_path}")   
     # Test the model
     test_metrics = test(model, test_loader, device)
     gender_preds, gender_labels = check_gender_predictions(model, test_loader, device)
