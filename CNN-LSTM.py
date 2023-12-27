@@ -110,9 +110,9 @@ class CNNLSTM(nn.Module):
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
     def forward(self, x):
 
-        print(f"Original shape: {x.shape}")
+        # print(f"Original shape: {x.shape}")
         x = x.permute(0, 2, 1)
-        print(f"Shape after permute: {x.shape}")
+        # print(f"Shape after permute: {x.shape}")
         # Convolutional layers
         x = self.conv1(x)  # First convolution
         x = self.relu(x)   # Apply ReLU
