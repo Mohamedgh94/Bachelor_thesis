@@ -15,7 +15,7 @@ from imblearn.pipeline import Pipeline
 # Configuration Parameters
 DATA_DIR = '/data/malghaja/SisFall_csv' 
 README_FILE_PATH = os.path.join(DATA_DIR, 'Readme.txt')
-SUBJECT_IDS = ['SA01', 'SA02', 'SA03', 'SA04', 'SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 'SA11', 'SA12', 'SA13', 'SA14', 'SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23', 'SE01', 'SE02','SE03','SE04','SE05','SE06','SE07','SE08','SE9','SE10','SE11','SE12','SE13','SE14','SE15']
+SUBJECT_IDS = ['SA01', 'SA02', 'SA03', 'SA04', 'SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 'SA11', 'SA12', 'SA13', 'SA14', 'SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23', 'SE01', 'SE02','SE03','SE04','SE05','SE06','SE07','SE08','SE09','SE10','SE11','SE12','SE13','SE14','SE15']
 WINDOW_SIZE = 200
 STRIDE = 50
 SOFT_BIOMETRICS = ['age', 'height', 'weight', 'gender']
@@ -139,7 +139,7 @@ def split_and_save_data(X, y):
         print (X.columns, y.columns)
         #unique_person_ids = y['person_id'].unique()
         
-        train_ids = ['SA01','SA14' , 'SA03', 'SA04','SA06','SA08', 'SA09','SA10', 'SA11', 'SA12', 'SA13','SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23','SE01', 'SE02','SE03','SE06','SE07','SE9','SE10','SE12','SE13','SE15']
+        train_ids = ['SA01','SA14' , 'SA03', 'SA04','SA06','SA08', 'SA09','SA10', 'SA11', 'SA12', 'SA13','SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23','SE01', 'SE02','SE03','SE06','SE07','SE09','SE10','SE12','SE13','SE15']
         valid_ids = ['SA02','SE04','SE05','SE11'] 
         test_ids = ['SA05',  'SA07','SE08','SE14']
         # Filter y based on the train, validation, and test ids and get indices for X
