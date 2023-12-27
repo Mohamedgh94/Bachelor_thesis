@@ -224,9 +224,12 @@ def combined_loss(predictions, targets):
 def train(model, train_loader, optimizer, device):
     model.train()
     total_loss = 0
-    for features, labels in train_loader:
-        # Move data to the appropriate device (CPU or GPU)
-        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+    for batch in train_loader:
+        features, labels = batch
+
+        # Move features and labels to the appropriate device
+        features = features.to(device)
+        labels = {k: v.to(device) for k, v in labels.items()}
 
         # Forward pass
         predictions = model(features)
