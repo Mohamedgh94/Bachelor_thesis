@@ -137,11 +137,11 @@ def split_and_save_data(X, y):
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
         print (X.columns, y.columns)
-        unique_person_ids = y['person_id'].unique()
-        # Split the data into training and validation sets
-        train_ids, temp_ids = train_test_split(unique_person_ids, test_size=0.3, random_state=42)
-        valid_ids, test_ids = train_test_split(temp_ids, test_size=0.5, random_state=42)
-
+        #unique_person_ids = y['person_id'].unique()
+        
+        train_ids = ['SA01','SA14' , 'SA03', 'SA04','SA06','SA08', 'SA09','SA10', 'SA11', 'SA12', 'SA13','SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23','SE01', 'SE02','SE03','SE06','SE07','SE9','SE10','SE12','SE13','SE15']
+        valid_ids = ['SA02','SE04','SE05','SE11'] 
+        test_ids = ['SA05',  'SA07','SE08','SE14']
         # Filter y based on the train, validation, and test ids and get indices for X
         train_indices = y.index[y['person_id'].isin(train_ids)].tolist()
         valid_indices = y.index[y['person_id'].isin(valid_ids)].tolist()
