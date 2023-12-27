@@ -27,6 +27,11 @@ for person_id in data_train['person_id'].unique():
     weight = person_data['weight']
     gender = person_data['gender']
     print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
+    train_age_dis= data_train['age'].value_counts()
+    train_height_dis = data_train['height'].value_counts()
+    train_weight_dis = data_train['weight'].value_counts()
+    train_gender_dis = data_train['gender'].value_counts()
+    print(f'train_age_dis: {train_age_dis}, train_height_dis : {train_height_dis} ,train_weight_dis {train_weight_dis}, train_gender_dis{train_gender_dis}')
 print(f'valid Data subjects :')
 
 for person_id in data_valid['person_id'].unique():
@@ -37,6 +42,11 @@ for person_id in data_valid['person_id'].unique():
     weight = person_data['weight']
     gender = person_data['gender']
     print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
+    valid_age_dis= data_train['age'].value_counts()
+    valid_height_dis = data_train['height'].value_counts()
+    valid_weight_dis = data_train['weight'].value_counts()
+    valid_gender_dis = data_train['gender'].value_counts()
+    print(f'train_age_dis: {valid_age_dis}, train_height_dis : {valid_height_dis} ,train_weight_dis {valid_weight_dis}, train_gender_dis{valid_gender_dis}')
 print(f'Test Data subjects :')
 for person_id in data_test['person_id'].unique():
     # Extract data for the current person ID
@@ -48,6 +58,12 @@ for person_id in data_test['person_id'].unique():
 
     # Print or process the data as needed
     print(f" Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
+    test_age_dis= data_train['age'].value_counts()
+    test_height_dis = data_train['height'].value_counts()
+    test_weight_dis = data_train['weight'].value_counts()
+    test_gender_dis = data_train['gender'].value_counts()
+    print(f'train_age_dis: {test_age_dis}, train_height_dis : {test_height_dis} ,train_weight_dis {test_weight_dis}, train_gender_dis{test_gender_dis}')
+print(f'Test Data subjects :')
 """
 import pandas as pd
 
