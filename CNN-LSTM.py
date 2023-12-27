@@ -308,7 +308,7 @@ def load_model(self):
 
 import time
 
-def main(self):
+def main():
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print (f'Using device: {device}')
@@ -334,8 +334,8 @@ def main(self):
        valid_loss = validate(model, valid_loader, device)
        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
        print(f'Epoch {epoch+1} trainng time {time.time() - start_time}')
-    torch.save(self.model.state_dict(), self.model_path)
-    print(f"Model saved to {self.model_path}")   
+    #torch.save(self.model.state_dict(), self.model_path)
+    #print(f"Model saved to {self.model_path}")   
     # Test the model
     test_metrics = test(model, test_loader, device)
     gender_preds, gender_labels = check_gender_predictions(model, test_loader, device)
