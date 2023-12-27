@@ -95,7 +95,7 @@ def normalize_and_encode(all_data):
         # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
         label_encoders = {}  
-        for col in ['person_id','gender'] :
+        for col in ['gender'] :
             le = LabelEncoder()
             all_data[col] = le.fit_transform(all_data[col])
             label_encoders[col] = le  # Store the encoder
