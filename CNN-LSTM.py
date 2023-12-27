@@ -31,15 +31,16 @@ class IMUDataset(Dataset):
         feature_vector = self.features[idx]
         label_vector = self.labels[idx]
         label_dict = {
-            'person_id': label_vector[0],
-            'age': label_vector[1],
-            'height': label_vector[2],
-            'weight': label_vector[3],
-            'gender': label_vector[4],
+            'person_id': torch.tensor(label_vector[0], dtype=torch.float32),
+            'age': torch.tensor(label_vector[1], dtype=torch.float32),
+            'height': torch.tensor(label_vector[2], dtype=torch.float32),
+            'weight': torch.tensor(label_vector[3], dtype=torch.float32),
+            'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
+        return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
-        return torch.tensor(feature_vector, dtype=torch.float32), label_dict
+        #return torch.tensor(feature_vector, dtype=torch.float32), label_dict
 
     @staticmethod
     def get_combined_categories(*datasets):
@@ -224,10 +225,7 @@ def combined_loss(predictions, targets):
 def train(model, train_loader, optimizer, device):
     model.train()
     total_loss = 0
-    for batch in train_loader:
-        features, labels = batch
-
-        # Move features and labels to the appropriate device
+    for features, labels in train_loader:
         features = features.to(device)
         labels = {k: v.to(device) for k, v in labels.items()}
 
@@ -246,7 +244,6 @@ def train(model, train_loader, optimizer, device):
         total_loss += loss.item()
 
     avg_loss = total_loss / len(train_loader)
-    logging.info(f"Training - Epoch Loss: {avg_loss}")
     return avg_loss
 
 ##############################################
