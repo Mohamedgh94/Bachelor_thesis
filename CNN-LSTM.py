@@ -37,7 +37,7 @@ class IMUDataset(Dataset):
             'weight': label_vector[3],
             'gender': label_vector[4],
         }
-        feature_vector = feature_vector.reshape(1, -1)
+        #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
 
@@ -190,7 +190,7 @@ def combined_loss(predictions, targets):
     return total_loss
 
 ##################################################
-def train(model, train_loader, optimizer, device):
+""" def train(model, train_loader, optimizer, device):
     model.train()
     total_loss = 0
     for features, labels in train_loader:
@@ -199,6 +199,32 @@ def train(model, train_loader, optimizer, device):
         labels['height'] = labels['height'].float()
         labels['weight'] = labels['weight'].float()
 
+        # Move data to the appropriate device (CPU or GPU)
+        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+
+        # Forward pass
+        predictions = model(features)
+        targets = (labels['age'], labels['height'], labels['weight'], labels['gender'])
+
+        # Compute loss
+        loss = combined_loss(predictions, targets)
+
+        # Backward pass and optimize
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    avg_loss = total_loss / len(train_loader)
+    logging.info(f"Training - Epoch Loss: {avg_loss}")
+    return avg_loss
+ """
+
+def train(model, train_loader, optimizer, device):
+    model.train()
+    total_loss = 0
+    for features, labels in train_loader:
         # Move data to the appropriate device (CPU or GPU)
         features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
 
