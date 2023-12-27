@@ -32,8 +32,8 @@ data_test = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 
 # Print information
 print_dataset_info(data_train, 'Train')
-print_dataset_info(data_valid, 'Valid')
-print_dataset_info(data_test, 'Test')
+# print_dataset_info(data_valid, 'Valid')
+# print_dataset_info(data_test, 'Test')
 
 """
 import pandas as pd
