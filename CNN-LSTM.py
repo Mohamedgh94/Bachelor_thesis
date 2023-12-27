@@ -37,6 +37,7 @@ class IMUDataset(Dataset):
             'weight': torch.tensor(label_vector[3], dtype=torch.float32),
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
+        feature_vector = feature_vector.reshape(1, -1)
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
@@ -56,16 +57,16 @@ class IMUDataset(Dataset):
 train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_train_data.csv")
 valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_valid_data.csv")
 test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_test_data.csv")
-# train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
-# valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
-# test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")
+# train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_train_data.csv")
+# valid_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_valid_data.csv")
+# test_dataset= IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_test_data.csv")
 
 
 
 # Create DataLoader instances
-train_loader = DataLoader(train_dataset, batch_size=2056, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=2056, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=2056, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=512, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
 
 
 ##############
@@ -109,7 +110,9 @@ class CNNLSTM(nn.Module):
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
     def forward(self, x):
 
+        print(f"Original shape: {x.shape}")
         x = x.permute(0, 2, 1)
+        print(f"Shape after permute: {x.shape}")
         # Convolutional layers
         x = self.conv1(x)  # First convolution
         x = self.relu(x)   # Apply ReLU
