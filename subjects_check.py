@@ -13,57 +13,28 @@ train_shuffeld.to_csv('mobiact_valid.csv', index=False)
 print(f'validation data shuffeld complete') """
 
 import pandas as pd
-import matplotlib.pyplot as plt
+
+def print_dataset_info(dataset, dataset_name):
+    print(f'{dataset_name} Data subjects:')
+    for person_id in dataset['person_id'].unique():
+        person_data = dataset[dataset['person_id'] == person_id].iloc[0]
+        print(f"Person ID: {person_id}, Age: {person_data['age']}, Height: {person_data['height']}, Weight: {person_data['weight']}, Gender: {person_data['gender']}")
+    
+    print(f"{dataset_name} Age Distribution:\n{dataset['age'].value_counts()}")
+    print(f"{dataset_name} Height Distribution:\n{dataset['height'].value_counts()}")
+    print(f"{dataset_name} Weight Distribution:\n{dataset['weight'].value_counts()}")
+    print(f"{dataset_name} Gender Distribution:\n{dataset['gender'].value_counts()}\n")
+
+# Load data
 data_train = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
 data_valid = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_valid_data.csv')
 data_test = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
-print(f'train Data subjects :')
 
-for person_id in data_train['person_id'].unique():
-    # Extract data for the current person ID
-    person_data = data_train[data_train['person_id'] == person_id].iloc[0]
-    age = person_data['age']
-    height = person_data['height']
-    weight = person_data['weight']
-    gender = person_data['gender']
-    print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
-    train_age_dis= data_train['age'].value_counts()
-    train_height_dis = data_train['height'].value_counts()
-    train_weight_dis = data_train['weight'].value_counts()
-    train_gender_dis = data_train['gender'].value_counts()
-    print(f'train_age_dis: {train_age_dis}, train_height_dis : {train_height_dis} ,train_weight_dis {train_weight_dis}, train_gender_dis{train_gender_dis}')
-print(f'valid Data subjects :')
+# Print information
+print_dataset_info(data_train, 'Train')
+print_dataset_info(data_valid, 'Valid')
+print_dataset_info(data_test, 'Test')
 
-for person_id in data_valid['person_id'].unique():
-    # Extract data for the current person ID
-    person_data = data_valid[data_valid['person_id'] == person_id].iloc[0]
-    age = person_data['age']
-    height = person_data['height']
-    weight = person_data['weight']
-    gender = person_data['gender']
-    print(f"Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
-    valid_age_dis= data_train['age'].value_counts()
-    valid_height_dis = data_train['height'].value_counts()
-    valid_weight_dis = data_train['weight'].value_counts()
-    valid_gender_dis = data_train['gender'].value_counts()
-    print(f'train_age_dis: {valid_age_dis}, train_height_dis : {valid_height_dis} ,train_weight_dis {valid_weight_dis}, train_gender_dis{valid_gender_dis}')
-print(f'Test Data subjects :')
-for person_id in data_test['person_id'].unique():
-    # Extract data for the current person ID
-    person_data = data_test[data_test['person_id'] == person_id].iloc[0]
-    age = person_data['age']
-    height = person_data['height']
-    weight = person_data['weight']
-    gender = person_data['gender']
-
-    # Print or process the data as needed
-    print(f" Person ID: {person_id}, Age: {age}, Height: {height}, Weight: {weight}, Gender: {gender}")
-    test_age_dis= data_train['age'].value_counts()
-    test_height_dis = data_train['height'].value_counts()
-    test_weight_dis = data_train['weight'].value_counts()
-    test_gender_dis = data_train['gender'].value_counts()
-    print(f'train_age_dis: {test_age_dis}, train_height_dis : {test_height_dis} ,train_weight_dis {test_weight_dis}, train_gender_dis{test_gender_dis}')
-print(f'Test Data subjects :')
 """
 import pandas as pd
 
