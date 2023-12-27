@@ -176,6 +176,9 @@ def split_and_save_data(X, y):
         train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
         valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
         test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
+        train_data.to_csv('Sis_train_data.csv', index=False)
+        valid_data.to_csv('Sis_valid_data.csv', index=False)
+        test_data.to_csv('Sis_test_data.csv', index=False)
         """  try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
