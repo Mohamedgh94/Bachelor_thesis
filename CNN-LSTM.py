@@ -64,9 +64,9 @@ test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_test_data.csv")
 
 
 # Create DataLoader instances
-train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=512, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=512, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size= 2056, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=2056, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=2056, shuffle=False)
 
 
 ##############
@@ -337,6 +337,26 @@ def load_model(self):
 
 import time
 
+class EarlyStopping:
+    def __init__(self, patience=5, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss
+        elif val_loss > self.best_loss - self.min_delta:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_loss = val_loss
+            self.counter = 0
+
+
 def main():
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -352,7 +372,7 @@ def main():
     model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
+    early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     # Training and Validation Loop
     num_epochs = 10
     start_time = time.time()
@@ -363,6 +383,10 @@ def main():
        valid_loss = validate(model, valid_loader, device)
        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
        print(f'Epoch {epoch+1} trainng time {time.time() - start_time}')
+       early_stopping(valid_loss)
+       if early_stopping.early_stop:
+            print("Early stopping triggered")
+            break
     #torch.save(self.model.state_dict(), self.model_path)
     #print(f"Model saved to {self.model_path}")   
     # Test the model
