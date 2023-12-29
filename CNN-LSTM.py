@@ -64,9 +64,9 @@ test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_test_data.csv")
 
 
 # Create DataLoader instances
-train_loader = DataLoader(train_dataset, batch_size= 2056, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=2056, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=2056, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size= 256, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=256, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
 
 ##############
@@ -371,7 +371,7 @@ def main():
     }
     model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     # Training and Validation Loop
     num_epochs = 10
