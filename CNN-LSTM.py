@@ -181,12 +181,15 @@ def combined_loss(predictions, targets):
     height_pred = height_pred.squeeze()
     weight_pred = weight_pred.squeeze()
 
-    # Compute regression losses (MSE)
+    """ # Compute regression losses (MSE)
     loss_age = F.mse_loss(age_pred, age_target)
     loss_height = F.mse_loss(height_pred, height_target)
-    loss_weight = F.mse_loss(weight_pred, weight_target)
+    loss_weight = F.mse_loss(weight_pred, weight_target) """
 
     # Compute classification loss (Cross-Entropy)
+    loss_age = F.cross_entropy(age_pred, age_target)
+    loss_height = F.cross_entropy(height_pred, height_target)
+    loss_weight = F.cross_entropy(weight_pred, weight_target)
     loss_gender = F.cross_entropy(gender_pred, gender_target)
 
     # Combine losses
