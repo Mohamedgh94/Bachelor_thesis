@@ -95,9 +95,10 @@ class CNNLSTM(nn.Module):
         self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
 
         #
-        self.fc1 = nn.Linear(hidden_size,256)
-        self.fc2 = nn.Linear(256,128)
-
+        #self.fc1 = nn.Linear(hidden_size,256)
+        #self.fc2 = nn.Linear(256,128)
+        #new
+       
         # Output heads
         """ self.fc_age = nn.Linear(hidden_size, num_classes['age'])
         self.fc_height = nn.Linear(hidden_size, num_classes['height'])
@@ -144,16 +145,16 @@ class CNNLSTM(nn.Module):
         x = x[:, -1, :]  # Get the last time step's output
 
         # Dense layers
-        x = self.fc1(x)   # First dense layer
-        x = F.relu(x)     # Apply ReLU
-        x = self.fc2(x)   # Second dense layer
-        x = F.relu(x)     # Apply ReLU
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
 
-        # Output heads with activation functions
+        # Output layers
         age = self.fc_age(x)
         height = self.fc_height(x)
         weight = self.fc_weight(x)
-        gender = self.softmax(self.fc_gender(x))
+        gender = self.fc_gender(x)  
 
         return age, height, weight, gender
 ########################################################################
@@ -192,7 +193,7 @@ def __repr__(self):
 
 def combined_loss(predictions, targets):
     # Unpack predictions
-    age_pred, height_pred, weight_pred, gender_pred = predictions
+    """ age_pred, height_pred, weight_pred, gender_pred = predictions
 
     # Unpack targets
     age_target, height_target, weight_target, gender_target = targets
@@ -202,17 +203,19 @@ def combined_loss(predictions, targets):
     height_pred = height_pred.squeeze()
     weight_pred = weight_pred.squeeze()
 
-    """ # Compute regression losses (MSE)
+     # Compute regression losses (MSE)
     loss_age = F.mse_loss(age_pred, age_target)
     loss_height = F.mse_loss(height_pred, height_target)
-    loss_weight = F.mse_loss(weight_pred, weight_target) """
+    loss_weight = F.mse_loss(weight_pred, weight_target) 
 
     print(f"age_pred shape: {age_pred.shape}, age_target shape: {age_target.shape}")
     print(f"height_pred shape: {height_pred.shape}, age_target shape: {age_target.shape}")
-    print(f"weight_pred shape: {weight_pred.shape}, age_target shape: {age_target.shape}")
+    print(f"weight_pred shape: {weight_pred.shape}, age_target shape: {age_target.shape}") """
     
+    age_pred, height_pred, weight_pred, gender_pred = predictions
+    age_target, height_target, weight_target, gender_target = targets
 
-    # Compute classification loss (Cross-Entropy)
+    # Compute classification loss (Cross-Entropy) for all tasks
     loss_age = F.cross_entropy(age_pred, age_target)
     loss_height = F.cross_entropy(height_pred, height_target)
     loss_weight = F.cross_entropy(weight_pred, weight_target)
@@ -221,6 +224,15 @@ def combined_loss(predictions, targets):
     # Combine losses
     total_loss = loss_age + loss_height + loss_weight + loss_gender
     return total_loss
+    """ # Compute classification loss (Cross-Entropy)
+    loss_age = F.cross_entropy(age_pred, age_target)
+    loss_height = F.cross_entropy(height_pred, height_target)
+    loss_weight = F.cross_entropy(weight_pred, weight_target)
+    loss_gender = F.cross_entropy(gender_pred, gender_target)
+
+    # Combine losses
+    total_loss = loss_age + loss_height + loss_weight + loss_gender
+    return total_loss """
 
 ##################################################
 """ def train(model, train_loader, optimizer, device):
