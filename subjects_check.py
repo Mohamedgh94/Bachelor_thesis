@@ -7,13 +7,13 @@ test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 
 # Define the categorization function
 def categorize_age(age):
-    return '<40' if age < 40 else '>=40'
+    return '0' if age < 40 else '1'
 
 def categorize_height(height):
-    return '<165' if height < 165 else '>=165'
+    return '0' if height < 165 else '1'
 
 def categorize_weight(weight):
-    return '<65' if weight < 65 else '>=65'
+    return '0' if weight < 65 else '1'
 
 # Apply the categorization
 train_data['age'] = train_data['age'].apply(categorize_age)
