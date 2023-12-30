@@ -312,6 +312,8 @@ def validate(model, valid_loader, device):
 #################################################
 from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, precision_recall_fscore_support
 
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+
 def test(model, test_loader, device):
     model.eval()
     age_preds, age_targets = [], []
@@ -329,32 +331,31 @@ def test(model, test_loader, device):
             weight_targets += labels['weight'].tolist()
             gender_targets += labels['gender'].tolist()
 
-            age_preds += age_pred.squeeze().tolist()
-            height_preds += height_pred.squeeze().tolist()
-            weight_preds += weight_pred.squeeze().tolist()
+            age_preds += age_pred.argmax(dim=1).tolist()
+            height_preds += height_pred.argmax(dim=1).tolist()
+            weight_preds += weight_pred.argmax(dim=1).tolist()
             gender_preds += gender_pred.argmax(dim=1).tolist()
 
-    # Regression Metrics
-    mse_age = mean_squared_error(age_targets, age_preds)
-    mae_age = mean_absolute_error(age_targets, age_preds)
-    mse_height = mean_squared_error(height_targets, height_preds)
-    mae_height = mean_absolute_error(height_targets, height_preds)
-    mse_weight = mean_squared_error(weight_targets, weight_preds)
-    mae_weight = mean_absolute_error(weight_targets, weight_preds)
-
     # Classification Metrics
+    accuracy_age = accuracy_score(age_targets, age_preds)
+    accuracy_height = accuracy_score(height_targets, height_preds)
+    accuracy_weight = accuracy_score(weight_targets, weight_preds)
     accuracy_gender = accuracy_score(gender_targets, gender_preds)
+
+    precision_age, recall_age, f1_age, _ = precision_recall_fscore_support(age_targets, age_preds, average='binary')
+    precision_height, recall_height, f1_height, _ = precision_recall_fscore_support(height_targets, height_preds, average='binary')
+    precision_weight, recall_weight, f1_weight, _ = precision_recall_fscore_support(weight_targets, weight_preds, average='binary')
     precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='binary')
 
     metrics = {
-        'mse_age': mse_age, 'mae_age': mae_age,
-        'mse_height': mse_height, 'mae_height': mae_height,
-        'mse_weight': mse_weight, 'mae_weight': mae_weight,
-        'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender,
-        'recall_gender': recall_gender, 'f1_gender': f1_gender
+        'accuracy_age': accuracy_age, 'precision_age': precision_age, 'recall_age': recall_age, 'f1_age': f1_age,
+        'accuracy_height': accuracy_height, 'precision_height': precision_height, 'recall_height': recall_height, 'f1_height': f1_height,
+        'accuracy_weight': accuracy_weight, 'precision_weight': precision_weight, 'recall_weight': recall_weight, 'f1_weight': f1_weight,
+        'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender, 'recall_gender': recall_gender, 'f1_gender': f1_gender
     }
     
     return metrics
+
 
 def check_gender_predictions(model, test_loader, device):
     model.eval()
@@ -371,6 +372,11 @@ def check_gender_predictions(model, test_loader, device):
             all_labels.extend(labels.cpu().numpy())
 
     return all_preds, all_labels
+
+def save_model(model, filename):
+    torch.save(model.state_dict(), filename)
+    print(f"Model saved to {filename}")
+
 
 def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
@@ -405,9 +411,9 @@ def main():
     hidden_size = 128  # Example hidden size, this can be tuned
     input_size = 45
     num_classes = {
-        'age': 1,  # Regression (assuming age is a continuous value)
-        'height': 1,  # Regression
-        'weight': 1,  # Regression
+        'age': 2,  # Regression (assuming age is a continuous value)
+        'height': 2,  # Regression
+        'weight': 2,  # Regression
         'gender': 2  # Classification (assuming gender is binary)
     }
     model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
@@ -428,12 +434,13 @@ def main():
        if early_stopping.early_stop:
             print("Early stopping triggered")
             break
-    #torch.save(self.model.state_dict(), self.model_path)
+    torch.save(model, 'saved_model')
+
     #print(f"Model saved to {self.model_path}")   
     # Test the model
     test_metrics = test(model, test_loader, device)
     gender_preds, gender_labels = check_gender_predictions(model, test_loader, device)
-    print("Gender Predictions:", np.unique(gender_preds, return_counts=True))
+    #print("Gender Predictions:", np.unique(gender_preds, return_counts=True))
     print("Test Metrics:")
     for metric, value in test_metrics.items():
         print(f"{metric}: {value}")
