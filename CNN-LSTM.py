@@ -405,9 +405,9 @@ class EarlyStopping:
 
 
 def main():
-    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print (f'Using device: {device}')
+    print(f'Using device: {device}')
+
     hidden_size = 256
     input_size = 45
     num_classes = {
@@ -416,33 +416,52 @@ def main():
         'weight': 2,  
         'gender': 2  
     }
+
+    # Ask user for the operation mode
+    mode = input("Enter mode (train/test/both): ").strip().lower()
+    if mode not in ['train', 'test', 'both']:
+        print("Invalid mode selected. Exiting.")
+        return
+
     model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-    early_stopping = EarlyStopping(patience=5, min_delta=0.01)
-    # Training and Validation Loop
-    num_epochs = 3 
-    start_time = time.time()
-    for epoch in range(num_epochs):
-       print(f'training ', epoch)
-       train_loss = train(model, train_loader, optimizer, device)
-       print(f'Epoch, {epoch+1}/{num_epochs},  Training Loss: {train_loss}')
-       valid_loss = validate(model, valid_loader, device)
-       print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Valid Loss: {valid_loss}')
-       print(f'Epoch {epoch+1} trainng time {time.time() - start_time}')
-       early_stopping(valid_loss)
-       if early_stopping.early_stop:
-            print("Early stopping triggered")
-            break
-    torch.save(model, 'saved_model')
+    if mode in ['train', 'both']:
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+        early_stopping = EarlyStopping(patience=5, min_delta=0.01)
+        num_epochs = 3
+        start_time = time.time()
 
-    #print(f"Model saved to {self.model_path}")   
-    # Test the model
-    test_metrics = test(model, test_loader, device)
-    gender_preds, gender_labels = check_gender_predictions(model, test_loader, device)
-    #print("Gender Predictions:", np.unique(gender_preds, return_counts=True))
-    print("Test Metrics:")
-    for metric, value in test_metrics.items():
-        print(f"{metric}: {value}")
+        # Training and Validation Loop
+        for epoch in range(num_epochs):
+            print(f'Training Epoch {epoch+1}/{num_epochs}')
+            train_loss = train(model, train_loader, optimizer, device)
+            valid_loss = validate(model, valid_loader, device)
+            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss}, Validation Loss: {valid_loss}')
+            trainng_time  = (time.time() - start_time)/60
+            print(f'Epoch {epoch+1} trainng time {trainng_time}')
+            early_stopping(valid_loss)
+            if early_stopping.early_stop:
+                print("Early stopping triggered")
+                break
+
+        # Save the trained model
+        model_save_path = 'saved_model.pth'
+        torch.save(model.state_dict(), model_save_path)
+        print(f"Model saved to {model_save_path}")
+
+    if mode in ['test', 'both']:
+        if mode == 'test':
+            # Load the pretrained model
+            model_load_path = input("Enter the path to the saved model: ").strip()
+            model.load_state_dict(torch.load(model_load_path))
+            model.eval()
+
+        # Test the model
+        test_metrics = test(model, test_loader, device)
+        print("Test Metrics:")
+        for metric, value in test_metrics.items():
+            print(f"{metric}: {value}")
+
 if __name__ == "__main__":
     main()
+trainng_timetrainng_time
