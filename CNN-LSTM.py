@@ -54,9 +54,9 @@ class IMUDataset(Dataset):
 
 
 
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Sis_test_data.csv")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_train_data.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv")
+test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
 # train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_train_data.csv")
 # valid_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_valid_data.csv")
 # test_dataset= IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_test_data.csv")
