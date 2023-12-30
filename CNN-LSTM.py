@@ -408,7 +408,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
 
-    hidden_size = 256
+    hidden_size = 128
     input_size = 45
     num_classes = {
         'age': 2, 
@@ -428,7 +428,7 @@ def main():
     if mode in ['train', 'both']:
         optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
         early_stopping = EarlyStopping(patience=5, min_delta=0.01)
-        num_epochs = 3
+        num_epochs = 4
         start_time = time.time()
 
         # Training and Validation Loop
@@ -464,4 +464,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-trainng_timetrainng_time
