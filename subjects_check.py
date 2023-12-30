@@ -1,3 +1,39 @@
+import pandas as pd
+
+# Read the datasets
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
+valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_valid_data.csv')
+test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
+
+# Define the categorization function
+def categorize_age(age):
+    return '<40' if age < 40 else '>=40'
+
+def categorize_height(height):
+    return '<165' if height < 165 else '>=165'
+
+def categorize_weight(weight):
+    return '<65' if weight < 65 else '>=65'
+
+# Apply the categorization
+train_data['age'] = train_data['age'].apply(categorize_age)
+train_data['height'] = train_data['height'].apply(categorize_height)
+train_data['weight'] = train_data['weight'].apply(categorize_weight)
+
+valid_data['age'] = valid_data['age'].apply(categorize_age)
+valid_data['height'] = valid_data['height'].apply(categorize_height)
+valid_data['weight'] = valid_data['weight'].apply(categorize_weight)
+
+test_data['age'] = test_data['age'].apply(categorize_age)
+test_data['height'] = test_data['height'].apply(categorize_height)
+test_data['weight'] = test_data['weight'].apply(categorize_weight)
+
+# Optionally, save the modified datasets
+train_data.to_csv('SisCat_train_data.csv', index=False)
+valid_data.to_csv('SisCat_valid_data.csv', index=False)
+test_data.to_csv('SisCat_test_data.csv', index=False)
+
+
 """ import pandas as pd
 valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_train.csv')
 valid_shuffeld  = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
@@ -12,7 +48,7 @@ train_shuffeld  = train_data.sample(frac=1,random_state=1).reset_index(drop=True
 train_shuffeld.to_csv('mobiact_valid.csv', index=False)
 print(f'validation data shuffeld complete') """
 
-import pandas as pd
+""" import pandas as pd
 
 def print_dataset_info(dataset, dataset_name):
     print(f'{dataset_name} Data subjects:')
@@ -33,7 +69,7 @@ data_test = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 # Print information
 print_dataset_info(data_train, 'Train')
 print_dataset_info(data_valid, 'Valid')
-print_dataset_info(data_test, 'Test')
+print_dataset_info(data_test, 'Test') """
 
 """
 import pandas as pd
