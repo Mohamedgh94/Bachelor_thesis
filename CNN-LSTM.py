@@ -408,20 +408,20 @@ def main():
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print (f'Using device: {device}')
-    hidden_size = 128  # Example hidden size, this can be tuned
+    hidden_size = 256
     input_size = 45
     num_classes = {
-        'age': 2,  # Regression (assuming age is a continuous value)
-        'height': 2,  # Regression
-        'weight': 2,  # Regression
-        'gender': 2  # Classification (assuming gender is binary)
+        'age': 2, 
+        'height': 2,  
+        'weight': 2,  
+        'gender': 2  
     }
     model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     # Training and Validation Loop
-    num_epochs = 10
+    num_epochs = 3 
     start_time = time.time()
     for epoch in range(num_epochs):
        print(f'training ', epoch)
