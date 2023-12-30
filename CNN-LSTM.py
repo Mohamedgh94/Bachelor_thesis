@@ -186,6 +186,11 @@ def combined_loss(predictions, targets):
     loss_height = F.mse_loss(height_pred, height_target)
     loss_weight = F.mse_loss(weight_pred, weight_target) """
 
+    print(f"age_pred shape: {age_pred.shape}, age_target shape: {age_target.shape}")
+    print(f"height_pred shape: {height_pred.shape}, age_target shape: {age_target.shape}")
+    print(f"weight_pred shape: {weight_pred.shape}, age_target shape: {age_target.shape}")
+    
+
     # Compute classification loss (Cross-Entropy)
     loss_age = F.cross_entropy(age_pred, age_target)
     loss_height = F.cross_entropy(height_pred, height_target)
