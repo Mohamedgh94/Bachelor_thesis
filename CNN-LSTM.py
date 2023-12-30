@@ -99,13 +99,19 @@ class CNNLSTM(nn.Module):
         self.fc2 = nn.Linear(256,128)
 
         # Output heads
-        self.fc_age = nn.Linear(hidden_size, num_classes['age'])
+        """ self.fc_age = nn.Linear(hidden_size, num_classes['age'])
         self.fc_height = nn.Linear(hidden_size, num_classes['height'])
         self.fc_weight = nn.Linear(hidden_size, num_classes['weight'])
         self.fc_gender = nn.Linear(hidden_size, num_classes['gender'])
-
+ """
+        
+        
+        self.fc_age = nn.Linear(hidden_size, 2)  # 2 classes for age
+        self.fc_height = nn.Linear(hidden_size, 2)  # 2 classes for height
+        self.fc_weight = nn.Linear(hidden_size, 2)  # 2 classes for weight
+        self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender
         # Activation function for gender
-        self.softmax = nn.Softmax(dim=1)
+        
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
     def forward(self, x):
@@ -151,6 +157,21 @@ class CNNLSTM(nn.Module):
 
         return age, height, weight, gender
 ########################################################################
+    
+def infer(model, input):
+    model.eval()
+    with torch.no_grad():
+        age_logits, height_logits, weight_logits, gender_logits = model(input)
+        
+        age_probs = F.softmax(age_logits, dim=1)
+        height_probs = F.softmax(height_logits, dim=1)
+        weight_probs = F.softmax(weight_logits, dim=1)
+        gender_probs = F.softmax(gender_logits, dim=1)
+
+        # Now age_probs, height_probs, weight_probs, and gender_probs contain
+        # the probabilities for each class
+        return age_probs, height_probs, weight_probs, gender_probs
+    
     
 def __repr__(self):
         # String representation of your model
