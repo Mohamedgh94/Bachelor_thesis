@@ -428,7 +428,7 @@ def main():
     if mode in ['train', 'both']:
         optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
         early_stopping = EarlyStopping(patience=5, min_delta=0.01)
-        num_epochs = 4
+        num_epochs = 10
         start_time = time.time()
 
         # Training and Validation Loop
