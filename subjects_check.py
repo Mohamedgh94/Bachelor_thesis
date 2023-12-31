@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Read the datasets
-train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
-valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_valid_data.csv')
-test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_train_data.csv')
+valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv')
+test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_test_data.csv')
 
 # Define the categorization function
 def categorize_age(age):
@@ -29,9 +29,9 @@ test_data['height'] = test_data['height'].apply(categorize_height)
 test_data['weight'] = test_data['weight'].apply(categorize_weight)
 
 # Optionally, save the modified datasets
-train_data.to_csv('SisCat_train_data.csv', index=False)
-valid_data.to_csv('SisCat_valid_data.csv', index=False)
-test_data.to_csv('SisCat_test_data.csv', index=False)
+train_data.to_csv('UniCat_train_data.csv', index=False)
+valid_data.to_csv('UniCat_valid_data.csv', index=False)
+test_data.to_csv('UniCat_test_data.csv', index=False)
 
 
 """ import pandas as pd
