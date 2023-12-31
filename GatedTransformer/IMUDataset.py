@@ -55,7 +55,7 @@ class IMUDataset(Dataset):
 # Create instances of the IMUDataset class for each dataset
 train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_train_data.csv")
 valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_test_data.csvv")
+test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
 # train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/SisCat_train_data.csv")
 # valid_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/SisCat_valid_data.csv")
 # test_dataset= IMUDataset("/Users/mohamadghajar/Documents/BAC/SisCat_test_data.csv")
