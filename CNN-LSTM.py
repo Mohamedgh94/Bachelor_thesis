@@ -409,7 +409,7 @@ def main():
     print(f'Using device: {device}')
 
     hidden_size = 128
-    input_size = 45
+    input_size = 15
     num_classes = {
         'age': 2, 
         'height': 2,  
