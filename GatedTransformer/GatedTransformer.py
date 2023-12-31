@@ -60,12 +60,12 @@ class GatedTransformer(nn.Module):
     def __init__(self, input_dim, d_model, num_heads, d_ff, num_layers,
                  num_person_ids, num_ages, num_heights, num_weights, num_genders):
         super(GatedTransformer, self).__init__()
-        self.person_ids_classifier = nn.Linear(d_model, num_person_ids)
-        self.age_regressor = nn.Linear(d_model, 1)  # Output one value for age
-        self.height_regressor = nn.Linear(d_model, 1)  # Output one value for height
-        self.weight_regressor = nn.Linear(d_model, 1)  # Output one value for weight
+        # self.person_ids_classifier = nn.Linear(d_model, num_person_ids)
+        self.age_classifier = nn.Linear(d_model, num_ages)
+        self.height_classifier = nn.Linear(d_model, num_heights)
+        self.weight_classifier = nn.Linear(d_model, num_weights)
         self.gender_classifier = nn.Linear(d_model, num_genders)
-        self.embedding = nn.Linear(input_dim, d_model)
+
         self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
 
     def forward(self, x):
@@ -78,19 +78,17 @@ class GatedTransformer(nn.Module):
         x = x.squeeze(0)  # Remove the sequence length dimension
 
         # Output raw logits for classification tasks
-        person_id_logits = self.person_ids_classifier(x)
+        # person_id_logits = self.person_ids_classifier(x)
+        age_logits = self.age_classifier(x)
+        height_logits = self.height_classifier(x)
+        weight_logits = self.weight_classifier(x)
         gender_logits = self.gender_classifier(x)
 
-        # Output raw values for regression tasks
-        age_output = self.age_regressor(x)
-        height_output = self.height_regressor(x)
-        weight_output = self.weight_regressor(x)
-
+        
         outputs = {
-            'person_id': person_id_logits,
-            'age': age_output,
-            'height': height_output,
-            'weight': weight_output,
+            'age': age_logits,
+            'height': height_logits,
+            'weight': weight_logits,
             'gender': gender_logits
         }
         return outputs

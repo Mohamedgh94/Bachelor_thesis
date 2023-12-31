@@ -168,9 +168,9 @@ import time
 from loss import MultiTaskLossFunction 
 
 class SaveAndLoadModel:
-    def __init__(self, model, loss_fn, optimizer_class, epochs, model_path="model.pth", device=None):
+    def __init__(self, model, optimizer_class, epochs, model_path="model.pth", device=None):
         self.model = model
-        self.loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) # This should be an instance of MultiTaskLossFunction
+        self.loss_fn = MultiTaskLossFunction()  # Update as needed for classification tasks
         self.optimizer = optimizer_class(self.model.parameters())
         self.epochs = epochs
         self.model_path = model_path
@@ -215,7 +215,7 @@ class SaveAndLoadModel:
      """
     
     def train(self, train_loader, epochs=10):
-        multi_task_loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) 
+        multi_task_loss_fn = MultiTaskLossFunction() 
         trainings_start_time = time.time()
         self.model.train()
     
@@ -264,7 +264,7 @@ class SaveAndLoadModel:
         print(f'Training completed in {training_end_time - trainings_start_time}s')
 
     def validate(self, valid_loader):
-        multi_task_loss_fn = MultiTaskLossFunction((person_id_weights, gender_weights) 
+        multi_task_loss_fn = MultiTaskLossFunction() 
         self.model.eval()
         total_loss = 0
         with torch.no_grad():
@@ -288,38 +288,29 @@ class SaveAndLoadModel:
                 inputs = inputs.to(self.device)
                 outputs_dict = self.model(inputs)
                 for task, output in outputs_dict.items():
-                    predicted = output.argmax(dim=1) if task in ['person_id', 'gender'] else output.squeeze()
+                    predicted = output.argmax(dim=1)
                     labels = labels_dict[task]
                     all_outputs.setdefault(task, []).extend(predicted.cpu().numpy())
                     all_labels.setdefault(task, []).extend(labels.cpu().numpy())
 
-        # Calculate metrics for each task
+        # Calculate metrics for each classification task
         metrics = {}
         for task in all_labels:
             true = np.array(all_labels[task]).reshape(-1)
             pred = np.array(all_outputs[task]).reshape(-1)
-            if task in ['person_id', 'gender']:
-                accuracy = accuracy_score(true, pred)
-                f1 = f1_score(true, pred, average="weighted")
-                precision = precision_score(true, pred, average="weighted")
-                recall = recall_score(true, pred, average="weighted")
-                cm = confusion_matrix(true, pred)
-                metrics[task] = {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall, "confusion_matrix": cm}
-                plt.figure(figsize=(10, 8))
-                sns.heatmap(cm, annot=True, fmt='g', cmap='Blues')
-                plt.title(f"Confusion Matrix for {task}")
-                plt.xlabel('Predicted')
-                plt.ylabel('True')
-                plt.show()
-                
-            else:
-                # Metrics for regression tasks
-                mse = mean_squared_error(true, pred)
-                rmse = mean_squared_error(true, pred, squared=False)
-                mae = mean_absolute_error(true, pred)
-                r2 = r2_score(true, pred)
-                
-                metrics[task] = {"mse": mse, "rmse": rmse, "mae": mae, "r2": r2}
+            accuracy = accuracy_score(true, pred)
+            f1 = f1_score(true, pred, average="weighted")
+            precision = precision_score(true, pred, average="weighted")
+            recall = recall_score(true, pred, average="weighted")
+            cm = confusion_matrix(true, pred)
+            metrics[task] = {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall, "confusion_matrix": cm}
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(cm, annot=True, fmt='g', cmap='Blues')
+            plt.title(f"Confusion Matrix for {task}")
+            plt.xlabel('Predicted')
+            plt.ylabel('True')
+            plt.show()    
+            
         
         print(metrics)
         return metrics , all_labels, all_outputs
