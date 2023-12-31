@@ -53,7 +53,7 @@ class IMUDataset(Dataset):
             weights[class_idx] = total_samples / (num_classes * count)
         return weights
 # Create instances of the IMUDataset class for each dataset
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_train_data.csv ")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_train_data.csv")
 valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv")
 test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_test_data.csv")
 # train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/SisCat_train_data.csv")
