@@ -12,7 +12,7 @@ class IMUDataset(Dataset):
         # Assuming the last 5 columns are labels
         self.labels = self.dataframe.iloc[:, -5:].values
         # Assuming all other columns are features
-        self.features = self.dataframe.iloc[:, :-4].values
+        self.features = self.dataframe.iloc[:, :-5].values
         self.label_categories = {}
         for column in self.dataframe.columns[-5:]:
             self.label_categories[column] = self.dataframe[column].unique()
@@ -151,3 +151,4 @@ num_genders = len(combined_categories['gender'])
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=32, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False) """
+
