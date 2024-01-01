@@ -62,12 +62,12 @@ class IMUDataset(Dataset):
         # Normalize weights so that the minimum weight is 1.0
         weights = weights / weights.min()
         return torch.tensor(weights, dtype=torch.float32) """
-# train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
-# valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
-# test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
-train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")    
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+# train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
+# valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
+# test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")    
 # global age_weights
 # global height_weights
 # global weight_weights
