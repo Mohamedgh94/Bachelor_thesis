@@ -60,6 +60,8 @@ class GatedTransformer(nn.Module):
     def __init__(self, input_dim, d_model, num_heads, d_ff, num_layers,
                  num_person_ids, num_ages, num_heights, num_weights, num_genders):
         super(GatedTransformer, self).__init__()
+        self.embedding = nn.Linear(input_dim, d_model)
+        #self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
         # self.person_ids_classifier = nn.Linear(d_model, num_person_ids)
         self.age_classifier = nn.Linear(d_model, num_ages)
         self.height_classifier = nn.Linear(d_model, num_heights)
@@ -67,7 +69,7 @@ class GatedTransformer(nn.Module):
         self.gender_classifier = nn.Linear(d_model, num_genders)
 
         self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
-
+        self.gate = nn.Linear(num_genders+num_person_ids, d_model)
     def forward(self, x):
         x = self.embedding(x)
         x = x.unsqueeze(0)  # Introduce a sequence length dimension of 1
