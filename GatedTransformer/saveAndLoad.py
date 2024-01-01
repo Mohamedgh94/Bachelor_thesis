@@ -170,13 +170,14 @@ from loss import MultiTaskLossFunction
 class SaveAndLoadModel:
     def __init__(self, model, optimizer_class, epochs, model_path="model.pth", device=None):
         self.model = model
-        self.loss_fn = MultiTaskLossFunction()  # Update as needed for classification tasks
+        self.loss_fn = MultiTaskLossFunction()
         self.optimizer = optimizer_class(self.model.parameters())
         self.epochs = epochs
         self.model_path = model_path
         self.device = device or (torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
         total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         print(f"Total number of trainable parameters: {total_params}")
+
 
     
    
@@ -256,7 +257,7 @@ class SaveAndLoadModel:
 
         training_end_time = time.time()
         print(f'Training completed in {training_end_time - trainings_start_time}s')
-        
+
     def validate(self, valid_loader):
         multi_task_loss_fn = MultiTaskLossFunction() 
         self.model.eval()

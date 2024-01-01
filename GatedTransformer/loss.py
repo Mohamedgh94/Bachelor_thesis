@@ -36,12 +36,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from IMUDataset import num_person_ids,num_ages,num_heights,num_weights,num_genders
 class MultiTaskLossFunction:
-    def __init__(self, age_weights, height_weights, weight_weights, gender_weights):
+    def __init__(self):
         self.loss_fns = {
-            'age': nn.CrossEntropyLoss(weight=age_weights),
-            'height': nn.CrossEntropyLoss(weight=height_weights),
-            'weight': nn.CrossEntropyLoss(weight=weight_weights),
-            'gender': nn.CrossEntropyLoss(weight=gender_weights),
+            'age': nn.CrossEntropyLoss(),
+            'height': nn.CrossEntropyLoss(),
+            'weight': nn.CrossEntropyLoss(),
+            'gender': nn.CrossEntropyLoss(),
         }
     
     def compute_loss(self, outputs_dict, labels_dict):

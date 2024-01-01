@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -52,14 +53,29 @@ class IMUDataset(Dataset):
         return combined_categories
 
 
-
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
-# train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
-# valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
-# test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")    
-
+    """ @staticmethod
+    def calculate_class_weights(labels):
+        # Count the frequency of each class
+        class_counts = np.bincount(labels)
+        # Calculate weights inversely proportional to class frequencies
+        weights = 1. / class_counts
+        # Normalize weights so that the minimum weight is 1.0
+        weights = weights / weights.min()
+        return torch.tensor(weights, dtype=torch.float32) """
+# train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+# valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+# test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
+valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
+test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")    
+# global age_weights
+# global height_weights
+# global weight_weights
+# global gender_weights
+# age_weights = IMUDataset.calculate_class_weights(train_dataset['age'].values)
+# height_weights = IMUDataset.calculate_class_weights(train_dataset['height'].values)
+# weight_weights = IMUDataset.calculate_class_weights(train_dataset['weight'].values)
+# gender_weights = IMUDataset.calculate_class_weights(train_dataset['gender'].values)
 combined_categories = IMUDataset.get_combined_categories(train_dataset,valid_dataset,test_dataset)
 global num_person_ids 
 global num_ages

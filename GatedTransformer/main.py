@@ -3,7 +3,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from IMUDataset import IMUDataset,num_person_ids , num_ages,num_heights,num_weights,num_genders
 from saveAndLoad import SaveAndLoadModel
-from loss import MultiTaskLossFunction as loss
+from loss import MultiTaskLossFunction 
 from GatedTransformer import GatedTransformer
 from torchsummary import summary
 import pandas as pd
@@ -25,6 +25,7 @@ class Main:
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.model_saver = SaveAndLoadModel(self.model,optimizer_class= torch.optim.Adam,epochs=self.epochs ,model_path= self.model_path, device=self.device)
+        #self.model_saver = SaveAndLoadModel(self.model,ptimizer_class=torch.optim.Adam,epochs=self.epochs,model_path=self.model_path,device=self.device,)
         self.train_loader = DataLoader(IMUDataset(self.train_csv), batch_size=self.batch_size, shuffle=True)
         self.valid_loader = DataLoader(IMUDataset(self.valid_csv), batch_size=self.batch_size, shuffle=False)
         self.test_loader = DataLoader(IMUDataset(self.test_csv), batch_size=self.batch_size, shuffle=False)
@@ -77,7 +78,8 @@ if __name__ == "__main__":
     
     model = GatedTransformer(input_dim, d_model, num_heads, d_ff, num_layers,num_person_ids,num_ages,num_heights,num_weights,num_genders)
     
-    loss_fn = torch.nn.CrossEntropyLoss()
+    #loss_fn = torch.nn.CrossEntropyLoss()
+    loss_fn = MultiTaskLossFunction()
     print("CUDA available:", torch.cuda.is_available())
 
     # Initialize the MainController
