@@ -215,54 +215,48 @@ class SaveAndLoadModel:
      """
     
     def train(self, train_loader, epochs=10):
-        multi_task_loss_fn = MultiTaskLossFunction() 
+        multi_task_loss_fn = MultiTaskLossFunction()  # Ensure this is initialized correctly for classification tasks
         trainings_start_time = time.time()
         self.model.train()
-    
+
         for epoch in range(epochs):
             total_loss = 0
-            correct_predictions = {task: 0 for task in ['person_id', 'gender']}
-            total_predictions = {task: 0 for task in ['person_id', 'gender']}
-        
-            for batch in train_loader:
-                inputs, labels_dict = batch
-                inputs = inputs.to(self.device)
-                labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
-            
-                self.optimizer.zero_grad()
-                outputs_dict = self.model(inputs)
-            
-                loss = 0
-                for task, output in outputs_dict.items():
-                    labels = labels_dict[task]
-                    if task in ['age', 'height', 'weight']:
-                        # For regression tasks, you can simply calculate the loss
-                        loss += multi_task_loss_fn.loss_fns[task](output.squeeze(), labels.float())
-                    elif task in ['person_id', 'gender']:
-                        # For classification tasks, calculate loss and accuracy
-                        
-                        loss += multi_task_loss_fn.loss_fns[task](output, labels.long())
-                    
-                    # Calculate the number of correct predictions
-                        _, predicted = torch.max(output, 1)
-                        correct_predictions[task] += (predicted == labels).sum().item()
-                        total_predictions[task] += labels.size(0)
-                    
+            correct_predictions = {task: 0 for task in ['age', 'height', 'weight', 'gender']}
+            total_predictions = {task: 0 for task in ['age', 'height', 'weight', 'gender']}
+
+        for batch in train_loader:
+            inputs, labels_dict = batch
+            inputs = inputs.to(self.device)
+            labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
+
+            self.optimizer.zero_grad()
+            outputs_dict = self.model(inputs)
+
+            loss = 0
+            for task, output in outputs_dict.items():
+                labels = labels_dict[task].long()  # Ensure labels are long type for classification
+                loss += multi_task_loss_fn.loss_fns[task](output, labels)
+                
+                # Calculate the number of correct predictions
+                _, predicted = torch.max(output, 1)
+                correct_predictions[task] += (predicted == labels).sum().item()
+                total_predictions[task] += labels.size(0)
+
             loss.backward()
             self.optimizer.step()
             total_loss += loss.item()
-        
+
         avg_loss = total_loss / len(train_loader)
         print(f"Epoch {epoch+1}, Avg Loss: {avg_loss}")
-        
+
         # Calculate and print the accuracy for each classification task
         for task in correct_predictions:
             accuracy = correct_predictions[task] / total_predictions[task]
             print(f"Epoch {epoch+1}, {task} Training Accuracy: {accuracy:.4f}")
-        
+
         training_end_time = time.time()
         print(f'Training completed in {training_end_time - trainings_start_time}s')
-
+        
     def validate(self, valid_loader):
         multi_task_loss_fn = MultiTaskLossFunction() 
         self.model.eval()
@@ -328,4 +322,3 @@ class SaveAndLoadModel:
     def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
-
