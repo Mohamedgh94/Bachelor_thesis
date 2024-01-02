@@ -35,11 +35,11 @@ class IMUDataset(Dataset):
         feature_vector = self.features[idx]
         label_vector = self.labels[idx]
         label_dict = {
-            'person_id': label_vector[0],
-            'age': label_vector[1],
-            'height': label_vector[2],
-            'weight': label_vector[3],
-            'gender': label_vector[4],
+            'person_id': torch.tensor(label_vector[0], dtype=torch.long),
+            'age': torch.tensor(label_vector[1], dtype=torch.long),
+            'height': torch.tensor(label_vector[2],dtype=torch.long),
+            'weight': torch.tensor(label_vector[3],dtype=torch.long),
+            'gender': torch.tensor(label_vector[4],dtype=torch.long),
         }
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
 
