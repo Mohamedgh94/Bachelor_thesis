@@ -54,9 +54,9 @@ class IMUDataset(Dataset):
 
 
 
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniCat_test_data.csv")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_train_data.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv")
+test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
 # train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_train_data.csv")
 # valid_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_valid_data.csv")
 # test_dataset= IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_test_data.csv")
@@ -409,7 +409,7 @@ def main():
     print(f'Using device: {device}')
 
     hidden_size = 128
-    input_size = 15
+    input_size = 45
     num_classes = {
         'age': 2, 
         'height': 2,  
