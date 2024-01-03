@@ -218,7 +218,7 @@ class SaveAndLoadModel:
     def train(self, train_loader, epochs=10):
         multi_task_loss_fn = MultiTaskLossFunction()  # Ensure this is initialized correctly for classification tasks
         trainings_start_time = time.time()
-        print(trainings_start_time)
+        
         self.model.train()
 
         for epoch in range(epochs):
