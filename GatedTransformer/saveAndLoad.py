@@ -310,12 +310,9 @@ class SaveAndLoadModel:
         
         print(metrics)
         return metrics , all_labels, all_outputs
-    
-    def train_and_validate(self, train_loader, valid_loader,epochs = 10):
-        for epoch in range(epochs):
-            self.train(train_loader, self.epochs)
-            validation_loss = self.validate(valid_loader)
-            print(f"Epoch {epoch+1}, Avg Validation Loss: {validation_loss:.4f}")
+    def train_and_validate(self, train_loader, valid_loader):
+        self.train(train_loader, self.epochs)
+        self.validate(valid_loader)
         
         torch.save(self.model.state_dict(), self.model_path)
         print(f"Model saved to {self.model_path}")
