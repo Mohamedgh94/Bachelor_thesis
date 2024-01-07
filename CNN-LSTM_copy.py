@@ -104,7 +104,7 @@ class CNNLSTM(nn.Module):
         self.relu4 = nn.ReLU()
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=523, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=2, batch_first=True)
         self.lstm2 = nn.LSTM(input_size= 256 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
 
         #
