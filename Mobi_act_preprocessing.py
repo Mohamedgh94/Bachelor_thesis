@@ -174,6 +174,17 @@ def process_file_parallel(act):
     """Ein Wrapper f  r die process_file-Funktion f  r Parallelisierung."""
     return process_file(act, DATA_DIR)
 
+def extract_and_combine_features(df, sensor_cols):
+    feature_list = []
+    for subject_id, group in df.groupby('subject_id'):
+        features = extract_features(group, sensor_cols)
+        features['subject_id'] = subject_id
+        feature_list.append(features)
+
+    # Combine all features into a single DataFrame
+    features_df = pd.concat(feature_list, axis=1).T.reset_index(drop=True)
+    return features_df
+
 def main():
     print("Reading subject info...")
     start_time = time.time()
@@ -208,7 +219,8 @@ def main():
     all_data = pd.merge(all_data, subject_info[['age', 'height', 'weight', 'gender']], left_on='subject_id', right_on=subject_info.index, how='left')
     print(all_data.head())
     sensor_cols = ['acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z','azimuth','pitch','roll']  
-    feature_df = all_data.groupby('subject_id').apply(lambda segment: extract_features(segment, sensor_cols))
+    feature_df = extract_and_combine_features(all_data, sensor_cols)
+    #feature_df = all_data.groupby('subject_id').apply(lambda segment: extract_features(segment, sensor_cols))
     all_data = pd.merge(all_data, feature_df, on='subject_id', how='left')
     print(all_data.head())
     all_data = remove_original_sensor_data(all_data) 
