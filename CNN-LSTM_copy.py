@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 import logging
 
 
-logging.basicConfig(filename='cnn_lstm_log.log', level=logging.INFO,
+logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_dataset_paths(dataset_name):
@@ -110,16 +110,6 @@ class CNNLSTM(nn.Module):
         #
         self.fc1 = nn.Linear(hidden_size,256)
         self.fc2 = nn.Linear(256,128)
-        #new
-       
-        # Output heads
-        """ self.fc_age = nn.Linear(hidden_size, num_classes['age'])
-        self.fc_height = nn.Linear(hidden_size, num_classes['height'])
-        self.fc_weight = nn.Linear(hidden_size, num_classes['weight'])
-        self.fc_gender = nn.Linear(hidden_size, num_classes['gender'])
- """
-        
-        
         self.fc_age = nn.Linear(hidden_size, 2)  # 2 classes for age
         self.fc_height = nn.Linear(hidden_size, 2)  # 2 classes for height
         self.fc_weight = nn.Linear(hidden_size, 2)  # 2 classes for weight
@@ -190,16 +180,16 @@ def infer(model, input):
     
     
 def __repr__(self):
-        # String representation of the model
+        
         representation = "CNNLSTM(\n"
-        # Add details about each layer, hyperparameters, etc.
+        
         representation += f"\tInput Size: {self.input_size}\n"
         representation += f"\tHidden Size: {self.hidden_size}\n"
         representation += f"\tNumber of Classes: {self.num_classes}\n"
-        # Add details for each layer
+        
         representation += f"\tConv1: {self.conv1}\n"
         representation += f"\tConv2: {self.conv2}\n"
-        # Continue for other layers...
+        
         representation += ")"
         return representation
 
@@ -208,24 +198,6 @@ def __repr__(self):
 
 def combined_loss(predictions, targets):
     
-    """ age_pred, height_pred, weight_pred, gender_pred = predictions
-
-    # Unpack targets
-    age_target, height_target, weight_target, gender_target = targets
-
-    # Squeeze the predictions to match the target shape
-    age_pred = age_pred.squeeze()
-    height_pred = height_pred.squeeze()
-    weight_pred = weight_pred.squeeze()
-
-     # Compute regression losses (MSE)
-    loss_age = F.mse_loss(age_pred, age_target)
-    loss_height = F.mse_loss(height_pred, height_target)
-    loss_weight = F.mse_loss(weight_pred, weight_target) 
-
-    print(f"age_pred shape: {age_pred.shape}, age_target shape: {age_target.shape}")
-    print(f"height_pred shape: {height_pred.shape}, age_target shape: {age_target.shape}")
-    print(f"weight_pred shape: {weight_pred.shape}, age_target shape: {age_target.shape}") """
     
     age_pred, height_pred, weight_pred, gender_pred = predictions
     age_target, height_target, weight_target, gender_target = targets
@@ -239,49 +211,10 @@ def combined_loss(predictions, targets):
     # Combine losses
     total_loss = loss_age + loss_height + loss_weight + loss_gender
     return total_loss
-    """
-    # Compute classification loss (Cross-Entropy)
-    loss_age = F.cross_entropy(age_pred, age_target)
-    loss_height = F.cross_entropy(height_pred, height_target)
-    loss_weight = F.cross_entropy(weight_pred, weight_target)
-    loss_gender = F.cross_entropy(gender_pred, gender_target)
-
-    # Combine losses
-    total_loss = loss_age + loss_height + loss_weight + loss_gender
-    return total_loss 
-    """
+   
 
 ##################################################
-""" def train(model, train_loader, optimizer, device):
-    model.train()
-    total_loss = 0
-    for features, labels in train_loader:
-        # Convert regression targets to Float
-        labels['age'] = labels['age'].float()
-        labels['height'] = labels['height'].float()
-        labels['weight'] = labels['weight'].float()
 
-        # Move data to the appropriate device (CPU or GPU)
-        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
-
-        # Forward pass
-        predictions = model(features)
-        targets = (labels['age'], labels['height'], labels['weight'], labels['gender'])
-
-        # Compute loss
-        loss = combined_loss(predictions, targets)
-
-        # Backward pass and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-
-    avg_loss = total_loss / len(train_loader)
-    logging.info(f"Training - Epoch Loss: {avg_loss}")
-    return avg_loss
- """
 
 def train(model, train_loader, optimizer, device):
     model.train()
@@ -327,9 +260,8 @@ def validate(model, valid_loader, device):
     return avg_loss
 
 #################################################
-from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 def test(model, test_loader, device):
     model.eval()
@@ -439,7 +371,7 @@ def main():
     # Dataset-specific configurations
     if dataset_name == "Unimib":
         input_size = 15
-        learning_rates = [0.0001, 0.00005, 0.00001]
+        learning_rates = [0.0001, 0.00001, 0.000001]
         batch_sizes = [128, 256, 512]
     else:
         input_size = 45
@@ -489,7 +421,7 @@ def main():
                 break
 
         # Save the trained model
-        model_save_path = 'saved_model.pth'
+        model_save_path = f" CNN-LSTM,_{dataset_name}_model.pth"
         torch.save(model.state_dict(), model_save_path)
         print(f"Model saved to {model_save_path}")
 
