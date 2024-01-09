@@ -8,12 +8,20 @@ from torch.utils.data import Dataset, DataLoader
 import logging
 
 
-logging.basicConfig(filename='cnn_lstm_log.log', level=logging.INFO,
+logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+def get_dataset_paths(dataset_name):
+        if dataset_name == "SisFall":
+            return "/data/malghaja/Bachelor_thesis/SisCat_train_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"
+        elif dataset_name == "MobiAct":
+            return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
+        elif dataset_name == "Unimib":
+            return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv"
 
 class IMUDataset(Dataset):
     def __init__(self, csv_file):
+
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
         # Assuming the last 5 columns are labels
@@ -51,12 +59,16 @@ class IMUDataset(Dataset):
                 combined_categories.setdefault(key, set()).update(value)
         combined_categories = {key: list(values) for key, values in combined_categories.items()}
         return combined_categories
+    
+    
+    
 
 
-
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
+dataset_name = input("Enter dataset name: ")
+train_path, valid_path, test_path = get_dataset_paths(dataset_name)
+train_dataset = IMUDataset(train_path)
+valid_dataset = IMUDataset(valid_path)
+test_dataset = IMUDataset(test_path)
 # train_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_train_data.csv")
 # valid_dataset = IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_valid_data.csv")
 # test_dataset= IMUDataset("/Users/mohamadghajar/Documents/BAC/Sis_test_data.csv")
@@ -79,39 +91,32 @@ class CNNLSTM(nn.Module):
         # Convolutional layers
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
-        #new
+        
         self.dropout1 = nn.Dropout(0.2)
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
-        #new
+        
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(0.2)
         self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.2)
-
+        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
+        self.relu4 = nn.ReLU()
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=2, batch_first=True)
         self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
 
         #
         self.fc1 = nn.Linear(hidden_size,256)
         self.fc2 = nn.Linear(256,128)
-        #new
-       
-        # Output heads
-        """ self.fc_age = nn.Linear(hidden_size, num_classes['age'])
-        self.fc_height = nn.Linear(hidden_size, num_classes['height'])
-        self.fc_weight = nn.Linear(hidden_size, num_classes['weight'])
-        self.fc_gender = nn.Linear(hidden_size, num_classes['gender'])
- """
-        
         
         self.fc_age = nn.Linear(hidden_size, 2)  # 2 classes for age
         self.fc_height = nn.Linear(hidden_size, 2)  # 2 classes for height
         self.fc_weight = nn.Linear(hidden_size, 2)  # 2 classes for weight
-        self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender
-        # Activation function for gender
+        self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender 
+
+        self.sigmoid = nn.Sigmoid()
         
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
@@ -133,6 +138,9 @@ class CNNLSTM(nn.Module):
         x = self.relu3(x)  # Apply ReLU
         x = self.dropout3(x)  # Apply dropout
 
+        x = self.conv4(x)
+        x = self.relu4(x)
+
         # Global Max Pooling
         x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
         x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
@@ -149,14 +157,32 @@ class CNNLSTM(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
+        age_output = self.sigmoid(self.fc_age(x))
+        height_output = self.sigmoid(self.fc_height(x))
+        weight_output = self.sigmoid(self.fc_weight(x))
+        gender_output = self.sigmoid(self.fc_gender(x))
 
+        return age_output, height_output, weight_output, gender_output
+        """ age_logits = self.fc_age(x)
+        height_logits = self.fc_height(x)
+        weight_logits = self.fc_weight(x)
+        gender_logits = self.fc_gender(x)  
+
+        age = F.softmax(age_logits, dim=1)
+        height = F.softmax(height_logits, dim=1)
+        weight = F.softmax(weight_logits, dim=1)
+        gender = F.softmax(gender_logits, dim=1)
+        return age, height, weight, gender """
+
+        """
+        return age, height, weight, gender
         # Output layers
         age = self.fc_age(x)
         height = self.fc_height(x)
         weight = self.fc_weight(x)
         gender = self.fc_gender(x)  
 
-        return age, height, weight, gender
+        return age, height, weight, gender """
 ########################################################################
     
 def infer(model, input):
@@ -169,22 +195,21 @@ def infer(model, input):
         weight_probs = F.softmax(weight_logits, dim=1)
         gender_probs = F.softmax(gender_logits, dim=1)
 
-        # Now age_probs, height_probs, weight_probs, and gender_probs contain
-        # the probabilities for each class
+        
         return age_probs, height_probs, weight_probs, gender_probs
     
     
 def __repr__(self):
-        # String representation of your model
+        
         representation = "CNNLSTM(\n"
-        # Add details about each layer, hyperparameters, etc.
+        
         representation += f"\tInput Size: {self.input_size}\n"
         representation += f"\tHidden Size: {self.hidden_size}\n"
         representation += f"\tNumber of Classes: {self.num_classes}\n"
-        # Add details for each layer
+        
         representation += f"\tConv1: {self.conv1}\n"
         representation += f"\tConv2: {self.conv2}\n"
-        # Continue for other layers...
+        
         representation += ")"
         return representation
 
@@ -192,25 +217,7 @@ def __repr__(self):
     
 
 def combined_loss(predictions, targets):
-    # Unpack predictions
-    """ age_pred, height_pred, weight_pred, gender_pred = predictions
-
-    # Unpack targets
-    age_target, height_target, weight_target, gender_target = targets
-
-    # Squeeze the predictions to match the target shape
-    age_pred = age_pred.squeeze()
-    height_pred = height_pred.squeeze()
-    weight_pred = weight_pred.squeeze()
-
-     # Compute regression losses (MSE)
-    loss_age = F.mse_loss(age_pred, age_target)
-    loss_height = F.mse_loss(height_pred, height_target)
-    loss_weight = F.mse_loss(weight_pred, weight_target) 
-
-    print(f"age_pred shape: {age_pred.shape}, age_target shape: {age_target.shape}")
-    print(f"height_pred shape: {height_pred.shape}, age_target shape: {age_target.shape}")
-    print(f"weight_pred shape: {weight_pred.shape}, age_target shape: {age_target.shape}") """
+    
     
     age_pred, height_pred, weight_pred, gender_pred = predictions
     age_target, height_target, weight_target, gender_target = targets
@@ -224,47 +231,10 @@ def combined_loss(predictions, targets):
     # Combine losses
     total_loss = loss_age + loss_height + loss_weight + loss_gender
     return total_loss
-    """ # Compute classification loss (Cross-Entropy)
-    loss_age = F.cross_entropy(age_pred, age_target)
-    loss_height = F.cross_entropy(height_pred, height_target)
-    loss_weight = F.cross_entropy(weight_pred, weight_target)
-    loss_gender = F.cross_entropy(gender_pred, gender_target)
-
-    # Combine losses
-    total_loss = loss_age + loss_height + loss_weight + loss_gender
-    return total_loss """
+   
 
 ##################################################
-""" def train(model, train_loader, optimizer, device):
-    model.train()
-    total_loss = 0
-    for features, labels in train_loader:
-        # Convert regression targets to Float
-        labels['age'] = labels['age'].float()
-        labels['height'] = labels['height'].float()
-        labels['weight'] = labels['weight'].float()
 
-        # Move data to the appropriate device (CPU or GPU)
-        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
-
-        # Forward pass
-        predictions = model(features)
-        targets = (labels['age'], labels['height'], labels['weight'], labels['gender'])
-
-        # Compute loss
-        loss = combined_loss(predictions, targets)
-
-        # Backward pass and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-
-    avg_loss = total_loss / len(train_loader)
-    logging.info(f"Training - Epoch Loss: {avg_loss}")
-    return avg_loss
- """
 
 def train(model, train_loader, optimizer, device):
     model.train()
@@ -310,9 +280,8 @@ def validate(model, valid_loader, device):
     return avg_loss
 
 #################################################
-from sklearn.metrics import mean_squared_error, mean_absolute_error, accuracy_score, precision_recall_fscore_support
+from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 def test(model, test_loader, device):
     model.eval()
@@ -366,7 +335,7 @@ def check_gender_predictions(model, test_loader, device):
             features = features.to(device)
             labels = labels['gender'].to(device)
             predictions = model(features)
-            gender_pred = predictions[3]  # Assuming gender is the fourth output
+            gender_pred = predictions[3]  
             gender_pred = torch.argmax(gender_pred, dim=1)
             all_preds.extend(gender_pred.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
@@ -405,19 +374,46 @@ class EarlyStopping:
 
 
 def main():
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
 
+    dataset_name = input("Enter dataset name: ")
+    train_path, valid_path, test_path = get_dataset_paths(dataset_name)
     hidden_size = 128
-    input_size = 45
+    #input_size = 45
     num_classes = {
         'age': 2, 
         'height': 2,  
         'weight': 2,  
         'gender': 2  
     }
+    # Dataset-specific configurations
+    if dataset_name == "Unimib":
+        input_size = 15
+        learning_rates = [0.0001, 0.000001, 0.00001]
+        batch_sizes = [128, 256, 512]
+    else:
+        input_size = 45
+        learning_rates = [0.0001, 0.00001, 0.000001]
+        batch_sizes = [64, 128, 256]
 
-    # Ask user for the operation mode
+    train_dataset = IMUDataset(train_path)
+    valid_dataset = IMUDataset(valid_path)
+    test_dataset = IMUDataset(test_path)
+
+    for lr, batch_size in zip(learning_rates, batch_sizes):
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+        model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+        logging.info(f"Dataset: {dataset_name}, Learning Rate: {lr}, Batch Size: {batch_size}, Model: {model}")
+    
+
+   
     mode = input("Enter mode (train/test/both): ").strip().lower()
     if mode not in ['train', 'test', 'both']:
         print("Invalid mode selected. Exiting.")
@@ -431,7 +427,7 @@ def main():
         num_epochs = 10
         start_time = time.time()
 
-        # Training and Validation Loop
+        
         for epoch in range(num_epochs):
             print(f'Training Epoch {epoch+1}/{num_epochs}')
             train_loss = train(model, train_loader, optimizer, device)
@@ -445,19 +441,20 @@ def main():
                 break
 
         # Save the trained model
-        model_save_path = 'saved_model.pth'
+        model_save_path = f" CNN-LSTM,_{dataset_name}_model.pth"
         torch.save(model.state_dict(), model_save_path)
         print(f"Model saved to {model_save_path}")
 
     if mode in ['test', 'both']:
         if mode == 'test':
-            # Load the pretrained model
-            model_load_path = input("Enter the path to the saved model: ").strip()
+            model_load_path = f" CNN-LSTM,_{dataset_name}_model.pth"
             model.load_state_dict(torch.load(model_load_path))
             model.eval()
 
-        # Test the model
+        
         test_metrics = test(model, test_loader, device)
+        logging.info(f"Test Results for {dataset_name} with LR: {lr}, Batch Size: {batch_size}: {test_metrics}")
+
         print("Test Metrics:")
         for metric, value in test_metrics.items():
             print(f"{metric}: {value}")
