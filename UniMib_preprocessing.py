@@ -166,12 +166,17 @@ def normalize_and_encode(all_data):
 
         # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
+        all_data['Gender'] = all_data['Gender'].str.strip()
+
+
+        all_data['Gender'] = all_data['Gender'].str.upper()
+        
         label_encoders = {}  
-        for col in ['person_id','gender']: 
-            le = LabelEncoder()
-            all_data[col] = le.fit_transform(all_data[col])
-            label_encoders[col] = le  # Store the encoder
-        return all_data        
+        
+        le = LabelEncoder()
+        all_data['Gender'] = le.fit_transform(all_data['Gender'])
+        
+        return all_data         
     except Exception as e:
         print(f"Error in normalize_and_encode: {e}")
         return None
@@ -210,10 +215,9 @@ def split_and_save_data(X, y):
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
         print (X.columns, y.columns)
-        unique_person_ids = y['person_id'].unique()
-        # Split the data into training and validation sets
-        train_ids, temp_ids = train_test_split(unique_person_ids, test_size=0.3, random_state=42)
-        valid_ids, test_ids = train_test_split(temp_ids, test_size=0.5, random_state=42)
+        train_ids = ['1', '2', '3', '4', '5', '6','9','10','11','12','14','15','16','17','18','19','20','21','23','24','25','26','30']
+        valid_ids =['8','22','27']
+        test_ids = ['7','13','28','29']
 
         # Filter y based on the train, validation, and test ids and get indices for X
         train_indices = y.index[y['person_id'].isin(train_ids)].tolist()
@@ -233,7 +237,7 @@ def split_and_save_data(X, y):
         steps = [('o', over), ('u', under)]
         pipeline = Pipeline(steps=steps)
 
-        # Apply the pipeline to your training data
+        
         X_train_resampled, y_train_resampled = pipeline.fit_resample(X_train, y_train['person_id'])
         
 
