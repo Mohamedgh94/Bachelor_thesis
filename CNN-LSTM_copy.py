@@ -390,7 +390,7 @@ def main():
     # Dataset-specific configurations
     if dataset_name == "Unimib":
         input_size = 15
-        learning_rates = [0.0001, 0.00001, 0.000001]
+        learning_rates = [0.0001, 0.000001, 0.00001]
         batch_sizes = [128, 256, 512]
     else:
         input_size = 45
