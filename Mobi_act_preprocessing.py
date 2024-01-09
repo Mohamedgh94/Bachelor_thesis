@@ -201,7 +201,7 @@ def main():
     # Verwenden von os.path.join f  r Dateipfade
     data_dir = os.path.join('/data/datasets/act_datasets', 'Annotated Data')
     act_list = [folder for folder in os.listdir(data_dir) if folder not in ['.DS_Store', 'MobiAct_data.csv', 'MobiAct_data.numbers', 'import pandas as pd.py', 'Readme.txt','SLH','SBW','SLW','SBE','SRH']]
-    print(f"act_list")
+    print(f"act_list , {act_list}")
     print("Processing files...")
     start_time = time.time()
    # Parallelisieren Sie den Dateiverarbeitungsprozess
