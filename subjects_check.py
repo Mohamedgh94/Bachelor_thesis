@@ -1,8 +1,10 @@
 import pandas as pd
 
-data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_test.csv')
-test_class_counts = data['subject_id'].unique()
-print(test_class_counts)
+data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniCat_test_data.csv')
+test_class_counts = data['gender'].value_counts()
+age_class_counts = data['age'].value_counts()
+
+print(f'gender,{test_class_counts}, age_class_counts , {age_class_counts}')
 """ # Read the datasets
 train_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv')
 valid_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv')
