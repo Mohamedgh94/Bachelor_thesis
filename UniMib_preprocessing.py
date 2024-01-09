@@ -159,27 +159,19 @@ def normalize_and_encode(all_data):
         scaler = StandardScaler()
         
         sensor_cols = all_data.iloc[:, :-5].columns
-        #all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
         all_data[sensor_cols] = all_data[sensor_cols].astype(float)
-
         all_data[sensor_cols] = scaler.fit_transform(all_data[sensor_cols])
 
-        # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
-        all_data['Gender'] = all_data['Gender'].str.strip()
+        all_data['gender'] = all_data['gender'].str.strip().str.upper()
 
-
-        all_data['Gender'] = all_data['Gender'].str.upper()
-        
-        label_encoders = {}  
-        
         le = LabelEncoder()
-        all_data['Gender'] = le.fit_transform(all_data['Gender'])
-        
+        all_data['gender'] = le.fit_transform(all_data['gender'])
+
         return all_data         
     except Exception as e:
         print(f"Error in normalize_and_encode: {e}")
-        return None
+        raise e  
 
 def extract_features(segment):
     features = []
