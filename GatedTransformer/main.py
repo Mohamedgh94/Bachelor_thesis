@@ -70,7 +70,7 @@ class Main:
 
 
 if __name__ == "__main__":
-    input_dim= 45  
+    input_dim= 15 
     d_model = 512      # Size of embeddings and model dimensionality
     num_heads = 8      # Number of attention heads
     d_ff = 2048        # Dimensionality of feed-forward layer
