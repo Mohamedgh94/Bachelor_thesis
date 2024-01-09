@@ -152,19 +152,24 @@ def split_and_save(df):
     y = df[['subject_id', 'age', 'height', 'weight', 'gender']]
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
-    train_data = pd.concat([X_train, y_train], axis=1)
+    print('Validation Data:')
     valid_data = pd.concat([X_valid, y_valid], axis=1)
+    valid_data.to_csv('mobiact_valid.csv', index=False)
+    print('Test Data: ')
     test_data = pd.concat([X_test, y_test], axis=1)
-    # train_data.to_csv('mobiact_train.csv', index=False)
-    # valid_data.to_csv('mobiact_valid.csv', index=False)
-    # test_data.to_csv('mobiact_test.csv', index=False)
+    test_data.to_csv('mobiact_test.csv', index=False)
+    gc.collect()
+    print('Training Data : ')
+    train_data = pd.concat([X_train, y_train], axis=1)
+    train_data.to_csv('mobiact_train.csv', index=False)
+    
 
-    train_shuffled  = train_data.sample(frac=1, random_state=1).reset_index(drop=True)
-    valid_shuffled  = valid_data.sample(frac=1, random_state=1).reset_index(drop=True)
-    test_shuffled  = test_data.sample(frac=1, random_state=1).reset_index(drop=True)
-    train_shuffled.to_csv('mobiact_train.csv', index=False)
-    valid_shuffled.to_csv('mobiact_valid.csv', index=False)
-    test_shuffled.to_csv('mobiact_test.csv', index=False) 
+    # train_shuffled  = train_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    # valid_shuffled  = valid_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    # test_shuffled  = test_data.sample(frac=1, random_state=1).reset_index(drop=True)
+    # train_shuffled.to_csv('mobiact_train.csv', index=False)
+    # valid_shuffled.to_csv('mobiact_valid.csv', index=False)
+    # test_shuffled.to_csv('mobiact_test.csv', index=False) 
 
     
     
