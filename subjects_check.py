@@ -1,7 +1,7 @@
 import pandas as pd
 
 data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_test.csv')
-test_class_counts = data['person_id'].unique()
+test_class_counts = data['subject_id'].unique()
 print(test_class_counts)
 """ # Read the datasets
 train_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv')
