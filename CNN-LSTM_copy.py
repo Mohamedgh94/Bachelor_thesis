@@ -21,13 +21,12 @@ def get_dataset_paths(dataset_name):
 
 class IMUDataset(Dataset):
     def __init__(self, csv_file):
-        
+
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
         # Assuming the last 5 columns are labels
-        #self.labels = self.dataframe.iloc[:, -5:].values
+        self.labels = self.dataframe.iloc[:, -5:].values
         # Assuming all other columns are features
-        self.labels = self.dataframe.iloc[:, -4:].values
         self.features = self.dataframe.iloc[:, :-5].values
         self.label_categories = {}
         for column in self.dataframe.columns[-5:]:
@@ -37,7 +36,7 @@ class IMUDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        """ feature_vector = self.features[idx]
+        feature_vector = self.features[idx]
         label_vector = self.labels[idx]
         label_dict = {
             #'person_id': torch.tensor(label_vector[0], dtype=torch.long),
@@ -47,10 +46,7 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         feature_vector = feature_vector.reshape(1, -1)
-        return torch.tensor(feature_vector, dtype=torch.float32), label_dict """
-        feature_vector = self.features[idx]
-        label_vector = self.labels[idx]
-        return torch.tensor(feature_vector, dtype=torch.float32), torch.tensor(label_vector, dtype=torch.float32)
+        return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
         #return torch.tensor(feature_vector, dtype=torch.float32), label_dict
