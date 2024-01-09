@@ -287,7 +287,7 @@ def main():
         print('Normalizing and encoding...')
         all_data = normalize_and_encode(all_data)
         print('Normalization and encoding complete.')
-        print(all_data['gender'].value_counts())
+        #print(all_data['gender'].value_counts())
         X = all_data.iloc[:, :-5]
         y = all_data[['person_id', 'age', 'height', 'weight', 'gender']]
       
