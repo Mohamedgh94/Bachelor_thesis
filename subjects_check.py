@@ -1,6 +1,9 @@
 import pandas as pd
 
-# Read the datasets
+data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_test.csv')
+test_class_counts = data['person_id'].unique()
+print(test_class_counts)
+""" # Read the datasets
 train_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv')
 valid_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv')
 test_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv')
@@ -31,7 +34,7 @@ test_data['weight'] = test_data['weight'].apply(categorize_weight)
 # Optionally, save the modified datasets
 train_data.to_csv('UniCat_train_data.csv', index=False)
 valid_data.to_csv('UniCat_valid_data.csv', index=False)
-test_data.to_csv('UniCat_test_data.csv', index=False)
+test_data.to_csv('UniCat_test_data.csv', index=False) """
 
 
 """ import pandas as pd
