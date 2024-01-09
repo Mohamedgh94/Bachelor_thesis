@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Read the datasets
-train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_train_data.csv')
-valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv')
-test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Unimib_test_data.csv')
+train_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv')
+valid_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv')
+test_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv')
 
 # Define the categorization function
 def categorize_age(age):
