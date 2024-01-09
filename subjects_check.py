@@ -1,5 +1,5 @@
 import pandas as pd
-
+"""
 data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 test_class_counts = data['gender'].value_counts()
 age_class_counts = data['age'].value_counts()
@@ -12,13 +12,13 @@ test_data = pd.read_csv('/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bach
 
 # Define the categorization function
 def categorize_age(age):
-    return '0' if age < 40 else '1'
+    return '0' if age < 30 else '1'
 
 def categorize_height(height):
-    return '0' if height < 165 else '1'
+    return '0' if height < 170 else '1'
 
 def categorize_weight(weight):
-    return '0' if weight < 65 else '1'
+    return '0' if weight < 70 else '1'
 
 # Apply the categorization
 train_data['age'] = train_data['age'].apply(categorize_age)
@@ -36,7 +36,7 @@ test_data['weight'] = test_data['weight'].apply(categorize_weight)
 # Optionally, save the modified datasets
 train_data.to_csv('UniCat_train_data.csv', index=False)
 valid_data.to_csv('UniCat_valid_data.csv', index=False)
-test_data.to_csv('UniCat_test_data.csv', index=False) """
+test_data.to_csv('UniCat_test_data.csv', index=False) 
 
 
 """ import pandas as pd
