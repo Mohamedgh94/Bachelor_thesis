@@ -25,8 +25,9 @@ class IMUDataset(Dataset):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
         # Assuming the last 5 columns are labels
-        self.labels = self.dataframe.iloc[:, -5:].values
+        #self.labels = self.dataframe.iloc[:, -5:].values
         # Assuming all other columns are features
+        self.labels = self.dataframe.iloc[:, -4:].values
         self.features = self.dataframe.iloc[:, :-5].values
         self.label_categories = {}
         for column in self.dataframe.columns[-5:]:
@@ -36,7 +37,7 @@ class IMUDataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        feature_vector = self.features[idx]
+        """ feature_vector = self.features[idx]
         label_vector = self.labels[idx]
         label_dict = {
             #'person_id': torch.tensor(label_vector[0], dtype=torch.long),
@@ -46,7 +47,10 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         feature_vector = feature_vector.reshape(1, -1)
-        return torch.tensor(feature_vector, dtype=torch.float32), label_dict
+        return torch.tensor(feature_vector, dtype=torch.float32), label_dict """
+        feature_vector = self.features[idx]
+        label_vector = self.labels[idx]
+        return torch.tensor(feature_vector, dtype=torch.float32), torch.tensor(label_vector, dtype=torch.float32)
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
         #return torch.tensor(feature_vector, dtype=torch.float32), label_dict
@@ -110,11 +114,13 @@ class CNNLSTM(nn.Module):
         #
         self.fc1 = nn.Linear(hidden_size,256)
         self.fc2 = nn.Linear(256,128)
+        
         self.fc_age = nn.Linear(hidden_size, 2)  # 2 classes for age
         self.fc_height = nn.Linear(hidden_size, 2)  # 2 classes for height
         self.fc_weight = nn.Linear(hidden_size, 2)  # 2 classes for weight
-        self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender
-        # Activation function for gender
+        self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender 
+        
+
         
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
@@ -155,14 +161,27 @@ class CNNLSTM(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
+        
+        age_logits = self.fc_age(x)
+        height_logits = self.fc_height(x)
+        weight_logits = self.fc_weight(x)
+        gender_logits = self.fc_gender(x)  
 
+        age = F.softmax(age_logits, dim=1)
+        height = F.softmax(height_logits, dim=1)
+        weight = F.softmax(weight_logits, dim=1)
+        gender = F.softmax(gender_logits, dim=1)
+        return age, height, weight, gender
+
+        """
+        return age, height, weight, gender
         # Output layers
         age = self.fc_age(x)
         height = self.fc_height(x)
         weight = self.fc_weight(x)
         gender = self.fc_gender(x)  
 
-        return age, height, weight, gender
+        return age, height, weight, gender """
 ########################################################################
     
 def infer(model, input):
