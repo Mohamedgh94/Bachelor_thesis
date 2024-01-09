@@ -1,6 +1,6 @@
 import pandas as pd
 
-data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniCat_test_data.csv')
+data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
 test_class_counts = data['gender'].value_counts()
 age_class_counts = data['age'].value_counts()
 
