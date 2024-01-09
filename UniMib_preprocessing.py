@@ -224,22 +224,7 @@ def split_and_save_data(X, y):
         X_test = X.iloc[test_indices]
         y_test = y.iloc[test_indices]
 
-        over = SMOTE(sampling_strategy=0.5)  # Adjust as needed
-        under = RandomUnderSampler(sampling_strategy=0.8)  # Adjust as needed
-        steps = [('o', over), ('u', under)]
-        pipeline = Pipeline(steps=steps)
-
-        
-        X_train_resampled, y_train_resampled = pipeline.fit_resample(X_train, y_train['person_id'])
-        
-
-        print('Splitting complete.')
-
-        # Concatenate the features and labels for each dataset
-        #train_data = pd.concat([X_train, y_train], axis=1)
-        train_data = pd.concat([X_train_resampled, y_train_resampled], axis=1)
-        train_class_counts = train_data['person_id'].value_counts()
-        print(f"Train class counts:\n{train_class_counts}")
+        train_data = pd.concat([X_train, y_train], axis=1)
         valid_data = pd.concat([X_valid, y_valid], axis=1)
         test_data = pd.concat([X_test, y_test], axis=1)
         train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
@@ -248,6 +233,8 @@ def split_and_save_data(X, y):
         train_data.to_csv('Unimib_train_data.csv', index=False)
         valid_data.to_csv('Unimib_valid_data.csv', index=False)
         test_data.to_csv('Unimib_test_data.csv', index=False)
+        print('Splitting complete.')
+        
     except Exception as e:
         print(f"Error in split_and_save_data: {e}")
 
