@@ -406,8 +406,7 @@ def objective(params):
         'gender': 2  
     }
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CNNLSTM(15, hidden_size, num_classes).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    
     model = CNNLSTM(15, hidden_size, num_classes, dropout_rate, kernel_size).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     num_epochs = 10
