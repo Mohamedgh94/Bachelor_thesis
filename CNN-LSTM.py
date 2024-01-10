@@ -17,8 +17,7 @@ def get_dataset_paths(dataset_name):
         elif dataset_name == "MobiAct":
             return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
         elif dataset_name == "Unimib":
-            return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv"
-
+            return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv" 
 class IMUDataset(Dataset):
     def __init__(self, csv_file):
 
@@ -45,6 +44,7 @@ class IMUDataset(Dataset):
             'weight': torch.tensor(label_vector[3], dtype=torch.long),
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
+        print("Feature vector shape:", feature_vector.shape) 
         feature_vector = feature_vector.reshape(1, -1)
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
@@ -92,7 +92,8 @@ class CNNLSTM(nn.Module):
     def __init__(self, input_size, hidden_size,num_classes,dropout_rate, kernel_size):
         super(CNNLSTM, self).__init__()
 
-        # Convolutional layers
+        # Convolutional layers 
+        print(input_size)
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=kernel_size, stride=1, padding=1)
         self.ln1 = nn.LayerNorm(64)  # Layer norm after conv1
         self.relu = nn.ReLU()
@@ -451,7 +452,7 @@ def main():
         'batch_size': hp.choice('batch_size', [50, 100, 200]),
         'hidden_size': hp.choice('hidden_size', [64, 128, 256]),
         'dropout_rate': hp.uniform('dropout_rate', 0.1, 0.5),
-        'kernel_size': hp.choice('kernel_size', [3, 5, 7])
+        'kernel_size': hp.choice('kernel_size', [1,2,3])
     }
 
     trials = Trials()
