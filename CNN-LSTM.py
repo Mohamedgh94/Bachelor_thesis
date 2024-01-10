@@ -11,13 +11,22 @@ import logging
 logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-def get_dataset_paths(dataset_name):
+""" def get_dataset_paths(dataset_name):
         if dataset_name == "SisFall":
             return "/data/malghaja/Bachelor_thesis/SisCat_train_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"
         elif dataset_name == "MobiAct":
             return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
         elif dataset_name == "Unimib":
             return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv" 
+ """
+def get_dataset_paths(dataset_name):
+        if dataset_name == "SisFall":
+            return "/data/malghaja/Bachelor_thesis/SisCat_train_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"
+        elif dataset_name == "MobiAct":
+            return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
+        elif dataset_name == "Unimib":
+            return "/Users/mohamadghajar/Desktop/py_exampels/UniCat_train_data.csv", "/Users/mohamadghajar/Desktop/py_exampels/UniCat_valid_data.csv", "/Users/mohamadghajar/Desktop/py_exampels/UniCat_test_data.csv"
+
 class IMUDataset(Dataset):
     def __init__(self, csv_file):
 
@@ -116,7 +125,7 @@ class CNNLSTM(nn.Module):
 
         # LSTM layer
         self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=4, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=4, batch_first=True)
+        self.lstm2 = nn.LSTM(input_size=128, hidden_size=hidden_size, num_layers=4, batch_first=True)
 
         # Dense layers
         self.fc1 = nn.Linear(hidden_size, 256)
@@ -143,21 +152,24 @@ class CNNLSTM(nn.Module):
         x = self.relu(x)
         x = self.dropout1(x)
 
-        x = x.view(x.size(0),-1)
+        
         x = self.conv2(x)
+        x = x.view(x.size(0),-1)
         x = self.ln2(x)
         x = x.view(x.size(0), 128, -1)
         x = self.relu2(x)
         x = self.dropout2(x)
 
-        x = x.view(x.size(0),-1)
+        
         x = self.conv3(x)
+        x = x.view(x.size(0),-1)
         x = self.ln3(x)
         x = x.view(x.size(0), 256, -1)
         x = self.relu3(x)
         x = self.dropout3(x)
-        x = x.view(x.size(0),-1)
+        
         x = self.conv4(x)
+        x = x.view(x.size(0),-1)
         x = self.ln4(x)
         x = x.view(x.size(0), 512, -1)
         x = self.relu4(x)
