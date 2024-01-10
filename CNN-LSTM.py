@@ -93,22 +93,22 @@ class CNNLSTM(nn.Module):
         super(CNNLSTM, self).__init__()
 
         # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=5, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=kernel_size, stride=1, padding=1)
         self.ln1 = nn.LayerNorm(64)  # Layer norm after conv1
         self.relu = nn.ReLU()
         
-        self.dropout1 = nn.Dropout(0.3)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=1)
+        self.dropout1 = nn.Dropout(dropout_rate)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=kernel_size, stride=1, padding=1)
         self.ln2 = nn.LayerNorm(128)  # Layer norm after conv2
         
         self.relu2 = nn.ReLU()
-        self.dropout2 = nn.Dropout(0.2)
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=5, stride=1, padding=1)
+        self.dropout2 = nn.Dropout(dropout_rate)
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=kernel_size, stride=1, padding=1)
         self.ln3 = nn.LayerNorm(256)  # Layer norm after conv3
         
         self.relu3 = nn.ReLU()
-        self.dropout3 = nn.Dropout(0.2)
-        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=5, stride=1, padding=1)
+        self.dropout3 = nn.Dropout(dropout_rate)
+        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=kernel_size, stride=1, padding=1)
         self.ln4 = nn.LayerNorm(512)  # Layer norm after conv4
         
         self.relu4 = nn.ReLU()
