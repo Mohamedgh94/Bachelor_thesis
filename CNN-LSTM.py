@@ -84,71 +84,82 @@ test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 ##############
 ##############
 
+import torch.nn as nn
+import torch.nn.functional as F
+import logging
+
 class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes):
+    def __init__(self, input_size, hidden_size,dropout_rate, kernel_size):
         super(CNNLSTM, self).__init__()
 
         # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=5, stride=1, padding=1)
+        self.ln1 = nn.LayerNorm(64)  # Layer norm after conv1
         self.relu = nn.ReLU()
         
-        self.dropout1 = nn.Dropout(0.2)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
+        self.dropout1 = nn.Dropout(0.3)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=1)
+        self.ln2 = nn.LayerNorm(128)  # Layer norm after conv2
         
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(0.2)
-        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=5, stride=1, padding=1)
+        self.ln3 = nn.LayerNorm(256)  # Layer norm after conv3
+        
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.2)
-        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=5, stride=1, padding=1)
+        self.ln4 = nn.LayerNorm(512)  # Layer norm after conv4
+        
         self.relu4 = nn.ReLU()
-        #self.fc_intermediate = nn.Linear(256, 128)
+
         # LSTM layer
         self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=4, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 4,batch_first = True)
+        self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=4, batch_first=True)
 
-        #
-        self.fc1 = nn.Linear(hidden_size,256)
-        self.fc2 = nn.Linear(256,128)
+        # Dense layers
+        self.fc1 = nn.Linear(hidden_size, 256)
+        self.fc2 = nn.Linear(256, 128)
         
+        # Final classification layers
         self.fc_age = nn.Linear(hidden_size, 2)  # 2 classes for age
         self.fc_height = nn.Linear(hidden_size, 2)  # 2 classes for height
         self.fc_weight = nn.Linear(hidden_size, 2)  # 2 classes for weight
         self.fc_gender = nn.Linear(hidden_size, 2)  # 2 classes for gender 
 
         self.sigmoid = nn.Sigmoid()
-        
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
+
     def forward(self, x):
-
-        # print(f"Original shape: {x.shape}")
         x = x.permute(0, 2, 1)
-        # print(f"Shape after permute: {x.shape}")
-        # Convolutional layers
-        x = self.conv1(x)  # First convolution
-        x = self.relu(x)   # Apply ReLU
-        x = self.dropout1(x)  # Apply dropout
 
-        x = self.conv2(x)  # Second convolution
-        x = self.relu2(x)  # Apply ReLU
-        x = self.dropout2(x)  # Apply dropout
+        # Convolutional layers with layer normalization
+        x = self.conv1(x)
+        x = self.ln1(x)
+        x = self.relu(x)
+        x = self.dropout1(x)
 
-        x = self.conv3(x)  # Third convolution
-        x = self.relu3(x)  # Apply ReLU
-        x = self.dropout3(x)  # Apply dropout
+        x = self.conv2(x)
+        x = self.ln2(x)
+        x = self.relu2(x)
+        x = self.dropout2(x)
+
+        x = self.conv3(x)
+        x = self.ln3(x)
+        x = self.relu3(x)
+        x = self.dropout3(x)
 
         x = self.conv4(x)
+        x = self.ln4(x)
         x = self.relu4(x)
 
         # Global Max Pooling
-        x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
-        x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
+        x = F.max_pool1d(x, kernel_size=x.size(2))
+        x = x.permute(0, 2, 1)
 
-        #x = self.fc_intermediate(x)
         # LSTM layers
         x, _ = self.lstm1(x)
-        #x = self.fc_intermediate(x)
         x, _ = self.lstm2(x)
         x = x[:, -1, :]  # Get the last time step's output
 
@@ -157,12 +168,15 @@ class CNNLSTM(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
+
+        # Final classification layers with sigmoid activation
         age_output = self.sigmoid(self.fc_age(x))
         height_output = self.sigmoid(self.fc_height(x))
         weight_output = self.sigmoid(self.fc_weight(x))
         gender_output = self.sigmoid(self.fc_gender(x))
 
         return age_output, height_output, weight_output, gender_output
+
         """ age_logits = self.fc_age(x)
         height_logits = self.fc_height(x)
         weight_logits = self.fc_weight(x)
@@ -372,7 +386,39 @@ class EarlyStopping:
             self.best_loss = val_loss
             self.counter = 0
 
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+import numpy as np
 
+def objective(params):
+    lr = params['lr']
+    batch_size = int(params['batch_size'])
+    hidden_size = int(params['hidden_size'])
+    dropout_rate = params['dropout_rate']
+    kernel_size = int(params['kernel_size'])
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    num_classes = {
+        'age': 2, 
+        'height': 2,  
+        'weight': 2,  
+        'gender': 2  
+    }
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = CNNLSTM(15, hidden_size, num_classes).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    model = CNNLSTM(15, hidden_size, num_classes, dropout_rate, kernel_size).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    num_epochs = 10
+    total_valid_loss = 0
+    for epoch in range(num_epochs):
+        train_loss = train(model, train_loader, optimizer, device)
+        valid_loss = validate(model, valid_loader, device)
+        total_valid_loss += valid_loss
+
+    avg_valid_loss = total_valid_loss / num_epochs
+    return {'loss': avg_valid_loss, 'status': STATUS_OK}
 def main():
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -391,18 +437,30 @@ def main():
     # Dataset-specific configurations
     if dataset_name == "Unimib":
         input_size = 15
-        learning_rates = [0.0001, 0.000001, 0.00001]
-        batch_sizes = [128, 256, 512]
+        #learning_rates = [0.0001]
+        #batch_sizes = [200]
     else:
         input_size = 45
-        learning_rates = [0.0001, 0.00001, 0.000001]
-        batch_sizes = [64, 128, 256]
+        #learning_rates = [0.0001, 0.00001, 0.000001]
+        #batch_sizes = [64, 128, 256]
 
     train_dataset = IMUDataset(train_path)
     valid_dataset = IMUDataset(valid_path)
     test_dataset = IMUDataset(test_path)
+    space = {
+        'lr': hp.loguniform('lr', np.log(0.00001), np.log(0.001)),
+        'batch_size': hp.choice('batch_size', [50, 100, 200]),
+        'hidden_size': hp.choice('hidden_size', [64, 128, 256]),
+        'dropout_rate': hp.uniform('dropout_rate', 0.1, 0.5),
+        'kernel_size': hp.choice('kernel_size', [3, 5, 7])
+    }
 
-    for lr, batch_size in zip(learning_rates, batch_sizes):
+    trials = Trials()
+    best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
+
+    print("Best hyperparameters:", best)
+
+    """ for lr, batch_size in zip(learning_rates, batch_sizes):
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -457,8 +515,8 @@ def main():
 
         print("Test Metrics:")
         for metric, value in test_metrics.items():
-            print(f"{metric}: {value}")
-    if mode == 'feat':        
+            print(f"{metric}: {value}") """
+    """ if mode == 'feat':        
         model_load_path = f" CNN-LSTM,_{dataset_name}_model.pth"
         model.load_state_dict(torch.load(model_load_path))
         model.eval()
@@ -489,7 +547,7 @@ def main():
 
         for i in range(len(result.importances_mean)):
             print('Feature %d: %f' % (i, result.importances_mean[i]))
-
+ """
 
 
 
