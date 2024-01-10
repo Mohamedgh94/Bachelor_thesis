@@ -137,22 +137,29 @@ class CNNLSTM(nn.Module):
 
         # Convolutional layers with layer normalization
         x = self.conv1(x)
+        x = x.view(x.size(0), -1)
         x = self.ln1(x)
+        x = x.view(x.size(0), 64, -1)
         x = self.relu(x)
         x = self.dropout1(x)
 
+        x = x.view(x.size(0),-1)
         x = self.conv2(x)
         x = self.ln2(x)
+        x = x.view(x.size(0), 128, -1)
         x = self.relu2(x)
         x = self.dropout2(x)
 
+        x = x.view(x.size(0),-1)
         x = self.conv3(x)
         x = self.ln3(x)
+        x = x.view(x.size(0), 256, -1)
         x = self.relu3(x)
         x = self.dropout3(x)
-
+        x = x.view(x.size(0),-1)
         x = self.conv4(x)
         x = self.ln4(x)
+        x = x.view(x.size(0), 512, -1)
         x = self.relu4(x)
 
         # Global Max Pooling
