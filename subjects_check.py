@@ -1,6 +1,6 @@
 import pandas as pd
-"""
-data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_test_data.csv')
+
+data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniCat_test_data.csv')
 test_class_counts = data['gender'].value_counts()
 age_class_counts = data['age'].value_counts()
 
@@ -37,7 +37,7 @@ test_data['weight'] = test_data['weight'].apply(categorize_weight)
 train_data.to_csv('UniCat_train_data.csv', index=False)
 valid_data.to_csv('UniCat_valid_data.csv', index=False)
 test_data.to_csv('UniCat_test_data.csv', index=False) 
-
+"""
 
 """ import pandas as pd
 valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_train.csv')
