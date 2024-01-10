@@ -11,21 +11,15 @@ import logging
 logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-""" def get_dataset_paths(dataset_name):
-        if dataset_name == "SisFall":
-            return "/data/malghaja/Bachelor_thesis/SisCat_train_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"
-        elif dataset_name == "MobiAct":
-            return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
-        elif dataset_name == "Unimib":
-            return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv" 
- """
+
 def get_dataset_paths(dataset_name):
         if dataset_name == "SisFall":
             return "/data/malghaja/Bachelor_thesis/SisCat_train_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"
         elif dataset_name == "MobiAct":
             return "path_to_MobiAct_train", "path_to_MobiAct_valid", "path_to_MobiAct_test"
         elif dataset_name == "Unimib":
-            return "/Users/mohamadghajar/Desktop/py_exampels/UniCat_train_data.csv", "/Users/mohamadghajar/Desktop/py_exampels/UniCat_valid_data.csv", "/Users/mohamadghajar/Desktop/py_exampels/UniCat_test_data.csv"
+            return "/data/malghaja/Bachelor_thesis/UniCat_train_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv", "/data/malghaja/Bachelor_thesis/UniCat_test_data.csv" 
+ 
 
 class IMUDataset(Dataset):
     def __init__(self, csv_file):
