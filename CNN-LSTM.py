@@ -89,23 +89,23 @@ class CNNLSTM(nn.Module):
         super(CNNLSTM, self).__init__()
 
         # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=5, stride=1, padding=1)
         self.relu = nn.ReLU()
         
         self.dropout1 = nn.Dropout(0.2)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=5, stride=1, padding=1)
         
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(0.2)
-        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=5, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.2)
-        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=5, stride=1, padding=1)
         self.relu4 = nn.ReLU()
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
+        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=4, batch_first=True)
+        self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 4,batch_first = True)
 
         #
         self.fc1 = nn.Linear(hidden_size,256)
