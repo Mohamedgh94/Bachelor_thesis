@@ -89,7 +89,7 @@ import torch.nn.functional as F
 import logging
 
 class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size,dropout_rate, kernel_size):
+    def __init__(self, input_size, hidden_size,num_classes,dropout_rate, kernel_size):
         super(CNNLSTM, self).__init__()
 
         # Convolutional layers
