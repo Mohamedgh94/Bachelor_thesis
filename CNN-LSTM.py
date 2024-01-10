@@ -415,7 +415,7 @@ def main():
 
    
     mode = input("Enter mode (train/test/both): ").strip().lower()
-    if mode not in ['train', 'test', 'both']:
+    if mode not in ['train', 'test', 'both','feat']:
         print("Invalid mode selected. Exiting.")
         return
 
