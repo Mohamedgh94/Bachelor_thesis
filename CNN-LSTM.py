@@ -458,6 +458,40 @@ def main():
         print("Test Metrics:")
         for metric, value in test_metrics.items():
             print(f"{metric}: {value}")
+    if mode == 'feat':        
+        model_load_path = f" CNN-LSTM,_{dataset_name}_model.pth"
+        model.load_state_dict(torch.load(model_load_path))
+        model.eval()
+        df = pd.read_csv('/path/to/unimibCat_valid.csv')
+
+
+        X_val = df.iloc[:, :-5].values  # Features (all columns except the last 5)
+        y_val = df.iloc[:, -4:].values 
+
+        def predict(model, X):
+    
+            X_tensor = torch.tensor(X, dtype=torch.float32)
+
+            # Forward pass and get predictions
+            with torch.no_grad():
+                model_output = model(X_tensor)
+                # Assuming you need to apply a softmax or another activation function based on your model's output
+                predictions = torch.softmax(model_output, dim=1).numpy()
+
+            # Return the class with the highest probability (you may need to adjust this based on your exact requirements)
+            return predictions.argmax(axis=1)
+        
+        from sklearn.inspection import permutation_importance
+
+
+        result = permutation_importance(lambda X: predict(model, X), X_val, y_val[:, 0], n_repeats=10, random_state=42)
+
+
+        for i in range(len(result.importances_mean)):
+            print('Feature %d: %f' % (i, result.importances_mean[i]))
+
+
+
 
 if __name__ == "__main__":
     main()
