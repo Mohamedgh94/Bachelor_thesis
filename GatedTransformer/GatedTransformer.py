@@ -55,8 +55,7 @@ from gatingMechanism import GatingMechanism
 from multiHeadAttention import MultiHeadAttention
 
 class GatedTransformer(nn.Module):
-    def __init__(self, input_dim, d_model, num_heads, d_ff, num_layers,
-                 num_person_ids, num_ages, num_heights, num_weights, num_genders, dropout_rate=0.1):
+    def __init__(self, input_dim, d_model, num_heads, d_ff, num_layers, dropout_rate=0.1):
         super(GatedTransformer, self).__init__()
         self.embedding = nn.Linear(input_dim, d_model)
         self.dropout = nn.Dropout(dropout_rate)
@@ -65,13 +64,13 @@ class GatedTransformer(nn.Module):
         self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff, dropout_rate) for _ in range(num_layers)])
 
         # Task-specific output layers
-        self.age_classifier = nn.Linear(d_model, num_ages)
-        self.height_classifier = nn.Linear(d_model, num_heights)
-        self.weight_classifier = nn.Linear(d_model, num_weights)
-        self.gender_classifier = nn.Linear(d_model, num_genders)
+        self.age_classifier = nn.Linear(d_model, 2)
+        self.height_classifier = nn.Linear(d_model, 2)
+        self.weight_classifier = nn.Linear(d_model, 2)
+        self.gender_classifier = nn.Linear(d_model, 2)
 
-        # Gating mechanism (if applicable)
-        self.gate = nn.Linear(num_genders + num_person_ids, d_model)
+        # # Gating mechanism (if applicable)
+        # self.gate = nn.Linear(num_genders + num_person_ids, d_model)
 
     def forward(self, x):
         x = self.embedding(x)
@@ -95,9 +94,9 @@ class GatedTransformer(nn.Module):
         gender_logits = self.gender_classifier(x)
 
         outputs = {
-            'age': age_logits,
-            'height': height_logits,
-            'weight': weight_logits,
-            'gender': gender_logits
+            'age': torch.sigmoid(age_logits),
+            'height': torch.sigmoid(height_logits),
+            'weight': torch.sigmoid(weight_logits),
+            'gender': torch.sigmoid(gender_logits)
         }
         return outputs

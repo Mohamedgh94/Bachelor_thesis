@@ -72,11 +72,11 @@ class Main:
 if __name__ == "__main__":
     input_dim= 15 
     d_model = 512      # Size of embeddings and model dimensionality
-    num_heads = 8      # Number of attention heads
+    num_heads = 16      # Number of attention heads
     d_ff = 2048        # Dimensionality of feed-forward layer
     num_layers = 6     # Number of layers in the encoder
     
-    model = GatedTransformer(input_dim, d_model, num_heads, d_ff, num_layers,num_person_ids,num_ages,num_heights,num_weights,num_genders)
+    model = GatedTransformer(input_dim, d_model, num_heads, d_ff, num_layers)
     
     #loss_fn = torch.nn.CrossEntropyLoss()
     loss_fn = MultiTaskLossFunction()

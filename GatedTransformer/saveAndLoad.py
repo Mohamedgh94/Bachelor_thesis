@@ -216,9 +216,10 @@ class SaveAndLoadModel:
      """
     
     def train(self, train_loader, epochs=10):
-        multi_task_loss_fn = MultiTaskLossFunction()  # Ensure this is initialized correctly for classification tasks
+        multi_task_loss_fn = MultiTaskLossFunction()  # Initialize correctly for classification tasks
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=0.1)  # Example scheduler
         trainings_start_time = time.time()
-        
+
         self.model.train()
 
         for epoch in range(epochs):
@@ -226,35 +227,35 @@ class SaveAndLoadModel:
             correct_predictions = {task: 0 for task in ['age', 'height', 'weight', 'gender']}
             total_predictions = {task: 0 for task in ['age', 'height', 'weight', 'gender']}
 
-        for batch in train_loader:
-            inputs, labels_dict = batch
-            inputs = inputs.to(self.device)
-            labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
+            for batch in train_loader:
+                inputs, labels_dict = batch
+                inputs = inputs.to(self.device)
+                labels_dict = {task: labels.to(self.device) for task, labels in labels_dict.items()}
 
-            self.optimizer.zero_grad()
-            outputs_dict = self.model(inputs)
+                self.optimizer.zero_grad()
+                outputs_dict = self.model(inputs)
 
-            loss = 0
-            for task, output in outputs_dict.items():
-                labels = labels_dict[task].long()  # Ensure labels are long type for classification
-                loss += multi_task_loss_fn.loss_fns[task](output, labels)
+                loss = 0
+                for task, output in outputs_dict.items():
+                    labels = labels_dict[task].long()
+                    loss += multi_task_loss_fn.loss_fns[task](output, labels)
                 
-                # Calculate the number of correct predictions
-                _, predicted = torch.max(output, 1)
-                correct_predictions[task] += (predicted == labels).sum().item()
-                total_predictions[task] += labels.size(0)
+                    _, predicted = torch.max(output, 1)
+                    correct_predictions[task] += (predicted == labels).sum().item()
+                    total_predictions[task] += labels.size(0)
 
-            loss.backward()
-            self.optimizer.step()
-            total_loss += loss.item()
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)  # Gradient clipping
+                self.optimizer.step()
+                total_loss += loss.item()
 
-        avg_loss = total_loss / len(train_loader)
-        print(f"Epoch {epoch+1}, Avg Loss: {avg_loss}")
+            scheduler.step()  # Update learning rate
+            avg_loss = total_loss / len(train_loader)
+            print(f"Epoch {epoch+1}, Avg Loss: {avg_loss}")
 
-        # Calculate and print the accuracy for each classification task
-        for task in correct_predictions:
-            accuracy = correct_predictions[task] / total_predictions[task]
-            print(f"Epoch {epoch+1}, {task} Training Accuracy: {accuracy:.4f}")
+            for task in correct_predictions:
+                accuracy = correct_predictions[task] / total_predictions[task]
+                print(f"Epoch {epoch+1}, {task} Training Accuracy: {accuracy:.4f}")
 
         training_end_time = time.time()
         print(f'Training completed in {training_end_time - trainings_start_time}s')
