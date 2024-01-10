@@ -462,7 +462,7 @@ def main():
         model_load_path = f" CNN-LSTM,_{dataset_name}_model.pth"
         model.load_state_dict(torch.load(model_load_path))
         model.eval()
-        df = pd.read_csv('/path/to/unimibCat_valid.csv')
+        df = pd.read_csv('/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv')
 
 
         X_val = df.iloc[:, :-5].values  # Features (all columns except the last 5)
