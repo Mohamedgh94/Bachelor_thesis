@@ -142,13 +142,13 @@ class CNNLSTM(nn.Module):
         x = self.relu4(x)
 
         # Global Max Pooling
-        x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
+        #x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
         x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
 
-        #x = self.fc_intermediate(x)
+        
         # LSTM layers
         x, _ = self.lstm1(x)
-        #x = self.fc_intermediate(x)
+        
         x, _ = self.lstm2(x)
         x = x[:, -1, :]  # Get the last time step's output
 
