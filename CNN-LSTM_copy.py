@@ -386,12 +386,12 @@ def main():
     # Dataset-specific configurations
     if dataset_name == "Unimib":
         input_size = 15
-        learning_rates = [0.0001, 0.000001, 0.00001]
-        batch_sizes = [128, 256, 512]
+        learning_rates = [ 0.000001, 0.00001,0.0001]
+        batch_sizes = [ 256, 512,128]
     else:
         input_size = 45
-        learning_rates = [0.0001, 0.00001, 0.000001]
-        batch_sizes = [64, 128, 256]
+        learning_rates = [ 0.00001, 0.000001,0.0001]
+        batch_sizes = [64, 256, 128]
 
     train_dataset = IMUDataset(train_path)
     valid_dataset = IMUDataset(valid_path)
@@ -456,3 +456,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
