@@ -356,6 +356,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "train_path": train_path,
         "valid_path": valid_path,
         "test_path": test_path,
+        "folder_exp": folder_exp,
         "learning_rate": learning_rate[learning_rates_idx],
         "usage_mod" : usage_mod[usage_mod_idx],
         "input_size" : input_size[input_size_idx],
@@ -569,9 +570,7 @@ def uniMib_main():
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                            gpudevice=0, epochs=10)
-    folder_exp = "/data/malghaja/Bachelor_thesis/"
-    if not os.path.exists(folder_exp):
-        os.makedirs(folder_exp)
+    
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
 
