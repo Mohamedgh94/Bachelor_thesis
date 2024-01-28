@@ -536,7 +536,7 @@ def run_network(configuration):
 
     def execute_testing():
         model_load_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
-        if configuration["usage_modus"] == 'test':
+        if configuration["usage_mod"] == 'test':
             model.load_state_dict(torch.load(model_load_path))
             model.eval()
 
@@ -547,11 +547,11 @@ def run_network(configuration):
         for metric, value in test_metrics.items():
             print(f"{metric}: {value}")
             save_results(configuration, test_metrics)
-    # Execution based on usage_modus
-    if configuration["usage_modus"] in ['train', 'train and test']:
+    # Execution based on usage_mod
+    if configuration["usage_mod"] in ['train', 'train and test']:
         execute_training()
 
-    if configuration["usage_modus"] in ['test', 'train and test']:
+    if configuration["usage_mod"] in ['test', 'train and test']:
         execute_testing()
 
 
