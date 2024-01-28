@@ -338,7 +338,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                     "path_to_MobiAct_valid",
                     "path_to_MobiAct_test")
     }
-    
+    folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
     learning_rate = [0.0001, 0.00001, 0.000001]
     batch_sizes = [64, 128 ,256] 
