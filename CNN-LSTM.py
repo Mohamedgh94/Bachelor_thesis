@@ -176,28 +176,35 @@ def __repr__(self):
     
     
 
-def combined_loss(predictions, targets):
-    
-    
-    age_pred, height_pred, weight_pred, gender_pred = predictions
-    age_target, height_target, weight_target, gender_target = targets
+def combined_loss(predictions, targets, configuration):
+    output_type = configuration['output_type']
+    if output_type == 'softmax':
+        # Assuming the first element in predictions is for person_id
+        person_id_pred = predictions[0]
+        person_id_target = targets['person_id']
+        loss = F.cross_entropy(person_id_pred, person_id_target)
+    elif output_type == 'attribute':
+        # Assuming the predictions are ordered as age, height, weight, gender
+        age_pred, height_pred, weight_pred, gender_pred = predictions[1:]
+        age_target, height_target, weight_target, gender_target = targets['age'], targets['height'], targets['weight'], targets['gender']
 
-    # Compute classification loss (Cross-Entropy) for all tasks
-    loss_age = F.cross_entropy(age_pred, age_target)
-    loss_height = F.cross_entropy(height_pred, height_target)
-    loss_weight = F.cross_entropy(weight_pred, weight_target)
-    loss_gender = F.cross_entropy(gender_pred, gender_target)
+        loss_age = F.cross_entropy(age_pred, age_target)
+        loss_height = F.cross_entropy(height_pred, height_target)
+        loss_weight = F.cross_entropy(weight_pred, weight_target)
+        loss_gender = F.cross_entropy(gender_pred, gender_target)
 
-    # Combine losses
-    total_loss = loss_age + loss_height + loss_weight + loss_gender
-    return total_loss
+        # Combine losses for attributes
+        loss = loss_age + loss_height + loss_weight + loss_gender
+
+    return loss
+
    
 
 ##################################################
 
 
-def train(model, train_loader, optimizer, device, output_type,config):
-    output_type = config['output_type']
+def train(model, train_loader, optimizer, device,configuration):
+    output_type = configuration['output_type']
     model.train()
     total_loss = 0
     for features, labels in train_loader:
@@ -216,8 +223,8 @@ def train(model, train_loader, optimizer, device, output_type,config):
     train_loss= total_loss / len(train_loader)
     return train_loss
 ##############################################
-def validate(model, valid_loader, device, config):
-    output_type = config['output_type']
+def validate(model, valid_loader, device, configuration):
+    output_type = configuration['output_type']
     model.eval()
     total_loss = 0
     with torch.no_grad():
@@ -240,8 +247,8 @@ from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 
-def test(model, test_loader, device, config):
-    output_type = config['output_type']
+def test(model, test_loader, device, configuration):
+    output_type = configuration['output_type']
     model.eval()
 
     if output_type == 'softmax':
@@ -546,7 +553,7 @@ def run_network(configuration):
         print("Test Metrics:")
         for metric, value in test_metrics.items():
             print(f"{metric}: {value}")
-            save_results(configuration, test_metrics)
+        save_results(configuration, test_metrics)
     # Execution based on usage_mod
     if configuration["usage_mod"] in ['train', 'train and test']:
         execute_training()
@@ -672,7 +679,3 @@ if __name__ == "__main__":
     #main()
     uniMib_main()
     
-# /****************************************************************
-# //TODO : remove the the user input, add the dataset root for each dataset.
-# add Experiment Logger 
-# add a function to save all the Results
