@@ -157,21 +157,26 @@ def process_subject(subject_id):
 def normalize_and_encode(all_data):
     try:
         scaler = StandardScaler()
-        
+
+        # Assuming the last 5 columns are 'person_id', 'age', 'height', 'weight', 'gender'
         sensor_cols = all_data.iloc[:, :-5].columns
         all_data[sensor_cols] = all_data[sensor_cols].astype(float)
         all_data[sensor_cols] = scaler.fit_transform(all_data[sensor_cols])
 
         print('Encoding labels...')
+        # Normalize and encode gender
         all_data['gender'] = all_data['gender'].str.strip().str.upper()
+        gender_le = LabelEncoder()
+        all_data['gender'] = gender_le.fit_transform(all_data['gender'])
 
-        le = LabelEncoder()
-        all_data['gender'] = le.fit_transform(all_data['gender'])
+        # Encode person_id
+        person_id_le = LabelEncoder()
+        all_data['person_id'] = person_id_le.fit_transform(all_data['person_id'])
 
         return all_data         
     except Exception as e:
         print(f"Error in normalize_and_encode: {e}")
-        raise e  
+        raise e 
 
 def extract_features(segment):
     features = []
@@ -202,7 +207,28 @@ def rearrange_columns(df):
     return df[cols]
 
 def split_and_save_data(X, y):
+    """Split the data into train, validation, and test sets and save them."""
     try:
+        # Concatenate the labels into a single string for stratification
+        # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
+        print('Splitting data...')
+        # Split the data into training and validation sets
+        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify= y['person_id'])
+
+        # Split the temp data into validation and test sets
+        X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp['person_id'])
+        print('Splitting complete.')
+        # Now, you can concatenate the X and y DataFrames for each split and save them to CSV
+        train_data = pd.concat([X_train, y_train], axis=1)
+        valid_data = pd.concat([X_valid, y_valid], axis=1)
+        test_data = pd.concat([X_test, y_test], axis=1)
+
+        train_data.to_csv('train_data.csv', index=False)
+        valid_data.to_csv('valid_data.csv', index=False)
+        test_data.to_csv('test_data.csv', index=False)
+    except Exception as e:
+        print(f"Error in split_and_save_data: {e}")
+    """ try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
@@ -236,7 +262,7 @@ def split_and_save_data(X, y):
         print('Splitting complete.')
         
     except Exception as e:
-        print(f"Error in split_and_save_data: {e}")
+        print(f"Error in split_and_save_data: {e}") """
 
 
 def main():
