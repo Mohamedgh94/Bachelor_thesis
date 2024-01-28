@@ -327,6 +327,7 @@ def load_model(self):
 now = datetime.datetime.now()
 def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice,epochs):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
+    num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  # Define num_classes here
     dataset_paths = {
         'Unimib': ("/data/malghaja/Bachelor_thesis/UniCat_train_data.csv",
                    "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv",
@@ -351,7 +352,6 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     #num_classes = {'Uninib': 10, 'SisFall': 15, 'MobiAct': 20}  # Example, adjust as needed
     #num_attributes = 4  # age, height, weight, gender
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
-    num_classes : {'Unimib' : 30 , 'SisFall' : 38 ,' MobiAct' : 67}
     config= {
         "dataset": dataset[dataset_idx],
         "train_path": train_path,
