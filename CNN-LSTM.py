@@ -344,7 +344,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     batch_sizes = [64, 128 ,256] 
     input_size = [15,45]
     gpudevice = [0,1,2]
-    os.environ["CUDA_VISIBLE_DEVICES"] = gpudevice
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
     usage_mod = { 0 : 'tarin', 1: 'train and test ', 2 : ' test' }
     epochs = epochs
     #input_size = 128  # Example, adjust as needed
@@ -359,7 +359,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "learning_rate": learning_rate[learning_rates_idx],
         "usage_mod" : usage_mod[usage_mod_idx],
         "input_size" : input_size[input_size_idx],
-        "gpudevice" : gpudevice[gpudevice],
+        "gpudevice" : gpudevice,
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
@@ -443,6 +443,7 @@ def save_results(config, metrics):
 
 
 def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
+    
     # set up the logging
     logging_format = '[%(asctime)-19s, %(name)s, %(levelname)s] %(message)s'
     if filename != None:
@@ -566,9 +567,11 @@ def uniMib_main():
     
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           usage_mod_idx= 'train', learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                            gpudevice=0, epochs=10)
-    
+    folder_exp = "/data/malghaja/Bachelor_thesis/"
+    if not os.path.exists(folder_exp):
+        os.makedirs(folder_exp)
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
 
