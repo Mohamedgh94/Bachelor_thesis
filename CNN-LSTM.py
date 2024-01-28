@@ -145,11 +145,11 @@ class CNNLSTM(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
-        if self.config['output'] == 'softmax':
+        if configuration['output'] == 'softmax':
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         
-        elif self.config['output'] == 'attribute':
+        elif configuration['output'] == 'attribute':
             age = F.softmax(self.fc_age(x), dim=1)
             height = F.softmax(self.fc_height(x), dim=1)
             weight = F.softmax(self.fc_weight(x), dim=1)
@@ -509,7 +509,7 @@ def run_network(configuration):
 
     # Initialize model and optimizer
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"]).to(device)
+    model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
