@@ -225,8 +225,8 @@ def train(model, train_loader, optimizer, device,config):
     train_loss= total_loss / len(train_loader)
     return train_loss
 ##############################################
-def validate(model, valid_loader, device):
-    output_type = configuration['output_type']
+def validate(model, valid_loader, device,config):
+    output_type = config['output_type']
     model.eval()
     total_loss = 0
     with torch.no_grad():
@@ -249,8 +249,8 @@ from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 
-def test(model, test_loader, device):
-    output_type = configuration['output_type']
+def test(model, test_loader, device,config):
+    output_type = config['output_type']
     model.eval()
 
     if output_type == 'softmax':
@@ -334,7 +334,7 @@ def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
 now = datetime.datetime.now()
-def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice,epochs):
+def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  # Define num_classes here
     dataset_paths = {
@@ -370,7 +370,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "learning_rate": learning_rate[learning_rates_idx],
         "usage_mod" : usage_mod[usage_mod_idx],
         "input_size" : input_size[input_size_idx],
-        "gpudevice" : gpudevice,
+        "gpudevice" : gpudevice[gpudevice_idx],
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
@@ -514,7 +514,8 @@ def run_network(configuration):
     test_loader = DataLoader(test_dataset, batch_size=configuration["batch_size"], shuffle=False)
 
     # Initialize model and optimizer
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = configuration['gpu_device']
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
     
@@ -553,7 +554,7 @@ def run_network(configuration):
             model.load_state_dict(torch.load(model_load_path))
             model.eval()
 
-        test_metrics = test(model, test_loader, device)
+        test_metrics = test(model, test_loader, device,configuration)
         logging.info(f"Test Results for {configuration['dataset']} with LR: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}: {test_metrics}")
 
         print("Test Metrics:")
