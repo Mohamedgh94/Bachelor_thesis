@@ -399,7 +399,7 @@ def save_results(config, metrics):
 
     xml_root = ET.Element("Experiment")
     child_network = ET.SubElement(xml_root, "network", name="CNN-LSTM")
-    child_dataset = ET.SubElement(child_network, "dataset", name=str(config['dataset_name']))
+    child_dataset = ET.SubElement(child_network, "dataset", name=str(config['dataset']))
 
     # Add more elements based on your configuration...
     child = ET.SubElement(child_dataset, "learning_rate", value=str(config['learning_rate']))
