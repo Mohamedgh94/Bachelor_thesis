@@ -573,11 +573,12 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 0,
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
+
     setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
