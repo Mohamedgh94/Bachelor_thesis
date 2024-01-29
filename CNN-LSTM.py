@@ -73,6 +73,7 @@ class CNNLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes,config):
         super(CNNLSTM, self).__init__()
 
+        self.config = config 
         # Convolutional layers
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
@@ -145,11 +146,11 @@ class CNNLSTM(nn.Module):
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
-        if configuration['output'] == 'softmax':
+        if  self.config['output_type'] == 'softmax':
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         
-        elif configuration['output'] == 'attribute':
+        elif self.config['output_type'] == 'attribute':
             age = F.softmax(self.fc_age(x), dim=1)
             height = F.softmax(self.fc_height(x), dim=1)
             weight = F.softmax(self.fc_weight(x), dim=1)
@@ -176,8 +177,8 @@ def __repr__(self):
     
     
 
-def combined_loss(predictions, targets, configuration):
-    output_type = configuration['output_type']
+def combined_loss(predictions, targets, config):
+    output_type = config['output_type']
     if output_type == 'softmax':
         # Assuming the first element in predictions is for person_id
         person_id_pred = predictions[0]
@@ -203,8 +204,9 @@ def combined_loss(predictions, targets, configuration):
 ##################################################
 
 
-def train(model, train_loader, optimizer, device,configuration):
-    output_type = configuration['output_type']
+def train(model, train_loader, optimizer, device,config):
+    
+    output_type = config['output_type']
     model.train()
     total_loss = 0
     for features, labels in train_loader:
@@ -223,7 +225,7 @@ def train(model, train_loader, optimizer, device,configuration):
     train_loss= total_loss / len(train_loader)
     return train_loss
 ##############################################
-def validate(model, valid_loader, device, configuration):
+def validate(model, valid_loader, device):
     output_type = configuration['output_type']
     model.eval()
     total_loss = 0
@@ -247,7 +249,7 @@ from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 
-def test(model, test_loader, device, configuration):
+def test(model, test_loader, device):
     output_type = configuration['output_type']
     model.eval()
 
@@ -353,7 +355,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     input_size = [15,45]
     gpudevice = [0,1,2]
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
-    usage_mod = { 0 : 'tarin', 1: 'train and test ', 2 : ' test' }
+    usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : ' test' }
     epochs = epochs
     #input_size = 128  # Example, adjust as needed
     #num_classes = {'Uninib': 10, 'SisFall': 15, 'MobiAct': 20}  # Example, adjust as needed
@@ -502,6 +504,7 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
 
 
 def run_network(configuration):
+    print(configuration)
     # Initialize datasets and data loaders
     train_dataset = IMUDataset(configuration["train_path"])
     valid_dataset = IMUDataset(configuration["valid_path"])
@@ -512,18 +515,21 @@ def run_network(configuration):
 
     # Initialize model and optimizer
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
+    
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
-
+    print(train_dataset.features)
     def execute_training():
+        print(f'start training')
         start_time = time.time()
         train_losses, val_losses = [], []
         for epoch in range(configuration["epochs"]):
             print(f'Training Epoch {epoch+1}/{configuration["epochs"]}')
-            train_loss = train(model, train_loader, optimizer, device)
-            val_loss = validate(model, valid_loader, device)
+            train_loss = train(model, train_loader, optimizer, device,configuration)
+            val_loss = validate(model, valid_loader, device,configuration)
             print(f'Epoch {epoch+1}/{configuration["epochs"]}, Training Loss: {train_loss}, Validation Loss: {val_loss}')
             train_losses.append(train_loss)
             val_losses.append(val_loss)
@@ -560,20 +566,17 @@ def run_network(configuration):
 
     if configuration["usage_mod"] in ['test', 'train and test']:
         execute_testing()
-
+ 
 
 def uniMib_main():
     """
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    # Assuming 'Unimib' is represented by index 0 in the configuration
-    
-
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                            gpudevice=0, epochs=10)
-    
+    #print(config)
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
 
@@ -581,99 +584,8 @@ def uniMib_main():
 
     return
 
-""""    
-def main():
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'Using device: {device}')
 
-    
-    hidden_size = 128
-    #input_size = 45
-    num_classes = {
-        'age': 2, 
-        'height': 2,  
-        'weight': 2,  
-        'gender': 2  
-    }
-    # Dataset-specific configurations
-    if dataset_name == "Unimib":
-        input_size = 15
-        learning_rates = [ 0.000001, 0.00001,0.0001]
-        batch_sizes = [ 256, 512,128]
-    else:
-        input_size = 45
-        learning_rates = [ 0.00001, 0.000001,0.0001]
-        batch_sizes = [64, 256, 128]
-
-    train_dataset = IMUDataset(config["train_path"])
-    valid_dataset = IMUDataset(config["valid_path"])
-    test_dataset = IMUDataset(config["test_path"])
-    train_loader = DataLoader(train_dataset, batch_size= 256, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=256, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
-
-    for lr, batch_size in zip(learning_rates, batch_sizes):
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-        model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-        logging.info(f"Dataset: {dataset_name}, Learning Rate: {lr}, Batch Size: {batch_size}, Model: {model}")
-    
-
-   
-    mode = input("Enter mode (train/test/both): ").strip().lower()
-    if mode not in ['train', 'test', 'both']:
-        print("Invalid mode selected. Exiting.")
-        return
-
-    model = CNNLSTM(input_size, hidden_size, num_classes).to(device)
-
-    if mode in ['train', 'both']:
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-        early_stopping = EarlyStopping(patience=5, min_delta=0.01)
-        num_epochs = 10
-        start_time = time.time()
-
-        train_losses, val_losses = [], []
-        for epoch in range(num_epochs):
-            print(f'Training Epoch {epoch+1}/{num_epochs}')
-            train_loss = train(model, train_loader, optimizer, device)
-            val_loss = validate(model, valid_loader, device)
-            print(f'Epoch {epoch+1}/{num_epochs}, Training Loss: {train_loss}, Validation Loss: {val_loss}')
-            trainng_time  = (time.time() - start_time)/60
-            print(f'Epoch {epoch+1} trainng time {trainng_time}')
-            train_losses.append(train_loss)
-            val_losses.append(val_loss)
-            logging.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
-            
-            early_stopping(val_loss)
-            if early_stopping.early_stop:
-                print("Early stopping triggered")
-                break
-        plot_learning_curve(train_losses, val_losses)
-        # Save the trained model
-        model_save_path = f" CNN-LSTM,_{dataset_name}_model.pth"
-        torch.save(model.state_dict(), model_save_path)
-        print(f"Model saved to {model_save_path}")
-
-    if mode in ['test', 'both']:
-        if mode == 'test':
-            model_load_path = f" CNN-LSTM,_{dataset_name}_model.pth"
-            model.load_state_dict(torch.load(model_load_path))
-            model.eval()
-
-        
-        test_metrics = test(model, test_loader, device)
-        logging.info(f"Test Results for {dataset_name} with LR: {lr}, Batch Size: {batch_size}: {test_metrics}")
-
-        print("Test Metrics:")
-        for metric, value in test_metrics.items():
-            print(f"{metric}: {value}")
- """
+ 
 if __name__ == "__main__":
 
     #main()
