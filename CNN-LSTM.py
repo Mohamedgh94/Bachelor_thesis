@@ -504,7 +504,7 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
 
 
 def run_network(configuration):
-    print(configuration)
+    #print(configuration)
     # Initialize datasets and data loaders
     train_dataset = IMUDataset(configuration["train_path"])
     valid_dataset = IMUDataset(configuration["valid_path"])
@@ -521,7 +521,7 @@ def run_network(configuration):
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
-    print(train_dataset.features)
+    #print(train_dataset.features)
     def execute_training():
         print(f'start training')
         start_time = time.time()
