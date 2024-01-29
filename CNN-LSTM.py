@@ -334,7 +334,7 @@ def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
 now = datetime.datetime.now()
-def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs):
+def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,epochs):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
@@ -353,8 +353,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     learning_rate = [0.0001, 0.00001, 0.000001]
     batch_sizes = [50, 100 ,200] 
     input_size = [15,45]
-    gpudevice = [0,1,2]
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
+    # gpudevice = [0,1,2]
+    # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
     usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : ' test' }
     epochs = epochs
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
@@ -367,7 +367,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "learning_rate": learning_rate[learning_rates_idx],
         "usage_mod" : usage_mod[usage_mod_idx],
         "input_size" : input_size[input_size_idx],
-        "gpudevice" : gpudevice[gpudevice_idx],
+        # "gpudevice" : gpudevice[gpudevice_idx],
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
@@ -573,7 +573,7 @@ def uniMib_main():
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
-                           gpudevice_idx=0, epochs=10)
+                            epochs=10)
     #print(config)
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
