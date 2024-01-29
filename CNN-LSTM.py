@@ -336,7 +336,7 @@ def load_model(self):
 now = datetime.datetime.now()
 def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
-    num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  # Define num_classes here
+    num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
         'Unimib': ("/data/malghaja/Bachelor_thesis/UniCat_train_data.csv",
                    "/data/malghaja/Bachelor_thesis/UniCat_valid_data.csv",
@@ -357,9 +357,6 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
     usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : ' test' }
     epochs = epochs
-    #input_size = 128  # Example, adjust as needed
-    #num_classes = {'Uninib': 10, 'SisFall': 15, 'MobiAct': 20}  # Example, adjust as needed
-    #num_attributes = 4  # age, height, weight, gender
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
     config= {
         "dataset": dataset[dataset_idx],
@@ -515,7 +512,7 @@ def run_network(configuration):
 
     # Initialize model and optimizer
     #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = configuration['gpu_device']
+    device = configuration['gpudevice']
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
     
