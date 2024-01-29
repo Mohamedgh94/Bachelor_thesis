@@ -511,8 +511,8 @@ def run_network(configuration):
     test_loader = DataLoader(test_dataset, batch_size=configuration["batch_size"], shuffle=False)
 
     # Initialize model and optimizer
-    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = configuration['gpudevice']
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = configuration['gpudevice']
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
     
