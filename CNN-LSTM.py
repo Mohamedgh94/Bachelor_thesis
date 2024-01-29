@@ -398,7 +398,7 @@ def save_results(config, metrics):
     xml_file_path = config['folder_exp'] + config['file_suffix']
 
     xml_root = ET.Element("Experiment")
-    child_network = ET.SubElement(xml_root, "network", name=str(config['network_name']))
+    child_network = ET.SubElement(xml_root, "network", name="CNN-LSTM")
     child_dataset = ET.SubElement(child_network, "dataset", name=str(config['dataset_name']))
 
     # Add more elements based on your configuration...
@@ -497,6 +497,7 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
     plt.ylabel('Loss')
     plt.legend()
     plt.savefig('learning_curve.png')
+    plt.show()
     plt.close()
 
 
@@ -572,8 +573,8 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
-                            epochs=10)
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                            epochs=15)
     #print(config)
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
