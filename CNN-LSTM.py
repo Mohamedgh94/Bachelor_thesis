@@ -351,7 +351,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
     learning_rate = [0.0001, 0.00001, 0.000001]
-    batch_sizes = [64, 128 ,256] 
+    batch_sizes = [50, 100 ,200] 
     input_size = [15,45]
     gpudevice = [0,1,2]
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
@@ -576,7 +576,7 @@ def uniMib_main():
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
-                           gpudevice=0, epochs=10)
+                           gpudevice_idx=0, epochs=10)
     #print(config)
     setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     logging.info('Finished UniMib experiment setup')
