@@ -592,6 +592,31 @@ def uniMib_main():
 
     return
 
+def SisFall_main():
+    """
+    Run experiment for SisFall dataset with predefined parameters.
+    """
+
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
+                           usage_mod_idx= 0 , learning_rates_idx=2,batch_size_idx=1 ,input_size_idx= 0,
+                            epochs=10)
+    #print(config)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
+    import os
+
+    # dir_name = os.path.dirname(log_filename)
+    # if not os.path.exists(dir_name):
+    #     os.makedirs(dir_name)
+
+    setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
+    #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
+    logging.info('Finished SisFall experiment setup')
+
+    run_network(config)
+
+    return
+
 
  
 if __name__ == "__main__":
