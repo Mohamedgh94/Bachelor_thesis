@@ -592,7 +592,7 @@ def uniMib_main():
 
     return
 
-def SisFall_main():
+def sisFall_main():
     """
     Run experiment for SisFall dataset with predefined parameters.
     """
@@ -622,5 +622,6 @@ def SisFall_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
-    
+    #uniMib_main()
+
+    sisFall_main()
