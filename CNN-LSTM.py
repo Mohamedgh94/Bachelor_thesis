@@ -355,7 +355,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     input_size = [24,45]
     # gpudevice = [0,1,2]
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
-    usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : ' test' }
+    usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : 'test' }
     epochs = epochs
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
     config= {
@@ -573,7 +573,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+                           usage_mod_idx= 2 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
