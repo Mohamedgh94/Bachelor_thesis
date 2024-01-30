@@ -210,10 +210,6 @@ def split_and_save_data(X, y,z):
 
 
 def main():
-    import cupy as cp
-
-    # Select GPU 1
-    cp.cuda.Device(1).use()
     sensor_cols = ['ADXL345_x', 'ADXL345_y', 'ADXL345_z', 'ITG3200_x', 'ITG3200_y', 'ITG3200_z', 'MMA8451Q_x', 'MMA8451Q_y', 'MMA8451Q_z']
     all_segments = []
     for subject_id in SUBJECT_IDS:
