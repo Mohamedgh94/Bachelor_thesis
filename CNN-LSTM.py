@@ -352,7 +352,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     output = {0 : 'softmax', 1 : 'attribute'}
     learning_rate = [0.0001, 0.00001, 0.000001]
     batch_sizes = [50, 100 ,200] 
-    input_size = [15,45]
+    input_size = [24,45]
     # gpudevice = [0,1,2]
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
     usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : ' test' }
