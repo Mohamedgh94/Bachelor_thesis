@@ -200,7 +200,7 @@ def split_and_save_data(X, y,z):
         valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
         test_data = pd.concat([X_test, y_test,z_test], axis=1)
 
-        #train_data.to_csv('Sis_train_data.csv', index=False)
+        train_data.to_csv('Sis_train_data.csv', index=False)
         valid_data.to_csv('Sis_valid_data.csv', index=False)
         test_data.to_csv('Sis_test_data.csv', index=False)
         
