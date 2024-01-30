@@ -14,8 +14,8 @@ from xml.dom import minidom
 
 import datetime
 
-logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
+#                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 
@@ -151,10 +151,10 @@ class CNNLSTM(nn.Module):
             return person_id_output
         
         elif self.config['output_type'] == 'attribute':
-            age = F.softmax(self.fc_age(x), dim=1)
-            height = F.softmax(self.fc_height(x), dim=1)
-            weight = F.softmax(self.fc_weight(x), dim=1)
-            gender = F.softmax(self.fc_gender(x), dim=1)
+            age = F.sigmoid(self.fc_age(x), dim=1)
+            height = F.sigmoid(self.fc_height(x), dim=1)
+            weight = F.sigmoid(self.fc_weight(x), dim=1)
+            gender = F.sigmoid(self.fc_gender(x), dim=1)
             return age, height, weight, gender
         
 ########################################################################
@@ -351,7 +351,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
     learning_rate = [0.0001, 0.00001, 0.000001]
-    batch_sizes = [50, 100 ,250] 
+    batch_sizes = [50, 100 ,200] 
     input_size = [15,45]
     # gpudevice = [0,1,2]
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
@@ -406,13 +406,13 @@ def save_results(config, metrics):
     child = ET.SubElement(child_dataset, "epochs", value=str(config['epochs']))
 
     # Adding metrics based on output type
-    if config['output'] == 'softmax':
+    if config['output_type'] == 'softmax':
         ET.SubElement(child_dataset, "person_id_metrics",
                       accuracy=str(metrics['accuracy_person_id']),
                       precision=str(metrics['precision_person_id']),
                       recall=str(metrics['recall_person_id']),
                       f1_score=str(metrics['f1_person_id']))
-    elif config['output'] == 'attributs':
+    elif config['output_type'] == 'attributs':
         # Age metrics
         ET.SubElement(child_dataset, "age_metrics",
                       accuracy=str(metrics['accuracy_age']),
