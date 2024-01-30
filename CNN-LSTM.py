@@ -14,8 +14,8 @@ from xml.dom import minidom
 
 import datetime
 
-#logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
-#                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 
