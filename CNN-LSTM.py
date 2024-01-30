@@ -27,11 +27,11 @@ class IMUDataset(Dataset):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
         # Assuming the last 5 columns are labels
-        self.labels = self.dataframe.iloc[:, -5:].values
+        self.labels = self.dataframe.iloc[:, -6:-1].values
         # Assuming all other columns are features
-        self.features = self.dataframe.iloc[:, :-5].values
+        self.features = self.dataframe.iloc[:, :-6].values
         self.label_categories = {}
-        for column in self.dataframe.columns[-5:]:
+        for column in self.dataframe.columns[-6:]:
             self.label_categories[column] = self.dataframe[column].unique()
 
     def __len__(self):
