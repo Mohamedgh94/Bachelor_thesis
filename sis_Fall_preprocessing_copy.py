@@ -13,7 +13,8 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 
 # Configuration Parameters
-DATA_DIR = '/data/malghaja/SisFall_csv' 
+# DATA_DIR = '/data/malghaja/SisFall_csv' 
+DATA_DIR = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv copy' 
 README_FILE_PATH = os.path.join(DATA_DIR, 'Readme.txt')
 SUBJECT_IDS = ['SA01', 'SA02', 'SA03', 'SA04', 'SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 'SA11', 'SA12', 'SA13', 'SA14', 'SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23', 'SE01', 'SE02','SE03','SE04','SE05','SE06','SE07','SE08','SE09','SE10','SE11','SE12','SE13','SE14','SE15']
 WINDOW_SIZE = 200
@@ -22,7 +23,7 @@ SOFT_BIOMETRICS = ['age', 'height', 'weight', 'gender']
 
 def get_person_info(subject_id):
     # Open the readme file and read the lines
-    file_path = '/data/malghaja/SisFall_csv/Readme.txt'
+    file_path = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv/Readme.txt'
     with open(file_path, 'r', encoding='latin1') as file:
         strings = file.readlines()
 
@@ -52,6 +53,7 @@ def get_person_info(subject_id):
 
 def process_file(file_path, subject_id):
     segments = []  # Define a list for the segments
+    activity_name = re.search(r'D\d{2}', file_path).group()
     try:
         # Read the data in chunks and process each chunk individually
         for chunk in pd.read_csv(file_path, header=0, chunksize=1000):  # Use chunksize to reduce memory usage
@@ -59,11 +61,13 @@ def process_file(file_path, subject_id):
             for i in range(0, len(chunk) - WINDOW_SIZE + 1, STRIDE):
                 segment = chunk.iloc[i:i + WINDOW_SIZE].copy()  # Create a segment
                 segments.append(segment)  # Add the segment to the list
-            person_info = get_person_info(subject_id)  # Correct call to get_person_info
+            person_info = get_person_info(subject_id)  
         for segment in segments:
+
             segment['person_id'] = subject_id
+            segment['act'] = activity_name
             for label in SOFT_BIOMETRICS:
-                segment[label] = person_info[label].values[0]  # Correct usage of person_info
+                segment[label] = person_info[label].values[0]  
 
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
@@ -76,7 +80,7 @@ def process_subject(subject_id):
     file_list = os.listdir(subject_dir)
     all_segments = []
     for file_name in file_list:
-        if file_name.endswith('.csv'):
+        if file_name.endswith('.csv') and re.match(r'D\d{2}', file_name):
             file_path = os.path.join(subject_dir, file_name)
             segments = process_file(file_path, subject_id)
             if segments is not None:
@@ -86,7 +90,7 @@ def process_subject(subject_id):
 def normalize_and_encode(all_data):
     try:
         scaler = StandardScaler()
-        cols_to_normalize = all_data.iloc[:, :-5].columns
+        cols_to_normalize = all_data.iloc[:, :-6].columns
         #all_data['MMA8451Q_x'] = all_data['MMA8451Q_x'].str.split(';').apply(lambda x: [float(i) for i in x])
         #all_data[cols_to_normalize] = all_data[sensor_cols].astype(float)
 
@@ -95,7 +99,7 @@ def normalize_and_encode(all_data):
         # Encode the person IDs and soft biometric labels
         print('Encoding labels...')
         label_encoders = {}  
-        for col in ['gender'] :
+        for col in ['person_id','gender'] :
             le = LabelEncoder()
             all_data[col] = le.fit_transform(all_data[col])
             label_encoders[col] = le  # Store the encoder
@@ -126,12 +130,13 @@ def remove_original_sensor_data(df):
 
 def rearrange_columns(df):
     cols = list(df.columns)
-    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender']]
-    cols.extend(['person_id', 'age', 'height', 'weight', 'gender'])
+    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender','act']]
+    cols.extend(['person_id', 'age', 'height', 'weight', 'gender','act'])
     return df[cols]
 
-def split_and_save_data(X, y):
+def split_and_save_data(X, y,z):
    
+    """
     try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
@@ -179,25 +184,26 @@ def split_and_save_data(X, y):
         train_data.to_csv('Sis_train_data.csv', index=False)
         valid_data.to_csv('Sis_valid_data.csv', index=False)
         test_data.to_csv('Sis_test_data.csv', index=False)
-        """  try:
+        """
+    try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
         # Split the data into training and validation sets
-        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify= y['person_id'])
+        X_train, X_temp, y_train, y_temp ,z_train,z_temp= train_test_split(X, y,z ,test_size=0.3, random_state=42, stratify= y['person_id'])
 
         # Split the temp data into validation and test sets
-        X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp['person_id'])
+        X_valid, X_test, y_valid, y_test,z_valid,z_test = train_test_split(X_temp, y_temp,z_temp ,test_size=0.5, random_state=42, stratify=y_temp['person_id'])
         print('Splitting complete.')
         # Now, you can concatenate the X and y DataFrames for each split and save them to CSV
-        train_data = pd.concat([X_train, y_train], axis=1)
-        valid_data = pd.concat([X_valid, y_valid], axis=1)
-        test_data = pd.concat([X_test, y_test], axis=1)
+        train_data = pd.concat([X_train, y_train,z_train], axis=1)
+        valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+        test_data = pd.concat([X_test, y_test,z_test], axis=1)
 
-        train_data.to_csv('Sis_train_data.csv', index=False)
+        #train_data.to_csv('Sis_train_data.csv', index=False)
         valid_data.to_csv('Sis_valid_data.csv', index=False)
         test_data.to_csv('Sis_test_data.csv', index=False)
-        """
+        
     except Exception as e:
         print(f"Error in split_and_save_data: {e}") 
 
@@ -227,14 +233,15 @@ def main():
         all_data = pd.merge(all_data, feature_df, on='person_id', how='left')
         all_data = remove_original_sensor_data(all_data) 
         all_data = rearrange_columns(all_data)
+        print(all_data.columns)
         print('Normalizing and encoding...')
         normalize_and_encode(all_data)
         print('Normalization and encoding complete.')
         #print(all_data.head())
-        X = all_data.iloc[:, :-5]
+        X = all_data.iloc[:, :-6]
         y = all_data[['person_id', 'age', 'height', 'weight', 'gender']]
-      
-        split_and_save_data(X, y)
+        z = all_data.iloc[:,-1]
+        split_and_save_data(X, y,z)
 
     except ValueError as e:
         print(f"Error: {e}")  # Print the error message
