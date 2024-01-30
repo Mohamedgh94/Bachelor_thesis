@@ -13,8 +13,8 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 
 # Configuration Parameters
-# DATA_DIR = '/data/malghaja/SisFall_csv' 
-DATA_DIR = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv copy' 
+DATA_DIR = '/data/malghaja/SisFall_csv' 
+#DATA_DIR = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv copy' 
 README_FILE_PATH = os.path.join(DATA_DIR, 'Readme.txt')
 SUBJECT_IDS = ['SA01', 'SA02', 'SA03', 'SA04', 'SA05', 'SA06', 'SA07', 'SA08', 'SA09', 'SA10', 'SA11', 'SA12', 'SA13', 'SA14', 'SA15', 'SA16', 'SA17', 'SA18', 'SA19', 'SA20', 'SA21', 'SA22', 'SA23', 'SE01', 'SE02','SE03','SE04','SE05','SE06','SE07','SE08','SE09','SE10','SE11','SE12','SE13','SE14','SE15']
 WINDOW_SIZE = 200
@@ -23,7 +23,8 @@ SOFT_BIOMETRICS = ['age', 'height', 'weight', 'gender']
 
 def get_person_info(subject_id):
     # Open the readme file and read the lines
-    file_path = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv/Readme.txt'
+    #file_path = '/Users/mohamadghajar/Downloads/SisFallDatasetAnnotation-master/sis_csv/Readme.txt'
+    file_path = '/data/malghaja/SisFall_csv/Readme.txt'
     with open(file_path, 'r', encoding='latin1') as file:
         strings = file.readlines()
 
