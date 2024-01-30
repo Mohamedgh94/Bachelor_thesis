@@ -113,6 +113,7 @@ def get_person_info(subject_id):
 
 def process_file(file_path, subject_id):
     segments = []  # Define a list for the segments
+    activity_name = os.path.basename(file_path).replace('.csv', '')
     try:
         # Read the data in chunks and process each chunk individually
         segment_id = 0
@@ -129,6 +130,7 @@ def process_file(file_path, subject_id):
         # Add the person ID and soft biometric labels
         person_info = get_person_info(subject_id)  # Correct call to get_person_info
         for segment in segments:
+            segment['act'] = activity_name 
             segment['person_id'] = subject_id
             for label in SOFT_BIOMETRICS:
                 segment[label] = person_info[label].values[0]  # Correct usage of person_info
@@ -159,7 +161,7 @@ def normalize_and_encode(all_data):
         scaler = StandardScaler()
 
         # Assuming the last 5 columns are 'person_id', 'age', 'height', 'weight', 'gender'
-        sensor_cols = all_data.iloc[:, :-5].columns
+        sensor_cols = all_data.iloc[:, :-6].columns
         all_data[sensor_cols] = all_data[sensor_cols].astype(float)
         all_data[sensor_cols] = scaler.fit_transform(all_data[sensor_cols])
 
@@ -178,23 +180,57 @@ def normalize_and_encode(all_data):
         print(f"Error in normalize_and_encode: {e}")
         raise e 
 
+import numpy as np
+import pandas as pd
+from scipy.fft import fft
+from scipy.stats import pearsonr
+
 def extract_features(segment):
     features = []
     sensor_cols = ['accel_x', 'accel_y', 'accel_z']
-    for col in segment.columns:
-        if col in  sensor_cols:
-            features.append(segment[col].mean())
-            features.append(segment[col].std())
-            features.append(segment[col].max())
-            features.append(segment[col].min())
-            features.append(np.sqrt(np.mean(segment[col]**2)))
-            
+    # Extract time domain features
+    for col in sensor_cols:
+        features.append(segment[col].mean())
+        features.append(segment[col].std())
+        features.append(segment[col].max())
+        features.append(segment[col].min())
+        features.append(np.sqrt(np.mean(segment[col]**2)))  # RMS
+        
+    
+    # Cross-sensor correlation features
+    for i in range(len(sensor_cols)):
+        for j in range(i+1, len(sensor_cols)):
+            corr, _ = pearsonr(segment[sensor_cols[i]], segment[sensor_cols[j]])
+            features.append(corr)  # Correlation between sensors
+    
+    # Derivative features - assuming the segment is a time series with equal time intervals
+    for col in sensor_cols:
+        derivative = np.diff(segment[col])  # First derivative
+        features.append(np.mean(derivative))
+        features.append(np.std(derivative))
+
     feature_names = [
         f'{col}_{stat}' for col in sensor_cols 
-        for stat in ['min', 'max','mean', 'std','rms']
+        for stat in ['mean', 'std', 'max', 'min', 'rms']
     ]
     
-    return pd.Series(features, index=feature_names).astype('float32')  
+
+    # Adding correlation feature names
+    correlation_feature_names = [
+        f'{sensor_cols[i]}_{sensor_cols[j]}_corr' for i in range(len(sensor_cols)) 
+        for j in range(i+1, len(sensor_cols))
+    ]
+    feature_names.extend(correlation_feature_names)
+    
+    # Adding derivative feature names
+    derivative_feature_names = [
+        f'{col}_derivative_{stat}' for col in sensor_cols for stat in ['mean', 'std']
+    ]
+    feature_names.extend(derivative_feature_names)
+    
+    return pd.Series(features, index=feature_names).astype('float32')
+
+# Remember to adjust the code according to the actual data interval if necessary.
 
 def remove_original_sensor_data(df):
     sensor_cols = ['accel_x', 'accel_y', 'accel_z','timestamp','time_instants',	'signal_magnitude','segment_id_x','segment_id_y']
@@ -202,26 +238,26 @@ def remove_original_sensor_data(df):
 
 def rearrange_columns(df):
     cols = list(df.columns)
-    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender']]
-    cols.extend(['person_id', 'age', 'height', 'weight', 'gender'])
+    cols = [col for col in cols if col not in ['person_id', 'age', 'height', 'weight', 'gender','act']]
+    cols.extend(['person_id', 'age', 'height', 'weight', 'gender','act'])
     return df[cols]
 
-def split_and_save_data(X, y):
+def split_and_save_data(X, y,z):
     """Split the data into train, validation, and test sets and save them."""
     try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
         # Split the data into training and validation sets
-        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42, stratify= y['person_id'])
+        X_train, X_temp, y_train, y_temp,z_train,z_temp = train_test_split(X, y, z,test_size=0.3, random_state=42, stratify= y['person_id'])
 
         # Split the temp data into validation and test sets
-        X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp['person_id'])
+        X_valid, X_test, y_valid, y_test,z_valid,z_test = train_test_split(X_temp, y_temp,z_temp, test_size=0.5, random_state=42, stratify=y_temp['person_id'])
         print('Splitting complete.')
         # Now, you can concatenate the X and y DataFrames for each split and save them to CSV
-        train_data = pd.concat([X_train, y_train], axis=1)
-        valid_data = pd.concat([X_valid, y_valid], axis=1)
-        test_data = pd.concat([X_test, y_test], axis=1)
+        train_data = pd.concat([X_train, y_train, z_train], axis=1)
+        valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+        test_data = pd.concat([X_test, y_test,z_test], axis=1)
 
         train_data.to_csv('train_data.csv', index=False)
         valid_data.to_csv('valid_data.csv', index=False)
@@ -290,13 +326,15 @@ def main():
         all_data['gender'] = all_data['gender'].str.strip().str.upper()
         print(all_data['gender'].value_counts())
         print('Normalizing and encoding...')
+        print(all_data.columns)
         all_data = normalize_and_encode(all_data)
         print('Normalization and encoding complete.')
         #print(all_data['gender'].value_counts())
-        X = all_data.iloc[:, :-5]
+        X = all_data.iloc[:, :-6]
         y = all_data[['person_id', 'age', 'height', 'weight', 'gender']]
+        z = all_data.iloc[:,-1]
       
-        split_and_save_data(X, y)
+        split_and_save_data(X, y,z)
 
     except ValueError as e:
         print(f"Error: {e}")
