@@ -67,94 +67,78 @@ class IMUDataset(Dataset):
 ##############
 ##############
 
+import torch.nn as nn
+import torch.nn.functional as F
+import logging
+
 class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes,config):
+    def __init__(self, input_size, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
 
         self.config = config 
         # Convolutional layers
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
-        
         self.dropout1 = nn.Dropout(0.2)
+
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
-        
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(0.2)
-        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
+
+        self.conv3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.2)
-        #self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
-        #self.relu4 = nn.ReLU()
-        #self.fc_intermediate = nn.Linear(256, 128)
-        # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
 
-        #
-        self.fc1 = nn.Linear(hidden_size,256)
-        #self.fc2 = nn.Linear(256,128)
-        
-        self.fc_person_id = nn.Linear(hidden_size, num_classes)
-        
+        # Single LSTM layer
+        self.lstm = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
 
-        self.fc_age = nn.Linear(hidden_size, 2)  
-        self.fc_height = nn.Linear(hidden_size, 2)
-        self.fc_weight = nn.Linear(hidden_size, 2)  
-        self.fc_gender = nn.Linear(hidden_size, 2)  
-        
+        # Dense layer
+        self.fc1 = nn.Linear(hidden_size, num_classes)
 
-        
+        # Output layers for different tasks
+        self.fc_person_id = nn.Linear(num_classes, num_classes)
+        self.fc_age = nn.Linear(num_classes, 2)
+        self.fc_height = nn.Linear(num_classes, 2)
+        self.fc_weight = nn.Linear(num_classes, 2)
+        self.fc_gender = nn.Linear(num_classes, 2)
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
+
     def forward(self, x):
-
-        # print(f"Original shape: {x.shape}")
-        x = x.permute(0, 2, 1)
-        # print(f"Shape after permute: {x.shape}")
         # Convolutional layers
-        x = self.conv1(x)  # First convolution
-        x = self.relu(x)   # Apply ReLU
-        x = self.dropout1(x)  # Apply dropout
+        x = x.permute(0, 2, 1)
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.dropout1(x)
 
-        x = self.conv2(x)  # Second convolution
-        x = self.relu2(x)  # Apply ReLU
-        x = self.dropout2(x)  # Apply dropout
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.dropout2(x)
 
-        x = self.conv3(x)  # Third convolution
-        x = self.relu3(x)  # Apply ReLU
-        x = self.dropout3(x)  # Apply dropout
+        x = self.conv3(x)
+        x = self.relu3(x)
+        x = self.dropout3(x)
+        x = x.permute(0, 2, 1)
 
-        #x = self.conv4(x)
-        #x = self.relu4(x)
-
-        # Global Max Pooling
-        #x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
-        x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
-
-        
-        # LSTM layers
-        x, _ = self.lstm1(x)
-        
-        x, _ = self.lstm2(x)
+        # LSTM layer
+        x, _ = self.lstm(x)
         x = x[:, -1, :]  # Get the last time step's output
 
-        # Dense layers
+        # Dense layer
         x = self.fc1(x)
         x = F.relu(x)
-        #x = self.fc2(x)
-        #x = F.relu(x)
-        if  self.config['output_type'] == 'softmax':
+
+        # Output determination based on configuration
+        if self.config['output_type'] == 'softmax':
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
-        
         elif self.config['output_type'] == 'attribute':
-            age = F.sigmoid(self.fc_age(x), dim=1)
-            height = F.sigmoid(self.fc_height(x), dim=1)
-            weight = F.sigmoid(self.fc_weight(x), dim=1)
-            gender = F.sigmoid(self.fc_gender(x), dim=1)
+            age = F.sigmoid(self.fc_age(x))
+            height = F.sigmoid(self.fc_height(x))
+            weight = F.sigmoid(self.fc_weight(x))
+            gender = F.sigmoid(self.fc_gender(x))
             return age, height, weight, gender
-        
+
 ########################################################################
     
 
@@ -349,7 +333,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
     learning_rate = [0.0001, 0.00001, 0.000001]
-    batch_sizes = [50, 100 ,200] 
+    batch_sizes = [50, 100 ,250] 
     input_size = [24,45]
     # gpudevice = [0,1,2]
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice_idx)
@@ -500,6 +484,9 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
     plt.show()
     plt.close()
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 def run_network(configuration):
     #print(configuration)
@@ -522,7 +509,7 @@ def run_network(configuration):
         print('Using CPU')
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
-    
+    print(f"Total trainable parameters: {count_parameters(model)}")
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
