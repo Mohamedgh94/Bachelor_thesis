@@ -361,7 +361,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 128,
+        'hidden_size' : 160,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
@@ -480,7 +480,7 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig()
+    plt.savefig('learning_curve.png')
     plt.show()
     plt.close()
 
@@ -535,7 +535,7 @@ def run_network(configuration):
                 break
 
         plot_learning_curve(train_losses, val_losses)
-        model_save_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
+        model_save_path = f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
         torch.save(model.state_dict(), model_save_path)
         print(f"Model saved to {model_save_path}")
 
@@ -592,7 +592,7 @@ def sisFall_main():
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
-                            gpudevice_idx=2,epochs=10)
+                            gpudevice_idx=1,epochs=10)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
