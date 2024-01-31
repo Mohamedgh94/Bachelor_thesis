@@ -334,7 +334,7 @@ def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
 now = datetime.datetime.now()
-def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,epochs):
+def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
@@ -354,7 +354,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     batch_sizes = [50, 100 ,200] 
     input_size = [24,45]
     # gpudevice = [0,1,2]
-    # os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpudevice_idx)
+    GPU = 0
     usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : 'test' }
     epochs = epochs
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
@@ -367,7 +368,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "learning_rate": learning_rate[learning_rates_idx],
         "usage_mod" : usage_mod[usage_mod_idx],
         "input_size" : input_size[input_size_idx],
-        # "gpudevice" : gpudevice[gpudevice_idx],
+        #"gpudevice" : gpudevice[gpudevice_idx],
+        'GPU' : GPU,
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
@@ -512,8 +514,14 @@ def run_network(configuration):
     test_loader = DataLoader(test_dataset, batch_size=configuration["batch_size"], shuffle=False)
 
     # Initialize model and optimizer
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #device = configuration['gpudevice']
+    if torch.cuda.is_available() and configuration['GPU'] >= 0:
+        device = torch.device(f'cuda:{configuration["GPU"]}')
+        print(f'Using GPU: {configuration["GPU"]}')
+    else:
+        device = torch.device('cpu')
+        print('Using CPU')
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
     
@@ -599,7 +607,7 @@ def sisFall_main():
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
-                            epochs=10)
+                            gpudevice_idx= 1,epochs=10)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
