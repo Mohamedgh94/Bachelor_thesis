@@ -496,7 +496,7 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig('learning_curve.png')
+    plt.savefig()
     plt.show()
     plt.close()
 
