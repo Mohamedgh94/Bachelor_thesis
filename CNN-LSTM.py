@@ -89,11 +89,12 @@ class CNNLSTM(nn.Module):
         self.dropout3 = nn.Dropout(0.3)
         self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
         self.relu4 = nn.ReLU()
+        self.dropout4 = nn.Dropout(0.3)
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=1, batch_first=True)
         # self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
-        self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
+        self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
 
         #
         self.fc1 = nn.Linear(hidden_size,256)
@@ -131,6 +132,7 @@ class CNNLSTM(nn.Module):
 
         x = self.conv4(x)
         x = self.relu4(x)
+        x = self.dropout4(x) #
 
         # Global Max Pooling
         #x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
@@ -381,7 +383,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 160,
+        'hidden_size' : 128,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
@@ -632,6 +634,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
