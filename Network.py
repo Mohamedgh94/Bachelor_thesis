@@ -361,7 +361,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 160,
+        'hidden_size' : 128,#160,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
