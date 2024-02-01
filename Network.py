@@ -93,10 +93,11 @@ class CNNLSTM(nn.Module):
         self.lstm = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
 
         # Dense layer
-        self.fc1 = nn.Linear(hidden_size, num_classes)
-
+        # self.fc1 = nn.Linear(hidden_size, num_classes)
+        self.fc1 = nn.Linear(hidden_size, 256)
+        self.fc2 = nn.Linear(256,128)
         # Output layers for different tasks
-        self.fc_person_id = nn.Linear(num_classes, num_classes)
+        self.fc_person_id = nn.Linear(hidden_size, num_classes)
         self.fc_age = nn.Linear(hidden_size, 2)
         self.fc_height = nn.Linear(hidden_size, 2)
         self.fc_weight = nn.Linear(hidden_size, 2)
@@ -126,6 +127,8 @@ class CNNLSTM(nn.Module):
 
         # Dense layer
         x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
         x = F.relu(x)
 
         # Output determination based on configuration
@@ -566,7 +569,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           usage_mod_idx= 2 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                             gpudevice_idx=2,epochs=15) 
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
