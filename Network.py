@@ -199,7 +199,7 @@ def train(model, train_loader, optimizer, device,config):
         if output_type == 'softmax':
             loss = F.cross_entropy(predictions, labels['person_id'])
         elif output_type == 'attribute':
-            loss = combined_loss(predictions, labels)
+            loss = combined_loss(predictions, labels,config)
 
         loss.backward()
         optimizer.step()
@@ -590,7 +590,7 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx=1,epochs=10)
     #print(config)
