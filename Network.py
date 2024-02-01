@@ -133,10 +133,10 @@ class CNNLSTM(nn.Module):
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         elif self.config['output_type'] == 'attribute':
-            age = F.sigmoid(self.fc_age(x))
-            height = F.sigmoid(self.fc_height(x))
-            weight = F.sigmoid(self.fc_weight(x))
-            gender = F.sigmoid(self.fc_gender(x))
+            age = torch.sigmoid(self.fc_age(x))
+            height = torch.sigmoid(self.fc_height(x))
+            weight = torch.sigmoid(self.fc_weight(x))
+            gender = torch.sigmoid(self.fc_gender(x))
             return age, height, weight, gender
 
 ########################################################################
