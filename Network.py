@@ -97,10 +97,10 @@ class CNNLSTM(nn.Module):
 
         # Output layers for different tasks
         self.fc_person_id = nn.Linear(num_classes, num_classes)
-        self.fc_age = nn.Linear(num_classes, 2)
-        self.fc_height = nn.Linear(num_classes, 2)
-        self.fc_weight = nn.Linear(num_classes, 2)
-        self.fc_gender = nn.Linear(num_classes, 2)
+        self.fc_age = nn.Linear(hidden_size, 2)
+        self.fc_height = nn.Linear(hidden_size, 2)
+        self.fc_weight = nn.Linear(hidden_size, 2)
+        self.fc_gender = nn.Linear(hidden_size, 2)
 
         logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
 
