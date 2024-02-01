@@ -168,7 +168,7 @@ def combined_loss(predictions, targets, config):
         loss = F.cross_entropy(person_id_pred, person_id_target)
     elif output_type == 'attribute':
         # Assuming the predictions are ordered as age, height, weight, gender
-        age_pred, height_pred, weight_pred, gender_pred = predictions[1:]
+        age_pred, height_pred, weight_pred, gender_pred = predictions[0:]
         age_target, height_target, weight_target, gender_target = targets['age'], targets['height'], targets['weight'], targets['gender']
 
         loss_age = F.cross_entropy(age_pred, age_target)
