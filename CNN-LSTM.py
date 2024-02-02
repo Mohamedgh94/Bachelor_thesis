@@ -79,14 +79,14 @@ class CNNLSTM(nn.Module):
         self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
         
-        self.dropout1 = nn.Dropout(0.3)
+       # self.dropout1 = nn.Dropout(0.3)
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
         
         self.relu2 = nn.ReLU()
-        self.dropout2 = nn.Dropout(0.3)
+        #self.dropout2 = nn.Dropout(0.3)
         self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
-        self.dropout3 = nn.Dropout(0.3)
+        #self.dropout3 = nn.Dropout(0.3)
         self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
         self.relu4 = nn.ReLU()
         self.dropout4 = nn.Dropout(0.3)
@@ -95,10 +95,11 @@ class CNNLSTM(nn.Module):
         self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=1, batch_first=True)
         # self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
         self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
-
+        self.dropout5 = nn.Dropout(0.3)
+        #NEW check if that increase the acc without Dense Layers
         #
-        self.fc1 = nn.Linear(hidden_size,256)
-        self.fc2 = nn.Linear(256,128)
+        #self.fc1 = nn.Linear(hidden_size,256)
+        #self.fc2 = nn.Linear(256,128)
         
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
@@ -120,15 +121,15 @@ class CNNLSTM(nn.Module):
         # Convolutional layers
         x = self.conv1(x)  # First convolution
         x = self.relu(x)   # Apply ReLU
-        x = self.dropout1(x)  # Apply dropout
+        #x = self.dropout1(x)  # Apply dropout
 
         x = self.conv2(x)  # Second convolution
         x = self.relu2(x)  # Apply ReLU
-        x = self.dropout2(x)  # Apply dropout
+        #x = self.dropout2(x)  # Apply dropout
 
         x = self.conv3(x)  # Third convolution
         x = self.relu3(x)  # Apply ReLU
-        x = self.dropout3(x)  # Apply dropout
+        #x = self.dropout3(x)  # Apply dropout
 
         x = self.conv4(x)
         x = self.relu4(x)
@@ -143,22 +144,23 @@ class CNNLSTM(nn.Module):
         x, _ = self.lstm1(x)
         
         x, _ = self.lstm2(x)
+        x, _ = self.dropout5(x) # Apply dropout
         x = x[:, -1, :]  # Get the last time step's output
 
         # Dense layers
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
-        x = F.relu(x)
+        #x = self.fc1(x)
+        #x = F.relu(x)
+        #x = self.fc2(x)
+        #x = F.relu(x)
         if  self.config['output_type'] == 'softmax':
-            person_id_output = F.softmax(self.fc_person_id(x), dim=1)
+            person_id_output = torch.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         
         elif self.config['output_type'] == 'attribute':
-            age = F.sigmoid(self.fc_age(x), dim=1)
-            height = F.sigmoid(self.fc_height(x), dim=1)
-            weight = F.sigmoid(self.fc_weight(x), dim=1)
-            gender = F.sigmoid(self.fc_gender(x), dim=1)
+            age = torch.sigmoid(self.fc_age(x), dim=1)
+            height = torch.sigmoid(self.fc_height(x), dim=1)
+            weight = torch.sigmoid(self.fc_weight(x), dim=1)
+            gender = torch.sigmoid(self.fc_gender(x), dim=1)
             return age, height, weight, gender
         
 ########################################################################
@@ -228,6 +230,8 @@ def train(model, train_loader, optimizer, device,config):
         total_loss += loss.item()
     train_loss= total_loss / len(train_loader)
     return train_loss
+
+
 ##############################################
 def validate(model, valid_loader, device,config):
     output_type = config['output_type']
@@ -248,82 +252,100 @@ def validate(model, valid_loader, device,config):
     return val_loss
 
 #################################################
+
+
 from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 
-def test(model, test_loader, device,config):
-    output_type = config['output_type']
-    model.eval()
+def test(model, test_loader, device, config):
+    try:
+        output_type = config['output_type']
+        print(f"Testing model with output type: {output_type}")
+        model.eval()
+        metrics = {}
 
-    if output_type == 'softmax':
-        person_id_preds, person_id_targets = [], []
+        if output_type == 'softmax':
+            person_id_preds, person_id_targets = [], []
+            with torch.no_grad():
+                for features, labels in test_loader:
+                    features, labels = features.to(device), labels['person_id'].to(device)
+                    predictions = model(features)
+                    person_id_preds.extend(predictions.argmax(dim=1).tolist())
+                    person_id_targets.extend(labels.tolist())
+            
+            # Calculating metrics
+            try:
+                accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
+                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
+                cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
 
-        with torch.no_grad():
-            for features, labels in test_loader:
-                features, labels = features.to(device), labels['person_id'].to(device)
-                predictions = model(features)
-                person_id_preds.extend(predictions.argmax(dim=1).tolist())
-                person_id_targets.extend(labels.tolist())
+                metrics = {
+                    'accuracy_person_id': accuracy_person_id,
+                    'precision_person_id': precision_person_id,
+                    'recall_person_id': recall_person_id,
+                    'f1_person_id': f1_person_id,
+                    'confusion_matrix_person_id': cm_person_id
+                }
+                print("Successfully calculated softmax output metrics.")
+            except Exception as e:
+                print(f"Error calculating metrics for softmax output: {e}")
 
-        accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
-        precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
-        cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
+        elif output_type == 'attribute':
+            # Initialize prediction and target lists for each attribute
+            age_preds, age_targets = [], []
+            height_preds, height_targets = [], []
+            weight_preds, weight_targets = [], []
+            gender_preds, gender_targets = [], []
 
-        metrics = {
-            'accuracy_person_id': accuracy_person_id,
-            'precision_person_id': precision_person_id,
-            'recall_person_id': recall_person_id,
-            'f1_person_id': f1_person_id,
-            'confusion_matrix_person_id': cm_person_id
-        }
+            with torch.no_grad():
+                for features, labels in test_loader:
+                    features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+                    try:
+                        age_pred, height_pred, weight_pred, gender_pred = model(features)
+                        age_targets.extend(labels['age'].tolist())
+                        height_targets.extend(labels['height'].tolist())
+                        weight_targets.extend(labels['weight'].tolist())
+                        gender_targets.extend(labels['gender'].tolist())
 
-    elif output_type == 'attributes':
-        age_preds, age_targets = [], []
-        height_preds, height_targets = [], []
-        weight_preds, weight_targets = [], []
-        gender_preds, gender_targets = [], []
+                        age_preds.extend(age_pred.argmax(dim=1).tolist())
+                        height_preds.extend(height_pred.argmax(dim=1).tolist())
+                        weight_preds.extend(weight_pred.argmax(dim=1).tolist())
+                        gender_preds.extend(gender_pred.argmax(dim=1).tolist())
+                    except Exception as e:
+                        print(f"Error processing batch in attributes output: {e}")
 
-        with torch.no_grad():
-            for features, labels in test_loader:
-                features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+            # Calculating metrics for each attribute
+            try:
+                accuracy_age = accuracy_score(age_targets, age_preds)
+                accuracy_height = accuracy_score(height_targets, height_preds)
+                accuracy_weight = accuracy_score(weight_targets, weight_preds)
+                accuracy_gender = accuracy_score(gender_targets, gender_preds)
 
-                age_pred, height_pred, weight_pred, gender_pred = model(features)
-                age_targets.extend(labels['age'].tolist())
-                height_targets.extend(labels['height'].tolist())
-                weight_targets.extend(labels['weight'].tolist())
-                gender_targets.extend(labels['gender'].tolist())
+                precision_age, recall_age, f1_age, _ = precision_recall_fscore_support(age_targets, age_preds, average='binary')
+                precision_height, recall_height, f1_height, _ = precision_recall_fscore_support(height_targets, height_preds, average='binary')
+                precision_weight, recall_weight, f1_weight, _ = precision_recall_fscore_support(weight_targets, weight_preds, average='binary')
+                precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='binary')
+                metrics = {
+                    'accuracy_age': accuracy_age, 'precision_age': precision_age, 'recall_age': recall_age, 'f1_age': f1_age,
+                    'accuracy_height': accuracy_height, 'precision_height': precision_height, 'recall_height': recall_height, 'f1_height': f1_height,
+                    'accuracy_weight': accuracy_weight, 'precision_weight': precision_weight, 'recall_weight': recall_weight, 'f1_weight': f1_weight,
+                    'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender, 'recall_gender': recall_gender, 'f1_gender': f1_gender
+                }
+                
+                print("Successfully calculated attributes output metrics.")
+            except Exception as e:
+                print(f"Error calculating metrics for attributes output: {e}")
 
-                age_preds.extend(age_pred.argmax(dim=1).tolist())
-                height_preds.extend(height_pred.argmax(dim=1).tolist())
-                weight_preds.extend(weight_pred.argmax(dim=1).tolist())
-                gender_preds.extend(gender_pred.argmax(dim=1).tolist())
+        else:
+            print(f"Unsupported output type: {output_type}")
 
-        metrics = {
-            'accuracy_age': accuracy_score(age_targets, age_preds),
-            'precision_age': precision_recall_fscore_support(age_targets, age_preds, average='binary')[0],
-            'recall_age': precision_recall_fscore_support(age_targets, age_preds, average='binary')[1],
-            'f1_age': precision_recall_fscore_support(age_targets, age_preds, average='binary')[2],
-            'confusion_matrix_age': confusion_matrix(age_targets, age_preds),
-            'accuracy_height': accuracy_score(height_targets, height_preds),
-            'precision_height': precision_recall_fscore_support(height_targets, height_preds, average='binary')[0],
-            'recall_height': precision_recall_fscore_support(height_targets, height_preds, average='binary')[1],
-            'f1_height': precision_recall_fscore_support(height_targets, height_preds, average='binary')[2],
-            'confusion_matrix_height': confusion_matrix(height_targets, height_preds),
-            'accuracy_weight': accuracy_score(weight_targets, weight_preds),
-            'precision_weight': precision_recall_fscore_support(weight_targets, weight_preds, average='binary')[0],
-            'recall_weight': precision_recall_fscore_support(weight_targets, weight_preds, average='binary')[1],
-            'f1_weight': precision_recall_fscore_support(weight_targets, weight_preds, average='binary')[2],
-            'confusion_matrix_weight': confusion_matrix(weight_targets, weight_preds),
-            'accuracy_gender': accuracy_score(gender_targets, gender_preds),
-            'precision_gender': precision_recall_fscore_support(gender_targets, gender_preds, average='binary')[0],
-            'recall_gender': precision_recall_fscore_support(gender_targets, gender_preds, average='binary')[1],
-            'f1_gender': precision_recall_fscore_support(gender_targets, gender_preds, average='binary')[2],
-            'confusion_matrix_gender': confusion_matrix(gender_targets, gender_preds)
-        }
+        return metrics
 
-    return metrics
+    except Exception as e:
+        print(f"Unexpected error during test function execution: {e}")
+        return {}
 
     
 
@@ -377,7 +399,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
-        'file_suffix': 'results_yy{}mm{}dd{:02d}hh{:02d}mm{:02d}.xml'.format(now.year,
+        'file_suffix': 'results_yy{}mm{}dd{:02d}.xml'.format(now.year,
                                                                                           now.month,
                                                                                           now.day,
                                                                                           now.hour,
@@ -401,7 +423,7 @@ def save_results(config, metrics):
     """
     Save the results of training and testing in XML format, adjusted for the output type.
     """
-    xml_file_path = config['folder_exp'] + config['file_suffix']
+    xml_file_path = config['dataset']+ config['learning_rate']+ config['batch_size']+ config['file_suffix']
 
     xml_root = ET.Element("Experiment")
     child_network = ET.SubElement(xml_root, "network", name="CNN-LSTM")
@@ -418,7 +440,7 @@ def save_results(config, metrics):
                       precision=str(metrics['precision_person_id']),
                       recall=str(metrics['recall_person_id']),
                       f1_score=str(metrics['f1_person_id']))
-    elif config['output_type'] == 'attributs':
+    elif config['output_type'] == 'attribute':
         # Age metrics
         ET.SubElement(child_dataset, "age_metrics",
                       accuracy=str(metrics['accuracy_age']),
@@ -507,6 +529,10 @@ def plot_learning_curve(train_losses, val_losses, title='Learning Curve'):
     plt.close()
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def run_network(configuration):
     #print(configuration)
     # Initialize datasets and data loaders
@@ -528,7 +554,7 @@ def run_network(configuration):
         print('Using CPU')
     print(device)
     model = CNNLSTM(configuration["input_size"], configuration["hidden_size"], configuration["num_classes"],configuration).to(device)
-    
+    print(f"Total trainable parameters: {count_parameters(model)}")
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
     logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
@@ -634,6 +660,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
