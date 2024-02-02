@@ -223,7 +223,7 @@ def train(model, train_loader, optimizer, device,config):
         if output_type == 'softmax':
             loss = F.cross_entropy(predictions, labels['person_id'])
         elif output_type == 'attribute':
-            loss = combined_loss(predictions, labels)
+            loss = combined_loss(predictions, labels,config)
 
         loss.backward()
         optimizer.step()
@@ -660,6 +660,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
