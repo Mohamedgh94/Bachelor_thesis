@@ -153,7 +153,7 @@ class CNNLSTM(nn.Module):
         #x = self.fc2(x)
         #x = F.relu(x)
         if  self.config['output_type'] == 'softmax':
-            person_id_output = torch.softmax(self.fc_person_id(x))
+            person_id_output = torch.softmax(self.fc_person_id(x),dim=1)
             return person_id_output
         
         elif self.config['output_type'] == 'attribute':
