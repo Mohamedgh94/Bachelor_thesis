@@ -341,7 +341,7 @@ def test(model, test_loader, device, config):
             except Exception as e:
                 print(f"Error calculating metrics for softmax output: {e}")
 
-        elif output_type == 'attributes':
+        elif output_type == 'attribute':
             # Initialize prediction and target lists for each attribute
             age_preds, age_targets = [], []
             height_preds, height_targets = [], []
@@ -489,7 +489,7 @@ def save_results(config, metrics):
                       precision=str(metrics['precision_person_id']),
                       recall=str(metrics['recall_person_id']),
                       f1_score=str(metrics['f1_person_id']))
-    elif config['output_type'] == 'attributs':
+    elif config['output_type'] == 'attribute':
         # Age metrics
         ET.SubElement(child_dataset, "age_metrics",
                       accuracy=str(metrics['accuracy_age']),
