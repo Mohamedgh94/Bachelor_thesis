@@ -144,7 +144,7 @@ class CNNLSTM(nn.Module):
         x, _ = self.lstm1(x)
         
         x, _ = self.lstm2(x)
-        x, _ = self.dropout5(x) # Apply dropout
+        x = self.dropout5(x) # Apply dropout
         x = x[:, -1, :]  # Get the last time step's output
 
         # Dense layers
