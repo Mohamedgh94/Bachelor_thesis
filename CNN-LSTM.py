@@ -153,14 +153,14 @@ class CNNLSTM(nn.Module):
         #x = self.fc2(x)
         #x = F.relu(x)
         if  self.config['output_type'] == 'softmax':
-            person_id_output = torch.softmax(self.fc_person_id(x), dim=1)
+            person_id_output = torch.softmax(self.fc_person_id(x))
             return person_id_output
         
         elif self.config['output_type'] == 'attribute':
-            age = torch.sigmoid(self.fc_age(x), dim=1)
-            height = torch.sigmoid(self.fc_height(x), dim=1)
-            weight = torch.sigmoid(self.fc_weight(x), dim=1)
-            gender = torch.sigmoid(self.fc_gender(x), dim=1)
+            age = torch.sigmoid(self.fc_age(x))
+            height = torch.sigmoid(self.fc_height(x))
+            weight = torch.sigmoid(self.fc_weight(x))
+            gender = torch.sigmoid(self.fc_gender(x))
             return age, height, weight, gender
         
 ########################################################################
@@ -611,7 +611,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
