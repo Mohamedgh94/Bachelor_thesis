@@ -615,7 +615,7 @@ def uniMib_main():
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"{config['dataset']+ config['learning_rate']+ config['batch_size']}logger_{timestamp}.txt"
+    log_filename = f"{config['dataset']+config['batch_size']}logger_{timestamp}.txt"
     import os
 
     dir_name = os.path.dirname(log_filename)
@@ -640,7 +640,7 @@ def sisFall_main():
                             gpudevice_idx= 0,epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"{config['dataset']+ config['learning_rate']+ config['batch_size']}logger_{timestamp}.txt"
+    log_filename = f"{config['dataset']+config['batch_size']}logger_{timestamp}.txt"
     import os
 
     # dir_name = os.path.dirname(log_filename)
