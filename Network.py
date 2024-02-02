@@ -633,7 +633,8 @@ def run_network(configuration):
         print(f"Model saved to {model_save_path}")
 
     def execute_testing():
-        model_load_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
+        #model_load_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
+        model_load_path= f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
         if configuration["usage_mod"] == 'test':
             model.load_state_dict(torch.load(model_load_path))
             model.eval()
