@@ -231,7 +231,7 @@ def validate(model, valid_loader, device,config):
 #################################################
 from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
 
-
+""" 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 
 def test(model, test_loader, device,config):
@@ -304,7 +304,97 @@ def test(model, test_loader, device,config):
             'confusion_matrix_gender': confusion_matrix(gender_targets, gender_preds)
         }
 
-    return metrics
+    return metrics """
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
+import torch
+
+def test(model, test_loader, device, config):
+    try:
+        output_type = config['output_type']
+        print(f"Testing model with output type: {output_type}")
+        model.eval()
+        metrics = {}
+
+        if output_type == 'softmax':
+            person_id_preds, person_id_targets = [], []
+            with torch.no_grad():
+                for features, labels in test_loader:
+                    features, labels = features.to(device), labels['person_id'].to(device)
+                    predictions = model(features)
+                    person_id_preds.extend(predictions.argmax(dim=1).tolist())
+                    person_id_targets.extend(labels.tolist())
+            
+            # Calculating metrics
+            try:
+                accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
+                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
+                cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
+
+                metrics = {
+                    'accuracy_person_id': accuracy_person_id,
+                    'precision_person_id': precision_person_id,
+                    'recall_person_id': recall_person_id,
+                    'f1_person_id': f1_person_id,
+                    'confusion_matrix_person_id': cm_person_id
+                }
+                print("Successfully calculated softmax output metrics.")
+            except Exception as e:
+                print(f"Error calculating metrics for softmax output: {e}")
+
+        elif output_type == 'attributes':
+            # Initialize prediction and target lists for each attribute
+            age_preds, age_targets = [], []
+            height_preds, height_targets = [], []
+            weight_preds, weight_targets = [], []
+            gender_preds, gender_targets = [], []
+
+            with torch.no_grad():
+                for features, labels in test_loader:
+                    features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+                    try:
+                        age_pred, height_pred, weight_pred, gender_pred = model(features)
+                        age_targets.extend(labels['age'].tolist())
+                        height_targets.extend(labels['height'].tolist())
+                        weight_targets.extend(labels['weight'].tolist())
+                        gender_targets.extend(labels['gender'].tolist())
+
+                        age_preds.extend(age_pred.argmax(dim=1).tolist())
+                        height_preds.extend(height_pred.argmax(dim=1).tolist())
+                        weight_preds.extend(weight_pred.argmax(dim=1).tolist())
+                        gender_preds.extend(gender_pred.argmax(dim=1).tolist())
+                    except Exception as e:
+                        print(f"Error processing batch in attributes output: {e}")
+
+            # Calculating metrics for each attribute
+            try:
+                accuracy_age = accuracy_score(age_targets, age_preds)
+                accuracy_height = accuracy_score(height_targets, height_preds)
+                accuracy_weight = accuracy_score(weight_targets, weight_preds)
+                accuracy_gender = accuracy_score(gender_targets, gender_preds)
+
+                precision_age, recall_age, f1_age, _ = precision_recall_fscore_support(age_targets, age_preds, average='binary')
+                precision_height, recall_height, f1_height, _ = precision_recall_fscore_support(height_targets, height_preds, average='binary')
+                precision_weight, recall_weight, f1_weight, _ = precision_recall_fscore_support(weight_targets, weight_preds, average='binary')
+                precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='binary')
+                metrics = {
+                    'accuracy_age': accuracy_age, 'precision_age': precision_age, 'recall_age': recall_age, 'f1_age': f1_age,
+                    'accuracy_height': accuracy_height, 'precision_height': precision_height, 'recall_height': recall_height, 'f1_height': f1_height,
+                    'accuracy_weight': accuracy_weight, 'precision_weight': precision_weight, 'recall_weight': recall_weight, 'f1_weight': f1_weight,
+                    'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender, 'recall_gender': recall_gender, 'f1_gender': f1_gender
+                }
+                
+                print("Successfully calculated attributes output metrics.")
+            except Exception as e:
+                print(f"Error calculating metrics for attributes output: {e}")
+
+        else:
+            print(f"Unsupported output type: {output_type}")
+
+        return metrics
+
+    except Exception as e:
+        print(f"Unexpected error during test function execution: {e}")
+        return {}
 
     
 
