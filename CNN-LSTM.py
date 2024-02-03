@@ -15,9 +15,10 @@ from xml.dom import minidom
 
 import datetime
 
-logging.basicConfig(filename=' cnn_lstm.log', level=logging.INFO,
+#logging.basicConfig(filename=' cnn_lstm.log', level=logging.INFO,
+#                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 
 
@@ -192,7 +193,7 @@ def combined_loss(predictions, targets, config):
         loss = F.cross_entropy(person_id_pred, person_id_target)
     elif output_type == 'attribute':
         # Assuming the predictions are ordered as age, height, weight, gender
-        age_pred, height_pred, weight_pred, gender_pred = predictions[1:]
+        age_pred, height_pred, weight_pred, gender_pred = predictions[0:]
         age_target, height_target, weight_target, gender_target = targets['age'], targets['height'], targets['weight'], targets['gender']
 
         loss_age = F.cross_entropy(age_pred, age_target)
@@ -423,7 +424,7 @@ def save_results(config, metrics):
     """
     Save the results of training and testing in XML format, adjusted for the output type.
     """
-    xml_file_path = config['dataset']+ config['learning_rate']+ config['batch_size']+ config['file_suffix']
+    xml_file_path = config['dataset']+ str(config['learning_rate'])+ str(config['batch_size'])+ config['file_suffix']
 
     xml_root = ET.Element("Experiment")
     child_network = ET.SubElement(xml_root, "network", name="CNN-LSTM")
@@ -580,12 +581,12 @@ def run_network(configuration):
                 break
 
         plot_learning_curve(train_losses, val_losses)
-        model_save_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
+        model_save_path = f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
         torch.save(model.state_dict(), model_save_path)
         print(f"Model saved to {model_save_path}")
 
     def execute_testing():
-        model_load_path = f"CNN-LSTM_{configuration['dataset']}_model.pth"
+        model_load_path= f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
         if configuration["usage_mod"] == 'test':
             model.load_state_dict(torch.load(model_load_path))
             model.eval()
@@ -610,8 +611,8 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
+                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
