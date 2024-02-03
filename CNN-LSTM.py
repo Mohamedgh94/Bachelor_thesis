@@ -246,7 +246,7 @@ def validate(model, valid_loader, device,config):
             if output_type == 'softmax':
                 loss = F.cross_entropy(predictions, labels['person_id'])
             elif output_type == 'attribute':
-                loss = combined_loss(predictions, labels)
+                loss = combined_loss(predictions, labels,config)
 
             total_loss += loss.item()
         val_loss =  total_loss / len(valid_loader)
