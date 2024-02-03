@@ -377,7 +377,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
-    learning_rate = [0.0001, 0.00001, 0.000001]
+    learning_rate = [0.001,0.0001, 0.00001, 0.000001]
     batch_sizes = [50, 100 ,200] 
     input_size = [24,45]
     # gpudevice = [0,1,2]
@@ -637,7 +637,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -661,6 +661,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
