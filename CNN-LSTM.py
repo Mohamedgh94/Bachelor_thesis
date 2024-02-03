@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import time
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+import seaborn as sns
 
 import datetime
 
@@ -289,6 +290,11 @@ def test(model, test_loader, device, config):
                     'f1_person_id': f1_person_id,
                     'confusion_matrix_person_id': cm_person_id
                 }
+                if 'confusion_matrix_person_id' in metrics:
+                    cm_person_id = metrics['confusion_matrix_person_id']
+
+                    class_labels = [f'Class {i}' for i in range(cm_person_id.shape[0])]
+                    save_confusion_matrix(cm_person_id, class_labels, 'confusion_matrix.png')
                 print("Successfully calculated softmax output metrics.")
             except Exception as e:
                 print(f"Error calculating metrics for softmax output: {e}")
@@ -350,7 +356,22 @@ def test(model, test_loader, device, config):
 
     
 
+def save_confusion_matrix(cm, class_labels, filename):
+    """
+    Saves a confusion matrix as a PNG file using Seaborn's heatmap.
 
+    Args:
+    cm (ndarray): Confusion matrix to save.
+    class_labels (list): List of class labels to use in the plot.
+    filename (str): The filename to save the image to.
+    """
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel('Predicted labels')
+    plt.ylabel('True labels')
+    plt.title('Confusion Matrix')
+    plt.savefig(filename, bbox_inches='tight', dpi=300)
+    plt.close()
 
 def save_model(model, filename):
     torch.save(model.state_dict(), filename)
