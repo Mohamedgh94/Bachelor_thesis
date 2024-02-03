@@ -474,7 +474,7 @@ def save_results(config, metrics):
     print("Results saved to XML:", xmlstr)
 
 
-def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
+""" def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
     
     # set up the logging
     logging_format = '[%(asctime)-19s, %(name)s, %(levelname)s] %(message)s'
@@ -497,7 +497,49 @@ def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
     logging.getLogger('').addHandler(console)   
 
 
-    return
+    return """
+
+import logging
+import os
+
+def setup_experiment_logger(logging_level=logging.DEBUG, log_dir='logs', experiment_name='experiment'):
+    """
+    Set up a custom logger for each experiment.
+
+    Parameters:
+    - logging_level: The logging level for the logger.
+    - log_dir: The directory where log files will be stored.
+    - experiment_name: A unique name for the experiment, which will be used to name the log file.
+    """
+    
+    # Ensure the log directory exists
+    os.makedirs(log_dir, exist_ok=True)
+
+    # Create a unique logger for the experiment
+    logger = logging.getLogger(experiment_name)
+    logger.setLevel(logging_level)
+
+    # Prevent adding multiple handlers to the logger if function is called multiple times
+    if not logger.handlers:
+        # Create file handler
+        log_file = os.path.join(log_dir, f"{experiment_name}.log")
+        file_handler = logging.FileHandler(log_file, mode='w')
+        file_handler.setLevel(logging.DEBUG)
+        file_format = logging.Formatter('[%(asctime)-19s, %(name)s, %(levelname)s] %(message)s')
+        file_handler.setFormatter(file_format)
+        
+        # Create console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_format = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+        console_handler.setFormatter(console_format)
+        
+        # Add handlers to the logger
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+
+    return logger
+
 
 class EarlyStopping:
     def __init__(self, patience=5, min_delta=0):
@@ -611,8 +653,8 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
+                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -623,9 +665,10 @@ def uniMib_main():
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
 
-    setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
+    #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    logging.info('Finished UniMib experiment setup')
+    experiment_logger = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
+    experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config)
 
@@ -648,9 +691,11 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
-    #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    logging.info('Finished SisFall experiment setup')
+    experiment_logger = setup_experiment_logger(experiment_name='SisFall_identification_experiment')    
+    experiment_logger.info('Finished UniMib experiment setup')
+    # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
+    # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
+    # logging.info('Finished SisFall experiment setup')
 
     run_network(config)
 
@@ -661,6 +706,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
