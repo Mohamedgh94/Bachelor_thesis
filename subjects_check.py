@@ -6,9 +6,9 @@ age_class_counts = data['age'].value_counts()
 
 print(f'gender,{test_class_counts}, age_class_counts , {age_class_counts}')
 """ # Read the datasets
-train_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_train.csv')
-valid_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_valid.csv')
-test_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_test.csv')
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_train.csv')
+valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_valid.csv')
+test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_test.csv')
 
 # Define the categorization function
 def categorize_age(age):
