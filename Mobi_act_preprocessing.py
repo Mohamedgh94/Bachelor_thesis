@@ -207,7 +207,7 @@ def main():
     #data_dir = os.path.join('/Users/mohamadghajar/Desktop/MobiAct_Dataset_v2.0', 'untitled folder')
     act_list = [folder for folder in os.listdir(data_dir) if folder not in ['.DS_Store', 'MobiAct_data.csv', 
                                                                             'MobiAct_data.numbers', 'import pandas as pd.py', 
-                                                                            'Readme.txt','SLH','SBW','SLW','SBE','SRH']]
+                                                                            'Readme.txt','SLH','SBW','SLW','SBE','SRH','FOL','FKL','BSC','SDL']]
     print(f"act_list , {act_list}")
     print("Processing files...")
     start_time = time.time()
