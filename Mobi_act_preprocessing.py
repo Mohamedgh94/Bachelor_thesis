@@ -9,9 +9,11 @@ from multiprocessing import Queue, Process, Pool
 import time
 # Configuration parameters
 DATA_DIR = '/data/datasets/act_datasets/Annotated Data'
+#DATA_DIR= '/Users/mohamadghajar/Desktop/MobiAct_Dataset_v2.0/untitled folder'
 WINDOW_SIZE = 200
 STRIDE = 50
 SUBJECT_INFO_FILE = '/data/datasets/act_datasets/Annotated Data/Readme.txt'
+#SUBJECT_INFO_FILE= '/Users/mohamadghajar/Desktop/MobiAct_Dataset_v2.0/Readme.txt'
 
 def read_subject_info(file_path):
     """
@@ -101,11 +103,11 @@ def extract_features(segment, sensor_cols):
     return pd.Series(features, index=feature_names).astype('float32')
 # Remove the original sensor columns
 def remove_original_sensor_data(df):
-    sensor_cols = ['timestamp', 'rel_time', 'acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z', 'azimuth', 'pitch', 'roll', 'label']
+    sensor_cols = ['timestamp', 'rel_time', 'acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z', 'azimuth', 'pitch', 'roll']
     return df.drop(columns=sensor_cols)
 
 def normalize_data_in_batches(df, batch_size=1000):
-    exclude_cols = ['subject_id', 'age', 'height', 'weight', 'gender']
+    exclude_cols = ['subject_id', 'age', 'height', 'weight', 'gender','label']
     cols_to_normalize = df.drop(columns=exclude_cols).columns
     
     scaler = StandardScaler()
@@ -144,23 +146,25 @@ def label_encode(df, subject_info):
             df[col] = le.fit_transform(df[col])
 def rearrange_columns(df):
     cols = list(df.columns)
-    cols = [col for col in cols if col not in ['subject_id', 'age', 'height', 'weight', 'gender']]
-    cols.extend(['subject_id', 'age', 'height', 'weight', 'gender'])
+    cols = [col for col in cols if col not in ['label','subject_id', 'age', 'height', 'weight', 'gender']]
+    cols.extend(['subject_id', 'age', 'height', 'weight', 'gender','label'])
     return df[cols]
 def split_and_save(df):
-    X = df.iloc[:,:-5]
+    X = df.iloc[:,:-6]
     y = df[['subject_id', 'age', 'height', 'weight', 'gender']]
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-    X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
+    z = df.iloc[:,-1]
+    X_train, X_temp, y_train, y_temp , z_train , z_temp = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+    X_valid, X_test, y_valid, y_test,z_valid, z_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
     print('Validation Data:')
-    valid_data = pd.concat([X_valid, y_valid], axis=1)
+    valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+    print(f'Validation data columns: {valid_data.columns}')
     valid_data.to_csv('mobiact_valid.csv', index=False)
     print('Test Data: ')
-    test_data = pd.concat([X_test, y_test], axis=1)
+    test_data = pd.concat([X_test, y_test,z_test], axis=1)
     test_data.to_csv('mobiact_test.csv', index=False)
     gc.collect()
     print('Training Data : ')
-    train_data = pd.concat([X_train, y_train], axis=1)
+    train_data = pd.concat([X_train, y_train,z_train], axis=1)
     train_data.to_csv('mobiact_train.csv', index=False)
     
 
@@ -200,7 +204,10 @@ def main():
 
     # Verwenden von os.path.join f  r Dateipfade
     data_dir = os.path.join('/data/datasets/act_datasets', 'Annotated Data')
-    act_list = [folder for folder in os.listdir(data_dir) if folder not in ['.DS_Store', 'MobiAct_data.csv', 'MobiAct_data.numbers', 'import pandas as pd.py', 'Readme.txt','SLH','SBW','SLW','SBE','SRH']]
+    #data_dir = os.path.join('/Users/mohamadghajar/Desktop/MobiAct_Dataset_v2.0', 'untitled folder')
+    act_list = [folder for folder in os.listdir(data_dir) if folder not in ['.DS_Store', 'MobiAct_data.csv', 
+                                                                            'MobiAct_data.numbers', 'import pandas as pd.py', 
+                                                                            'Readme.txt','SLH','SBW','SLW','SBE','SRH']]
     print(f"act_list , {act_list}")
     print("Processing files...")
     start_time = time.time()
@@ -211,6 +218,7 @@ def main():
     print(f"Files processed in {time.time() - start_time:.2f} seconds.")
      # Optimierung des Speichers durch Verwenden einer List Comprehension
     all_data = pd.concat([segment for sublist in all_segments for segment in sublist], ignore_index=True)
+    print(all_data.head())
     print("convert to float32")
     # Optimierung der Datentypen
     float_cols = all_data.select_dtypes(include=['float64']).columns
@@ -225,15 +233,14 @@ def main():
     del all_segments
     gc.collect()
     all_data = pd.merge(all_data, subject_info[['age', 'height', 'weight', 'gender']], left_on='subject_id', right_on=subject_info.index, how='left')
-    print(all_data.head())
     sensor_cols = ['acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z','azimuth','pitch','roll']  
     feature_df = extract_and_combine_features(all_data, sensor_cols)
     #feature_df = all_data.groupby('subject_id').apply(lambda segment: extract_features(segment, sensor_cols))
     all_data = pd.merge(all_data, feature_df, on='subject_id', how='left')
     print(all_data.head())
     all_data = remove_original_sensor_data(all_data) 
+   
     all_data =  rearrange_columns(all_data)
-    
     print(all_data.head())
     print(all_data.info())
     print(all_data.describe())
@@ -245,3 +252,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+#TODO: reorder the columns to make the label the last column and rename it to act
