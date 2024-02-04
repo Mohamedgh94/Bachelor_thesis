@@ -6,9 +6,9 @@ age_class_counts = data['age'].value_counts()
 
 print(f'gender,{test_class_counts}, age_class_counts , {age_class_counts}')
 """ # Read the datasets
-train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
-valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_valid_data.csv')
-test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/Sis_train_data.csv')
+train_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_train.csv')
+valid_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_valid.csv')
+test_data = pd.read_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/mobiact_test.csv')
 
 # Define the categorization function
 def categorize_age(age):
@@ -34,9 +34,9 @@ test_data['height'] = test_data['height'].apply(categorize_height)
 test_data['weight'] = test_data['weight'].apply(categorize_weight)
 
 # Optionally, save the modified datasets
-train_data.to_csv('SisCat_train_data.csv', index=False)
-valid_data.to_csv('SisCat_valid_data.csv', index=False)
-test_data.to_csv('SisCat_test_data.csv', index=False) 
+train_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_train_data.csv', index=False)
+valid_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_valid_data.csv', index=False)
+test_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_test_data.csv', index=False) 
 
 
 """ import pandas as pd
