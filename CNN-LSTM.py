@@ -281,23 +281,24 @@ def test(model, test_loader, device, config):
             try:
                 accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
                 precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
-                cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
+                #cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
 
                 metrics = {
                     'accuracy_person_id': accuracy_person_id,
                     'precision_person_id': precision_person_id,
                     'recall_person_id': recall_person_id,
                     'f1_person_id': f1_person_id,
-                    'confusion_matrix_person_id': cm_person_id
+                    #'confusion_matrix_person_id': cm_person_id
                 }
-                if 'confusion_matrix_person_id' in metrics:
+                """  if 'confusion_matrix_person_id' in metrics:
                     cm_person_id = metrics['confusion_matrix_person_id']
 
                     class_labels = [f'Class {i}' for i in range(cm_person_id.shape[0])]
-                    save_confusion_matrix(cm_person_id, class_labels, 'confusion_matrix.png')
+                    #save_confusion_matrix(cm_person_id, class_labels, 'confusion_matrix.png')
                 print("Successfully calculated softmax output metrics.")
+                """
             except Exception as e:
-                print(f"Error calculating metrics for softmax output: {e}")
+                print(f"Error calculating metrics for softmax output: {e}") 
 
         elif output_type == 'attribute':
             # Initialize prediction and target lists for each attribute
@@ -700,7 +701,7 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=15)
     #print(config)
@@ -727,6 +728,6 @@ def sisFall_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
