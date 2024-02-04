@@ -140,7 +140,7 @@ def label_encode(df, subject_info):
         print("DataFrame is None in label_encode.")
         return
     le = LabelEncoder()
-    for col in ['subject', 'age', 'height', 'weight', 'gender']:
+    for col in ['subject_id','gender']:
         if col in df.columns and col in subject_info.columns:
             df[col] = df[col].astype(str)
             df[col] = le.fit_transform(df[col])
