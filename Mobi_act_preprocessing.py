@@ -153,8 +153,8 @@ def split_and_save(df):
     X = df.iloc[:,:-6]
     y = df[['subject_id', 'age', 'height', 'weight', 'gender']]
     z = df.iloc[:,-1]
-    X_train, X_temp, y_train, y_temp , z_train , z_temp = train_test_split(X, y, z,test_size=0.3, random_state=42, stratify= y['person_id'])
-    X_valid, X_test, y_valid, y_test,z_valid, z_test = train_test_split(X_temp, y_temp, z_temp,test_size=0.5, random_state=42, stratify=y_temp['person_id'])
+    X_train, X_temp, y_train, y_temp , z_train , z_temp = train_test_split(X, y, z,test_size=0.3, random_state=42, stratify= y['subject_id'])
+    X_valid, X_test, y_valid, y_test,z_valid, z_test = train_test_split(X_temp, y_temp, z_temp,test_size=0.5, random_state=42, stratify=y_temp['subject_id'])
     print('Validation Data:')
     valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
     print(f'Validation data columns: {valid_data.columns}')
