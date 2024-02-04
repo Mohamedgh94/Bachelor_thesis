@@ -235,6 +235,7 @@ def main():
     all_data = pd.merge(all_data, subject_info[['age', 'height', 'weight', 'gender']], left_on='subject_id', right_on=subject_info.index, how='left')
     sensor_cols = ['acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z','azimuth','pitch','roll']  
     feature_df = extract_and_combine_features(all_data, sensor_cols)
+    gc.collect()
     #feature_df = all_data.groupby('subject_id').apply(lambda segment: extract_features(segment, sensor_cols))
     all_data = pd.merge(all_data, feature_df, on='subject_id', how='left')
     print(all_data.head())
