@@ -34,9 +34,9 @@ test_data['height'] = test_data['height'].apply(categorize_height)
 test_data['weight'] = test_data['weight'].apply(categorize_weight)
 
 # Optionally, save the modified datasets
-train_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_train_data.csv', index=False)
-valid_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_valid_data.csv', index=False)
-test_data.to_csv('/Users/mohamadghajar/Desktop/CNN-LSTM/MobiCat_test_data.csv', index=False) 
+train_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_train_data.csv', index=False)
+valid_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_valid_data.csv', index=False)
+test_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv', index=False) 
 
 
 """ import pandas as pd
