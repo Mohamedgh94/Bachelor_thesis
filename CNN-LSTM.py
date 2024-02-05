@@ -18,8 +18,8 @@ import datetime
 
 #logging.basicConfig(filename=' cnn_lstm.log', level=logging.INFO,
 #                    format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(filename='{dataset_name}}cnn_lstm.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(filename=f"{configuration['daset_name']}cnn_lstm.log', level=logging.INFO,
+#                    format='%(asctime)s - %(levelname)s - %(message)s")
 
 
 
@@ -393,9 +393,9 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisCat_valid_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"),
-        'MobiAct': ("path_to_MobiAct_train",
-                    "path_to_MobiAct_valid",
-                    "path_to_MobiAct_test")
+        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiCat_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiCat_valid_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv")
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
@@ -560,7 +560,7 @@ def setup_experiment_logger(logging_level=logging.DEBUG, log_dir='logs', experim
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
 
-    return logger
+    return logger, log_file
 
 
 class EarlyStopping:
@@ -598,7 +598,7 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def run_network(configuration):
+def run_network(configuration,logger):
     #print(configuration)
     # Initialize datasets and data loaders
     train_dataset = IMUDataset(configuration["train_path"])
@@ -622,7 +622,7 @@ def run_network(configuration):
     print(f"Total trainable parameters: {count_parameters(model)}")
     optimizer = torch.optim.Adam(model.parameters(), lr=configuration["learning_rate"])
     early_stopping = EarlyStopping(patience=5, min_delta=0.01)
-    logging.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
+    logger.info(f"Dataset: {configuration['dataset']}, Learning Rate: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}, Model: {model}")
     #print(train_dataset.features)
     def execute_training():
         print(f'start training')
@@ -637,7 +637,7 @@ def run_network(configuration):
             val_losses.append(val_loss)
             trainng_time  = (time.time() - start_time)/60
             print(f'Epoch {epoch+1} trainng time {trainng_time}')
-            logging.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
+            logger.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
 
             early_stopping(val_loss)
             if early_stopping.early_stop:
@@ -656,7 +656,7 @@ def run_network(configuration):
             model.eval()
 
         test_metrics = test(model, test_loader, device,configuration)
-        logging.info(f"Test Results for {configuration['dataset']} with LR: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}: {test_metrics}")
+        logger.info(f"Test Results for {configuration['dataset']} with LR: {configuration['learning_rate']}, Batch Size: {configuration['batch_size']}: {test_metrics}")
 
         print("Test Metrics:")
         for metric, value in test_metrics.items():
@@ -679,8 +679,8 @@ def uniMib_main():
                            gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
+    #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
     import os
 
     dir_name = os.path.dirname(log_filename)
@@ -689,7 +689,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config)
@@ -705,29 +705,39 @@ def sisFall_main():
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=15)
     #print(config)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
+    #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
     import os
 
     # dir_name = os.path.dirname(log_filename)
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger = setup_experiment_logger(experiment_name='SisFall_identification_experiment')    
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_identification_experiment')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
     # logging.info('Finished SisFall experiment setup')
 
-    run_network(config)
+    run_network(config,experiment_logger)
 
     return
+def mobiact_main():
+    
+    config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
+                            gpudevice_idx= 2,epochs=15)
+     
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_experiment')   
+    experiment_logger.info('Finished Mobiact experiment setup')
 
+    run_network(config,experiment_logger)
 
- 
+    return
 if __name__ == "__main__":
 
     #main()
     #uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
+    mobiact_main()
