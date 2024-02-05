@@ -395,7 +395,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                     "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv")
+                    #"/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
@@ -725,7 +726,7 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=0 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=15)
      
     experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_on_sisFall_testdata')   
