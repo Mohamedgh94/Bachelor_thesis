@@ -574,7 +574,7 @@ class EarlyStopping:
     def __call__(self, val_loss):
         if self.best_loss is None:
             self.best_loss = val_loss
-        elif val_loss > self.best_loss - self.min_delta:
+        elif val_loss >= self.best_loss - self.min_delta:
             self.counter += 1
             if self.counter >= self.patience:
                 self.early_stop = True
