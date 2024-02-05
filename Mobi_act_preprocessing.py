@@ -106,26 +106,38 @@ def remove_original_sensor_data(df):
     sensor_cols = ['timestamp', 'rel_time', 'acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z', 'azimuth', 'pitch', 'roll']
     return df.drop(columns=sensor_cols)
 
-def normalize_data_in_batches(df, batch_size=1000):
-    exclude_cols = ['subject_id', 'age', 'height', 'weight', 'gender','label']
-    cols_to_normalize = df.drop(columns=exclude_cols).columns
+# def normalize_data_in_batches(df, batch_size=1000):
+#     exclude_cols = ['subject_id', 'age', 'height', 'weight', 'gender','label']
+#     cols_to_normalize = df.drop(columns=exclude_cols).columns
     
-    scaler = StandardScaler()
+#     scaler = StandardScaler()
     
-    # Aufteilen des DataFrames in eine Liste von kleineren DataFrames
-    dfs = [df[i:i+batch_size] for i in range(0, len(df), batch_size)]
+#     # Aufteilen des DataFrames in eine Liste von kleineren DataFrames
+#     dfs = [df[i:i+batch_size] for i in range(0, len(df), batch_size)]
     
-    normalized_dfs = []  # Liste zum Speichern der normalisierten DataFrames
+#     normalized_dfs = []  # Liste zum Speichern der normalisierten DataFrames
     
-    for small_df in dfs:
-        # Erstellen einer Kopie des kleinen DataFrames, um Warnungen zu vermeiden
-        small_df_copy = small_df.copy()
-        small_df_copy.loc[:, cols_to_normalize] = scaler.fit_transform(small_df[cols_to_normalize])
-        normalized_dfs.append(small_df_copy)
-         # Zusammenf  hren der normalisierten DataFrames zur  ck in einen gro ^=en DataFrame
-    normalized_df = pd.concat(normalized_dfs, ignore_index=True)
-    return normalized_df  # R  ckgabe des normalisierten DataFrames
-def label_encode(df, subject_info):
+#     for small_df in dfs:
+        
+#         small_df_copy = small_df.copy()
+#         small_df_copy.loc[:, cols_to_normalize] = scaler.fit_transform(small_df[cols_to_normalize])
+#         print(small_df_copy)
+#         normalized_dfs.append(small_df_copy)
+#          # Zusammenf  hren der normalisierten DataFrames zur  ck in einen gro ^=en DataFrame
+#     normalized_df = pd.concat(normalized_dfs, ignore_index=True)
+#     return normalized_df  
+def normalize_data(all_data):
+    try:
+        print(f'cols befor normalization : {all_data.columns}')
+        scaler = StandardScaler()
+        cols_to_normalize = all_data.iloc[:,:-6].columns
+        all_data[cols_to_normalize] = scaler.fit_transform(all_data[cols_to_normalize])
+        print(f'data After Normalize : {all_data[cols_to_normalize].describe()}')
+        return all_data
+    except Exception as e:
+        print(f"Failed to normalize {e} ")
+        return None   
+def label_encode(df):
     """
     Encodes categorical columns in the given dataframe using LabelEncoder.
 
@@ -141,18 +153,16 @@ def label_encode(df, subject_info):
         return
     le = LabelEncoder()
     for col in ['subject_id','gender']:
-        if col in df.columns and col in subject_info.columns:
-            df[col] = df[col].astype(str)
+        if col in ['subject_id','gender']:
             df[col] = le.fit_transform(df[col])
+    return df        
 def rearrange_columns(df):
     cols = list(df.columns)
     cols = [col for col in cols if col not in ['label','subject_id', 'age', 'height', 'weight', 'gender']]
     cols.extend(['subject_id', 'age', 'height', 'weight', 'gender','label'])
     return df[cols]
-def split_and_save(df):
-    X = df.iloc[:,:-6]
-    y = df[['subject_id', 'age', 'height', 'weight', 'gender']]
-    z = df.iloc[:,-1]
+def split_and_save(X,y,z):
+    
     X_train, X_temp, y_train, y_temp , z_train , z_temp = train_test_split(X, y, z,test_size=0.3, random_state=42, stratify= y['subject_id'])
     X_valid, X_test, y_valid, y_test,z_valid, z_test = train_test_split(X_temp, y_temp, z_temp,test_size=0.5, random_state=42, stratify=y_temp['subject_id'])
     print('Validation Data:')
@@ -224,12 +234,9 @@ def main():
     float_cols = all_data.select_dtypes(include=['float64']).columns
     all_data[float_cols] = all_data[float_cols].astype('float32', errors='raise')
     print(all_data[float_cols].dtypes)
-    #all_data[float_cols] = all_data[float_cols].astype('float32')
-    #all_data = all_data.astype({col: 'float32' for col in float_cols})
     cat_cols = all_data.select_dtypes(include=['category']).columns
     all_data[cat_cols] = all_data[cat_cols].astype('category')
     print("convert to float32 done")
-    # L  schen und Garbage Collection
     del all_segments
     gc.collect()
     all_data = pd.merge(all_data, subject_info[['age', 'height', 'weight', 'gender']], left_on='subject_id', right_on=subject_info.index, how='left')
@@ -248,9 +255,12 @@ def main():
     print(all_data.info())
     print(all_data.describe())
     if all_data is not None:
-        all_data = normalize_data_in_batches(all_data)
-        label_encode(all_data, subject_info)
-        split_and_save(all_data)
+        all_data = normalize_data(all_data)
+        all_data = label_encode(all_data)
+        X = all_data.iloc[:,:-6]
+        y = all_data[['subject_id', 'age', 'height', 'weight', 'gender']]
+        z = all_data.iloc[:,-1]
+        split_and_save(X,y,z)
     gc.collect()
 
 if __name__ == "__main__":
