@@ -684,9 +684,9 @@ def uniMib_main():
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
     import os
 
-    dir_name = os.path.dirname(log_filename)
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    # dir_name = os.path.dirname(log_filename)
+    # if not os.path.exists(dir_name):
+    #     os.makedirs(dir_name)
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
