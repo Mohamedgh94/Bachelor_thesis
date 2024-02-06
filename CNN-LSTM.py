@@ -693,7 +693,7 @@ def uniMib_main():
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
     experiment_logger.info('Finished UniMib experiment setup')
 
-    run_network(config)
+    run_network(config,experiment_logger)
 
     return
 
