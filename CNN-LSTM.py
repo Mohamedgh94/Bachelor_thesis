@@ -95,10 +95,10 @@ class CNNLSTM(nn.Module):
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
         self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=1, batch_first=True)
-        # self.lstm2 = nn.LSTM(input_size= 128 ,hidden_size = hidden_size, num_layers = 2,batch_first = True)
+       
         self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
         self.dropout5 = nn.Dropout(0.3)
-        #NEW check if that increase the acc without Dense Layers
+        
         #
         #self.fc1 = nn.Linear(hidden_size,256)
         #self.fc2 = nn.Linear(256,128)
@@ -149,11 +149,7 @@ class CNNLSTM(nn.Module):
         x = self.dropout5(x) # Apply dropout
         x = x[:, -1, :]  # Get the last time step's output
 
-        # Dense layers
-        #x = self.fc1(x)
-        #x = F.relu(x)
-        #x = self.fc2(x)
-        #x = F.relu(x)
+       
         if  self.config['output_type'] == 'softmax':
             person_id_output = torch.softmax(self.fc_person_id(x),dim=1)
             return person_id_output
@@ -166,23 +162,7 @@ class CNNLSTM(nn.Module):
             return age, height, weight, gender
         
 ########################################################################
-    
 
-def __repr__(self):
-        
-        representation = "CNNLSTM(\n"
-        
-        representation += f"\tInput Size: {self.input_size}\n"
-        representation += f"\tHidden Size: {self.hidden_size}\n"
-        representation += f"\tNumber of Classes: {self.num_classes}\n"
-        
-        representation += f"\tConv1: {self.conv1}\n"
-        representation += f"\tConv2: {self.conv2}\n"
-        
-        representation += ")"
-        return representation
-
-    
     
 
 def combined_loss(predictions, targets, config):
@@ -395,8 +375,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                     "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv"),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiCat_valid_data.csv",
-                    #"/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv"
-                    "/data/malghaja/Bachelor_thesis/SisCat_test_data.csv")
+                    "/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv"
+                    )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
     output = {0 : 'softmax', 1 : 'attribute'}
@@ -455,6 +435,7 @@ def save_results(config, metrics):
 
     # Add more elements based on your configuration...
     child = ET.SubElement(child_dataset, "learning_rate", value=str(config['learning_rate']))
+    child = ET.SubElement(child_dataset, " Batchsize", value=str(config['batch_size']))
     child = ET.SubElement(child_dataset, "epochs", value=str(config['epochs']))
 
     # Adding metrics based on output type
@@ -676,8 +657,8 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
+                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
