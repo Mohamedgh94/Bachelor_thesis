@@ -6,19 +6,19 @@ age_class_counts = data['age'].value_counts()
 
 print(f'gender,{test_class_counts}, age_class_counts , {age_class_counts}')
 """ # Read the datasets
-train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_train.csv')
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/MobiAct/mobiact_train.csv')
 valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_valid.csv')
 test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/mobiact_test.csv')
 
 # Define the categorization function
 def categorize_age(age):
-    return '0' if age < 30 else '1'
+    return '0' if age < 25 else '1'
 
 def categorize_height(height):
-    return '0' if height < 170 else '1'
+    return '0' if height < 175.7 else '1'
 
 def categorize_weight(weight):
-    return '0' if weight < 70 else '1'
+    return '0' if weight < 76.8 else '1'
 
 # Apply the categorization
 train_data['age'] = train_data['age'].apply(categorize_age)
@@ -34,9 +34,9 @@ test_data['height'] = test_data['height'].apply(categorize_height)
 test_data['weight'] = test_data['weight'].apply(categorize_weight)
 
 # Optionally, save the modified datasets
-train_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_train_data.csv', index=False)
-valid_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_valid_data.csv', index=False)
-test_data.to_csv('/data/malghaja/Bachelor_thesis/MobiCat_test_data.csv', index=False) 
+train_data.to_csv('/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv', index=False)
+valid_data.to_csv('/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv', index=False)
+test_data.to_csv('/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv', index=False) 
 
 
 """ import pandas as pd
