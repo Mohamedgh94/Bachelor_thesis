@@ -435,7 +435,7 @@ def save_results(config, metrics):
 
     # Add more elements based on your configuration...
     child = ET.SubElement(child_dataset, "learning_rate", value=str(config['learning_rate']))
-    child = ET.SubElement(child_dataset, " Batchsize", value=str(config['batch_size']))
+    child = ET.SubElement(child_dataset, "Batchsize", value=str(config['batch_size']))
     child = ET.SubElement(child_dataset, "epochs", value=str(config['epochs']))
 
     # Adding metrics based on output type
