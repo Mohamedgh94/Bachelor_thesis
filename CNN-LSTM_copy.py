@@ -185,8 +185,10 @@ class CNNLSTM(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0))
         self.relu = nn.ReLU()
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.2)
         self.pool = nn.MaxPool2d(kernel_size=(1, 1), stride=(1, 1))  # Pooling to reduce height dimension
-        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, batch_first=True)
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers = 2,batch_first=True)
+        self.dropout2 = nn.Dropout(0.3)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.relu_fc1 = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
@@ -204,6 +206,7 @@ class CNNLSTM(nn.Module):
         #print(f'data shape befor the forward: {x.shape}')
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
+        x = self.dropout1(x)
        # print(f'data shape after  the conv: {x.shape}')
         x = self.pool(x)
         x = x.permute(0, 2, 1, 3)  # Rearrange dimensions for LSTM: [batch, seq_len, channels, width]
@@ -212,6 +215,7 @@ class CNNLSTM(nn.Module):
         x = x.view(batch_size, seq_len, -1)  # Flatten channels and width into features for LSTM
         #print(f'data shape befor LSTM layer and after flatten: {x.shape}')
         x, _ = self.lstm(x)
+        x = self.dropout2(x)
         #print(f'data shape after LSTM layer: {x.shape}')
         x = x[:, -1, :]  # Take the output of the last time step
         x = self.fc1(x)
