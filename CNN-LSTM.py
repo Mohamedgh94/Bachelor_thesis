@@ -270,6 +270,9 @@ def test(model, test_loader, device, config):
                     'f1_person_id': f1_person_id,
                     #'confusion_matrix_person_id': cm_person_id
                 }
+                num_classes = len(set(person_id_targets)) # Assuming your classes are labeled from 0 to num_classes-1
+                for i in range(num_classes):
+                    print(f"Class {i}: Precision = {precision_person_id[i]}, Recall = {recall_person_id[i]}, F1 = {recall_person_id[i]}")
                 """  if 'confusion_matrix_person_id' in metrics:
                     cm_person_id = metrics['confusion_matrix_person_id']
 
@@ -367,9 +370,9 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
-        'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniCat_train_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniCat_valid_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniCat_test_data.csv"),
+        'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv",
+                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
+                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisCat_valid_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisCat_test_data.csv"),
@@ -719,7 +722,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
     #sisFall_main()
-    mobiact_main()
+    #mobiact_main()
