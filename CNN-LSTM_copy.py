@@ -215,7 +215,10 @@ class CNNLSTM(nn.Module):
         #print(f'data shape after LSTM layer: {x.shape}')
         x = x[:, -1, :]  # Take the output of the last time step
         x = self.fc1(x)
+        x = self.relu_fc1(x)
         x = self.fc2(x)
+        x = self.relu_fc2(x)
+        x = self.fc3(x)
         x = self.fc3(x)
         if self.config['output_type'] == 'softmax':
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
