@@ -98,7 +98,13 @@ class CNNLSTM(nn.Module):
        
         self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
         self.dropout5 = nn.Dropout(0.3)
-        
+        self.fc1 = nn.Linear(hidden_size, hidden_size)
+        self.relu_fc1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.relu_fc2 = nn.ReLU()
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
+        self.relu_fc3 = nn.ReLU()
+        self.fc_person_id = nn.Linear(hidden_size, num_classes)
         #
         #self.fc1 = nn.Linear(hidden_size,256)
         #self.fc2 = nn.Linear(256,128)
@@ -148,7 +154,12 @@ class CNNLSTM(nn.Module):
         x, _ = self.lstm2(x)
         x = self.dropout5(x) # Apply dropout
         x = x[:, -1, :]  # Get the last time step's output
-
+        x = self.fc1(x)
+        x = self.relu_fc1(x)
+        x = self.fc2(x)
+        x = self.relu_fc2(x)
+        x = self.fc3(x)
+        x = self.fc3(x)
        
         if  self.config['output_type'] == 'softmax':
             person_id_output = torch.softmax(self.fc_person_id(x),dim=1)
@@ -662,7 +673,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=0,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
