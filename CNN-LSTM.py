@@ -82,22 +82,22 @@ class CNNLSTM(nn.Module):
         self.relu = nn.ReLU()
         
        # self.dropout1 = nn.Dropout(0.3)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
         
         self.relu2 = nn.ReLU()
         #self.dropout2 = nn.Dropout(0.3)
-        self.conv3 = nn.Conv1d(in_channels= 128 , out_channels= 256 , kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv1d(in_channels= 64 , out_channels= 64 , kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         #self.dropout3 = nn.Dropout(0.3)
-        self.conv4 = nn.Conv1d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
         self.relu4 = nn.ReLU()
-        self.dropout4 = nn.Dropout(0.3)
+        self.dropout4 = nn.Dropout(0.2)
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=512, hidden_size=hidden_size, num_layers=1, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=1, batch_first=True)
        
         self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
-        self.dropout5 = nn.Dropout(0.3)
+        self.dropout5 = nn.Dropout(0.2)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.relu_fc1 = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
