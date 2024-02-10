@@ -85,6 +85,7 @@ class CNNLSTM(nn.Module):
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
         
         self.relu2 = nn.ReLU()
+        
         #self.dropout2 = nn.Dropout(0.3)
         #self.conv3 = nn.Conv1d(in_channels= 64 , out_channels= 64 , kernel_size=3, stride=1, padding=1)
         #self.relu3 = nn.ReLU()
