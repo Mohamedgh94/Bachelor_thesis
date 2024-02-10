@@ -85,7 +85,7 @@ class CNNLSTM(nn.Module):
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
         
         self.relu2 = nn.ReLU()
-        
+
         #self.dropout2 = nn.Dropout(0.3)
         #self.conv3 = nn.Conv1d(in_channels= 64 , out_channels= 64 , kernel_size=3, stride=1, padding=1)
         #self.relu3 = nn.ReLU()
@@ -136,12 +136,12 @@ class CNNLSTM(nn.Module):
         x = self.relu2(x)  # Apply ReLU
         #x = self.dropout2(x)  # Apply dropout
 
-        x = self.conv3(x)  # Third convolution
-        x = self.relu3(x)  # Apply ReLU
-        #x = self.dropout3(x)  # Apply dropout
+        # x = self.conv3(x)  # Third convolution
+        # x = self.relu3(x)  # Apply ReLU
+        # #x = self.dropout3(x)  # Apply dropout
 
-        x = self.conv4(x)
-        x = self.relu4(x)
+        # x = self.conv4(x)
+        # x = self.relu4(x)
         x = self.dropout4(x) #
 
         # Global Max Pooling
