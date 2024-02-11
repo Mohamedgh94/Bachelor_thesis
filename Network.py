@@ -326,6 +326,9 @@ def test(model, test_loader, device, config):
                     'f1_person_id': f1_person_id,
                     #'confusion_matrix_person_id': cm_person_id
                 }
+                num_classes = len(set(person_id_targets)) # Assuming your classes are labeled from 0 to num_classes-1
+                for i in range(num_classes):
+                    print(f"Class {i}: Precision = {precision_person_id[i]}, Recall = {recall_person_id[i]}, F1 = {recall_person_id[i]}")
                 """  if 'confusion_matrix_person_id' in metrics:
                     cm_person_id = metrics['confusion_matrix_person_id']
 
@@ -497,6 +500,7 @@ def save_results(config, metrics):
     # Adding metrics based on output type
     if config['output_type'] == 'softmax':
         ET.SubElement(child_dataset, "person_id_metrics",
+                      
                       accuracy=str(metrics['accuracy_person_id']),
                       precision=str(metrics['precision_person_id']),
                       recall=str(metrics['recall_person_id']),
