@@ -123,11 +123,14 @@ class CNNLSTM(nn.Module):
         self.config = config
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.25)
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.dropout2 = nn.Dropout(0.25)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(1, 1), stride=(1, 1))
         self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.dropout3 = nn.Dropout(0.25)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
@@ -137,6 +140,10 @@ class CNNLSTM(nn.Module):
         self.fc_height = nn.Linear(hidden_size, 1)
         self.fc_weight = nn.Linear(hidden_size, 1)
         self.fc_gender = nn.Linear(hidden_size, 2)
+
+        self.softmax = nn.Softmax()
+        
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.relu(self.conv1(x))
@@ -156,7 +163,7 @@ class CNNLSTM(nn.Module):
         x = self.relu(self.fc3(x))
         
         if self.config['output_type'] == 'softmax':
-            person_id_output = F.softmax(self.fc_person_id(x), dim=1)
+            person_id_output = self.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         elif self.config['output_type'] == 'attribute':
             age = torch.sigmoid(self.fc_age(x))
@@ -415,7 +422,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 128,
+        'hidden_size' : 256,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
