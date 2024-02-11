@@ -166,7 +166,7 @@ class CNNLSTM(nn.Module):
         x = self.relu(self.fc3(x))
         
         if self.config['output_type'] == 'softmax':
-            person_id_output = self.softmax(self.fc_person_id(x))
+            person_id_output = F.softmax(self.fc_person_id(x))
             return person_id_output
         elif self.config['output_type'] == 'attribute':
             age = torch.sigmoid(self.fc_age(x))
