@@ -78,10 +78,12 @@ class CNNLSTM(nn.Module):
         self.config = config
         
         # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=0)
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=64, kernel_size=3, stride=1, padding=0)
         self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=0)
-        
-        # Pooling layers
+        self.conv3 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride = 1,padding=0)
+        self.conv3 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride = 1,padding=0)
+        self.conv4 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride=1,padding=0)
+        # Pooling layersstr
         self.pool1 = nn.MaxPool1d(kernel_size=2, stride=2)
         self.pool2 = nn.MaxPool1d(kernel_size=2, stride=2)
 
@@ -109,8 +111,11 @@ class CNNLSTM(nn.Module):
 
     def forward(self, x):
         # Convolutional and pooling layers
-        x = self.pool1(self.relu(self.conv1(x)))
-        x = self.pool2(self.relu(self.conv2(x)))
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.relu(self.conv3(x))
+        x = self.relu(self.conv4(x))
+        x = self.pool1(x)
         x = self.dropout(x)
 
         # Prepare for LSTM: [batch, seq_len, features]
