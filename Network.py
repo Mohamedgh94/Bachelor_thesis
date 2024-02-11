@@ -20,10 +20,10 @@ import datetime
 
 
 class IMUDataset(Dataset):
-    def __init__(self, csv_file):
-
+    def __init__(self, csv_file, transform=None):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
+        self.transform = transform
         # Assuming the last 5 columns are labels
         self.labels = self.dataframe.iloc[:, -6:-1].values
         # Assuming all other columns are features
@@ -45,7 +45,12 @@ class IMUDataset(Dataset):
             'weight': torch.tensor(label_vector[3], dtype=torch.long),
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
-        feature_vector = feature_vector.reshape(1, -1)
+        # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
+        feature_vector = feature_vector.reshape(1, 4, 6)  # Adjust the reshape dimensions as necessary
+
+        if self.transform:
+            feature_vector = self.transform(feature_vector)
+
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
