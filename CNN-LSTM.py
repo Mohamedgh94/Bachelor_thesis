@@ -95,9 +95,9 @@ class CNNLSTM(nn.Module):
         self.dropout4 = nn.Dropout(0.2)
         #self.fc_intermediate = nn.Linear(256, 128)
         # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=1, batch_first=True)
+        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
        
-        self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =1,batch_first = True)
+        self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =2,batch_first = True)
         self.dropout5 = nn.Dropout(0.2)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.relu_fc1 = nn.ReLU()
@@ -160,7 +160,7 @@ class CNNLSTM(nn.Module):
         x = self.fc2(x)
         x = self.relu_fc2(x)
         x = self.fc3(x)
-        x = self.fc3(x)
+        x = self.relu_fc3(x)
        
         if  self.config['output_type'] == 'softmax':
             person_id_output = torch.softmax(self.fc_person_id(x),dim=1)
