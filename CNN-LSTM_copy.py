@@ -148,14 +148,17 @@ class CNNLSTM(nn.Module):
     def forward(self, x):
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
+        x = self.dropout1(x)
         x = self.relu(self.conv3(x))
         x = self.relu(self.conv4(x))
+        x = self.dropout2(x)
         x = self.pool(x)
         
         x = x.permute(0, 2, 1, 3)  # Prepare for LSTM: [batch, seq_len, channels, width]
         x = x.reshape(x.size(0), x.size(1)*x.size(3), -1)  # Flatten for LSTM: [batch, seq_len, features]
         
         x, _ = self.lstm(x)
+        x = self.dropout3(x)
         x = x[:, -1, :]  # Last time step
         
         x = self.relu(self.fc1(x))
@@ -163,7 +166,7 @@ class CNNLSTM(nn.Module):
         x = self.relu(self.fc3(x))
         
         if self.config['output_type'] == 'softmax':
-            person_id_output = self.softmax(self.fc_person_id(x), dim=1)
+            person_id_output = self.softmax(self.fc_person_id(x))
             return person_id_output
         elif self.config['output_type'] == 'attribute':
             age = torch.sigmoid(self.fc_age(x))
