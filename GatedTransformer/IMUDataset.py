@@ -67,7 +67,7 @@ class IMUDataset(Dataset):
 # test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
 train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv")
 valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv")
-test_dataset= IMUDataset("data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv")    
+test_dataset= IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv")    
 # global age_weights
 # global height_weights
 # global weight_weights
