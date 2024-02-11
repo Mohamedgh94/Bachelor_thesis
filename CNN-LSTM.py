@@ -73,105 +73,71 @@ class IMUDataset(Dataset):
 ##############
 
 class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes,config):
+    def __init__(self, input_size, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
-
-        self.config = config 
+        self.config = config
+        
         # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=0)
+        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=0)
+        
+        # Pooling layers
+        self.pool1 = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.pool2 = nn.MaxPool1d(kernel_size=2, stride=2)
+
+        # Activation and Dropout
         self.relu = nn.ReLU()
-        
-       # self.dropout1 = nn.Dropout(0.3)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
-        
-        self.relu2 = nn.ReLU()
-
-        #self.dropout2 = nn.Dropout(0.3)
-        #self.conv3 = nn.Conv1d(in_channels= 64 , out_channels= 64 , kernel_size=3, stride=1, padding=1)
-        #self.relu3 = nn.ReLU()
-        #self.dropout3 = nn.Dropout(0.3)
-        #self.conv4 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
-        #self.relu4 = nn.ReLU()
-        self.dropout4 = nn.Dropout(0.2)
-        #self.fc_intermediate = nn.Linear(256, 128)
-        # LSTM layer
-        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-       
-        self.lstm2 = nn.LSTM(input_size= hidden_size ,hidden_size = hidden_size, num_layers =2,batch_first = True)
-        self.dropout5 = nn.Dropout(0.2)
-        self.fc1 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc1 = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc2 = nn.ReLU()
-        self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc3 = nn.ReLU()
-        self.fc_person_id = nn.Linear(hidden_size, num_classes)
-        #
-        #self.fc1 = nn.Linear(hidden_size,256)
-        #self.fc2 = nn.Linear(256,128)
-        
-        self.fc_person_id = nn.Linear(hidden_size, num_classes)
-        
-
-        self.fc_age = nn.Linear(hidden_size, 2)  
-        self.fc_height = nn.Linear(hidden_size, 2)
-        self.fc_weight = nn.Linear(hidden_size, 2)  
-        self.fc_gender = nn.Linear(hidden_size, 2)  
-        
-
-        
-
-        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
-    def forward(self, x):
-
-        # print(f"Original shape: {x.shape}")
-        x = x.permute(0, 2, 1)
-        # print(f"Shape after permute: {x.shape}")
-        # Convolutional layers
-        x = self.conv1(x)  # First convolution
-        x = self.relu(x)   # Apply ReLU
-        #x = self.dropout1(x)  # Apply dropout
-
-        x = self.conv2(x)  # Second convolution
-        x = self.relu2(x)  # Apply ReLU
-        #x = self.dropout2(x)  # Apply dropout
-
-        # x = self.conv3(x)  # Third convolution
-        # x = self.relu3(x)  # Apply ReLU
-        # #x = self.dropout3(x)  # Apply dropout
-
-        # x = self.conv4(x)
-        # x = self.relu4(x)
-        x = self.dropout4(x) #
-
-        # Global Max Pooling
-        #x = F.max_pool1d(x, kernel_size=x.size(2))  # Global max pooling
-        x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
-
+        self.dropout = nn.Dropout(0.2)
         
         # LSTM layers
+        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        
+        # Fully connected layers
+        self.fc1 = nn.Linear(hidden_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
+        self.fc_person_id = nn.Linear(hidden_size, num_classes)
+        
+        # Output layers for attributes
+        self.fc_age = nn.Linear(hidden_size, 2)
+        self.fc_height = nn.Linear(hidden_size, 2)
+        self.fc_weight = nn.Linear(hidden_size, 2)
+        self.fc_gender = nn.Linear(hidden_size, 2)
+
+        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
+
+    def forward(self, x):
+        # Convolutional and pooling layers
+        x = self.pool1(self.relu(self.conv1(x)))
+        x = self.pool2(self.relu(self.conv2(x)))
+        x = self.dropout(x)
+
+        # Prepare for LSTM: [batch, seq_len, features]
+        x = x.permute(0, 2, 1)
+
+        # LSTM layers
         x, _ = self.lstm1(x)
-        
         x, _ = self.lstm2(x)
-        x = self.dropout5(x) # Apply dropout
+        x = self.dropout(x)
         x = x[:, -1, :]  # Get the last time step's output
-        x = self.fc1(x)
-        x = self.relu_fc1(x)
-        x = self.fc2(x)
-        x = self.relu_fc2(x)
-        x = self.fc3(x)
-        x = self.relu_fc3(x)
-       
-        if  self.config['output_type'] == 'softmax':
-            person_id_output = torch.softmax(self.fc_person_id(x),dim=1)
+
+        # Fully connected layers
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
+
+        # Output processing
+        if self.config['output_type'] == 'softmax':
+            person_id_output = torch.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
-        
         elif self.config['output_type'] == 'attribute':
             age = torch.sigmoid(self.fc_age(x))
             height = torch.sigmoid(self.fc_height(x))
             weight = torch.sigmoid(self.fc_weight(x))
             gender = torch.sigmoid(self.fc_gender(x))
             return age, height, weight, gender
+
         
 ########################################################################
 
@@ -425,7 +391,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 128,
+        'hidden_size' : 256,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
