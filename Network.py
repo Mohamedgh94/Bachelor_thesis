@@ -77,7 +77,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import logging
 
-class CNNLSTM(nn.Module):
+""" class CNNLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
 
@@ -151,8 +151,66 @@ class CNNLSTM(nn.Module):
             height = torch.sigmoid(self.fc_height(x))
             weight = torch.sigmoid(self.fc_weight(x))
             gender = torch.sigmoid(self.fc_gender(x))
-            return age, height, weight, gender
+            return age, height, weight, gender """
 
+class CNNLSTM(nn.Module):
+    def __init__(self, input_channels, hidden_size, num_classes, config):
+        super(CNNLSTM, self).__init__()
+        self.config = config
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.25)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.dropout2 = nn.Dropout(0.25)
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.dropout3 = nn.Dropout(0.25)
+        self.fc1 = nn.Linear(hidden_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
+        self.fc_person_id = nn.Linear(hidden_size, num_classes)
+        
+        self.fc_age = nn.Linear(hidden_size, 1)
+        self.fc_height = nn.Linear(hidden_size, 1)
+        self.fc_weight = nn.Linear(hidden_size, 1)
+        self.fc_gender = nn.Linear(hidden_size, 2)
+
+        self.softmax = nn.Softmax()
+        
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.dropout1(x)
+        x = self.relu(self.conv3(x))
+        x = self.relu(self.conv4(x))
+        x = self.dropout2(x)
+        x = self.pool(x)
+        
+        x = x.permute(0, 2, 1, 3)  # Prepare for LSTM: [batch, seq_len, channels, width]
+        x = x.reshape(x.size(0), x.size(1)*x.size(3), -1)  # Flatten for LSTM: [batch, seq_len, features]
+        
+        x, _ = self.lstm(x)
+        x = self.dropout3(x)
+        x = x[:, -1, :]  # Last time step
+        
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
+        
+        if self.config['output_type'] == 'softmax':
+            person_id_output = F.softmax(self.fc_person_id(x),dim=1)
+            return person_id_output
+        elif self.config['output_type'] == 'attribute':
+            age = torch.sigmoid(self.fc_age(x))
+            height = torch.sigmoid(self.fc_height(x))
+            weight = torch.sigmoid(self.fc_weight(x))
+            gender = torch.sigmoid(self.fc_gender(x))
+            return age, height, weight, gender
+        
 
 ########################################################################
  
@@ -651,7 +709,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -664,7 +722,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='New Experimentwith 2D')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
