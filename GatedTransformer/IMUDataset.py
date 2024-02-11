@@ -10,11 +10,11 @@ class IMUDataset(Dataset):
         self.dataframe = pd.read_csv(csv_file)
         
         # Assuming the last 5 columns are labels
-        self.labels = self.dataframe.iloc[:, -5:].values
+        self.labels = self.dataframe.iloc[:, -6:-1].values
         # Assuming all other columns are features
-        self.features = self.dataframe.iloc[:, :-5].values
+        self.features = self.dataframe.iloc[:, :-6].values
         self.label_categories = {}
-        for column in self.dataframe.columns[-5:]:
+        for column in self.dataframe.columns[-6:]:
             self.label_categories[column] = self.dataframe[column].unique()
         
     def __len__(self):
@@ -35,7 +35,7 @@ class IMUDataset(Dataset):
         feature_vector = self.features[idx]
         label_vector = self.labels[idx]
         label_dict = {
-            #person_id': torch.tensor(label_vector[0], dtype=torch.long),
+            'person_id': torch.tensor(label_vector[0], dtype=torch.long),
             'age': torch.tensor(label_vector[1], dtype=torch.long),
             'height': torch.tensor(label_vector[2],dtype=torch.long),
             'weight': torch.tensor(label_vector[3],dtype=torch.long),
@@ -62,12 +62,12 @@ class IMUDataset(Dataset):
         # Normalize weights so that the minimum weight is 1.0
         weights = weights / weights.min()
         return torch.tensor(weights, dtype=torch.float32) """
-train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
-valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
-test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
-# train_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_train_data.csv")
-# valid_dataset = IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_valid_data.csv")
-# test_dataset= IMUDataset("/Users/mohamadghajar/Desktop/Bachelor_version2/Bac/Bachelor_thesis/Unimib_test_data.csv")    
+# train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_train_data.csv")
+# valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_valid_data.csv")
+# test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/Unimib_test_data.csv")
+train_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv")
+valid_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv")
+test_dataset= IMUDataset("data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv")    
 # global age_weights
 # global height_weights
 # global weight_weights
