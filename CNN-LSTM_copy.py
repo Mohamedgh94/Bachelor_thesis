@@ -20,10 +20,10 @@ import datetime
 
 
 class IMUDataset(Dataset):
-    def __init__(self, csv_file):
-
+    def __init__(self, csv_file, transform=None):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
+        self.transform = transform
         # Assuming the last 5 columns are labels
         self.labels = self.dataframe.iloc[:, -6:-1].values
         # Assuming all other columns are features
@@ -37,7 +37,6 @@ class IMUDataset(Dataset):
 
     def __getitem__(self, idx):
         feature_vector = self.features[idx]
-        feature_vector = feature_vector.reshape(-1, 1, 1)  # Reshape to [features, 1, 1]
         label_vector = self.labels[idx]
         label_dict = {
             'person_id': torch.tensor(label_vector[0], dtype=torch.long),
@@ -46,7 +45,12 @@ class IMUDataset(Dataset):
             'weight': torch.tensor(label_vector[3], dtype=torch.long),
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
-        #feature_vector = feature_vector.reshape(1, -1)
+        # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
+        feature_vector = feature_vector.reshape(1, 4, 6)  # Adjust the reshape dimensions as necessary
+
+        if self.transform:
+            feature_vector = self.transform(feature_vector)
+
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
@@ -108,132 +112,60 @@ import torch.nn as nn
 import torch.nn.functional as F
 import logging
 
-""" class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes, config):
-        super(CNNLSTM, self).__init__()
 
-        self.config = config 
-        # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
-        self.relu = nn.ReLU()
-        self.dropout1 = nn.Dropout(0.2)
-
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
-        self.relu2 = nn.ReLU()
-        self.dropout2 = nn.Dropout(0.2)
-
-        self.conv3 = nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1)
-        self.relu3 = nn.ReLU()
-        self.dropout3 = nn.Dropout(0.2)
-
-        # Single LSTM layer
-        self.lstm = nn.LSTM(input_size=256, hidden_size=hidden_size, num_layers=2, batch_first=True)
-
-        # Dense layer
-        self.fc1 = nn.Linear(hidden_size, num_classes)
-
-        # Output layers for different tasks
-        self.fc_person_id = nn.Linear(num_classes, num_classes)
-        self.fc_age = nn.Linear(hidden_size, 2)
-        self.fc_height = nn.Linear(hidden_size, 2)
-        self.fc_weight = nn.Linear(hidden_size, 2)
-        self.fc_gender = nn.Linear(hidden_size, 2)
-
-        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
-
-    def forward(self, x):
-        # Convolutional layers
-        x = x.permute(0, 2, 1)
-        print(x.shape)
-        x = self.conv1(x)
-        x = self.relu(x)
-        x = self.dropout1(x)
-
-        x = self.conv2(x)
-        x = self.relu2(x)
-        x = self.dropout2(x)
-
-        x = self.conv3(x)
-        x = self.relu3(x)
-        x = self.dropout3(x)
-        x = x.permute(0, 2, 1)
-
-        # LSTM layer
-        x, _ = self.lstm(x)
-        x = x[:, -1, :]  # Get the last time step's output
-
-        # Dense layer
-        x = self.fc1(x)
-        x = F.relu(x)
-
-        # Output determination based on configuration
-        if self.config['output_type'] == 'softmax':
-            person_id_output = F.softmax(self.fc_person_id(x), dim=1)
-            return person_id_output
-        elif self.config['output_type'] == 'attribute':
-            age = F.sigmoid(self.fc_age(x))
-            height = F.sigmoid(self.fc_height(x))
-            weight = F.sigmoid(self.fc_weight(x))
-            gender = F.sigmoid(self.fc_gender(x))
-            return age, height, weight, gender """
-
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class CNNLSTM(nn.Module):
-    def __init__(self, input_channels, hidden_size, num_classes,config):
+    def __init__(self, input_channels, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
         self.config = config
-        self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0))
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.relu = nn.ReLU()
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0))
-        self.dropout1 = nn.Dropout(0.2)
-        self.pool = nn.MaxPool2d(kernel_size=(1, 1), stride=(1, 1))  # Pooling to reduce height dimension
-        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers = 2,batch_first=True)
-        self.dropout2 = nn.Dropout(0.3)
+        self.pool = nn.MaxPool2d(kernel_size=(1, 1), stride=(1, 1))
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc1 = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc2 = nn.ReLU()
         self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc3 = nn.ReLU()
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
-        # Output layers for attributes
         self.fc_age = nn.Linear(hidden_size, 1)
         self.fc_height = nn.Linear(hidden_size, 1)
         self.fc_weight = nn.Linear(hidden_size, 1)
         self.fc_gender = nn.Linear(hidden_size, 2)
+
     def forward(self, x):
-        #print(f'data shape befor the forward: {x.shape}')
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
-        x = self.dropout1(x)
-       # print(f'data shape after  the conv: {x.shape}')
+        x = self.relu(self.conv3(x))
+        x = self.relu(self.conv4(x))
         x = self.pool(x)
-        x = x.permute(0, 2, 1, 3)  # Rearrange dimensions for LSTM: [batch, seq_len, channels, width]
-        #print(f'data shape befor LSTM layer: {x.shape}')
-        batch_size, seq_len, channels, width = x.size()
-        x = x.view(batch_size, seq_len, -1)  # Flatten channels and width into features for LSTM
-        #print(f'data shape befor LSTM layer and after flatten: {x.shape}')
+        
+        x = x.permute(0, 2, 1, 3)  # Prepare for LSTM: [batch, seq_len, channels, width]
+        x = x.reshape(x.size(0), x.size(1)*x.size(3), -1)  # Flatten for LSTM: [batch, seq_len, features]
+        
         x, _ = self.lstm(x)
-        x = self.dropout2(x)
-        #print(f'data shape after LSTM layer: {x.shape}')
-        x = x[:, -1, :]  # Take the output of the last time step
-        x = self.fc1(x)
-        x = self.relu_fc1(x)
-        x = self.fc2(x)
-        x = self.relu_fc2(x)
-        x = self.fc3(x)
-        x = self.fc3(x)
+        x = x[:, -1, :]  # Last time step
+        
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
+        
         if self.config['output_type'] == 'softmax':
             person_id_output = F.softmax(self.fc_person_id(x), dim=1)
             return person_id_output
         elif self.config['output_type'] == 'attribute':
-            age = F.sigmoid(self.fc_age(x))
-            height = F.sigmoid(self.fc_height(x))
-            weight = F.sigmoid(self.fc_weight(x))
-            gender = F.sigmoid(self.fc_gender(x))
+            age = torch.sigmoid(self.fc_age(x))
+            height = torch.sigmoid(self.fc_height(x))
+            weight = torch.sigmoid(self.fc_weight(x))
+            gender = torch.sigmoid(self.fc_gender(x))
             return age, height, weight, gender
-       
+        
+        
 
 ########################################################################
 def combined_loss(predictions, targets, config):
@@ -341,6 +273,9 @@ def test(model, test_loader, device, config):
                     'f1_person_id': f1_person_id,
                     #'confusion_matrix_person_id': cm_person_id
                 }
+                num_classes = len(set(person_id_targets)) # Assuming your classes are labeled from 0 to num_classes-1
+                for i in range(num_classes):
+                    print(f"Class {i}: Precision = {precision_person_id[i]}, Recall = {recall_person_id[i]}, F1 = {recall_person_id[i]}")
                 """  if 'confusion_matrix_person_id' in metrics:
                     cm_person_id = metrics['confusion_matrix_person_id']
 
