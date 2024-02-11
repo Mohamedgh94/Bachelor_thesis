@@ -316,7 +316,7 @@ def test(model, test_loader, device, config):
             # Calculating metrics
             try:
                 accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
-                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
+                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='None')
                 #cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
 
                 metrics = {
@@ -740,7 +740,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
+                           usage_mod_idx= 0 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 1,epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -775,7 +775,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
     #mobiact_main()
