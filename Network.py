@@ -167,11 +167,11 @@ class CNNLSTM(nn.Module):
         self.dropout1 = nn.Dropout(0.25)
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.dropout2 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.3)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
         self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.dropout3 = nn.Dropout(0.25)
+        self.dropout3 = nn.Dropout(0.3)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
@@ -763,7 +763,7 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=15)
      
     experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_testdata')   
@@ -777,5 +777,5 @@ if __name__ == "__main__":
     #main()
     #uniMib_main()
 
-    sisFall_main()
-    #mobiact_main()
+    #sisFall_main()
+    mobiact_main()
