@@ -795,7 +795,7 @@ def cross_validate(dataset, model, config, k=5):
         valid_loader = DataLoader(valid_subsampler, batch_size=config["batch_size"], shuffle=False)
         
         # Initialize the model and optimizer for each fold
-        model = CNNLSTM(config['input_channels'], config['hidden_size'], config['num_classes'], config).to(device)
+        model = CNNLSTM(1, config['hidden_size'], config['num_classes'], config).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
         
         # Training, validation, and testing
