@@ -177,9 +177,9 @@ class CNNLSTM(nn.Module):
         self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
-        self.fc_age = nn.Linear(hidden_size, 1)
-        self.fc_height = nn.Linear(hidden_size, 1)
-        self.fc_weight = nn.Linear(hidden_size, 1)
+        self.fc_age = nn.Linear(hidden_size, 2)
+        self.fc_height = nn.Linear(hidden_size, 2)
+        self.fc_weight = nn.Linear(hidden_size, 2)
         self.fc_gender = nn.Linear(hidden_size, 2)
 
         self.softmax = nn.Softmax()
