@@ -716,8 +716,8 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
+                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -778,8 +778,8 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
     #mobiact_main()
 
