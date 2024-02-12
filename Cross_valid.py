@@ -775,8 +775,8 @@ def mobiact_main():
 
 def cross_validate(dataset, model, config, k=5):
     kfold = KFold(n_splits=k, shuffle=True, random_state=42)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f'cuda:{config["GPU"]}')
     results = []
 
     for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
@@ -824,7 +824,7 @@ if __name__ == "__main__":
     #sisFall_main()
     #mobiact_main()
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     run_cross_validation(config)
     
