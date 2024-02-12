@@ -316,7 +316,8 @@ def test(model, test_loader, device, config):
             # Calculating metrics
             try:
                 accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
-                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='None')
+                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average=None)
+                #precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
                 #cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
 
                 metrics = {
@@ -393,7 +394,6 @@ def test(model, test_loader, device, config):
     except Exception as e:
         print(f"Unexpected error during test function execution: {e}")
         return {}
-
     
 
 def save_confusion_matrix(cm, class_labels, filename):
@@ -500,7 +500,6 @@ def save_results(config, metrics):
     # Adding metrics based on output type
     if config['output_type'] == 'softmax':
         ET.SubElement(child_dataset, "person_id_metrics",
-                      
                       accuracy=str(metrics['accuracy_person_id']),
                       precision=str(metrics['precision_person_id']),
                       recall=str(metrics['recall_person_id']),
@@ -718,7 +717,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=1,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
