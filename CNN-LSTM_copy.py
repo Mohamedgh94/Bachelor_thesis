@@ -81,11 +81,11 @@ class CNNLSTM(nn.Module):
     def __init__(self, input_channels, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
         self.config = config
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.dropout1 = nn.Dropout(0.25)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(5, 1), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(5, 1), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.5)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(5, 1), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(5, 1), stride=1, padding=(1, 0))
         self.dropout2 = nn.Dropout(0.3)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
@@ -636,7 +636,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 0,epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
