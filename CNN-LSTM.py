@@ -85,7 +85,7 @@ class CNNLSTM(nn.Module):
         self.conv4 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride=1,padding=0)
         # Pooling layersstr
         self.pool1 = nn.MaxPool1d(kernel_size=2, stride=2)
-        self.pool2 = nn.MaxPool1d(kernel_size=2, stride=2)
+        #self.pool2 = nn.MaxPool1d(kernel_size=2, stride=2)
 
         # Activation and Dropout
         self.relu = nn.ReLU()
@@ -93,12 +93,12 @@ class CNNLSTM(nn.Module):
         
         # LSTM layers
         self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        #self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=2, batch_first=True)
         
         # Fully connected layers
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, hidden_size)
+        #self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
         # Output layers for attributes
@@ -123,14 +123,14 @@ class CNNLSTM(nn.Module):
 
         # LSTM layers
         x, _ = self.lstm1(x)
-        x, _ = self.lstm2(x)
+        #x, _ = self.lstm2(x)
         x = self.dropout(x)
         x = x[:, -1, :]  # Get the last time step's output
 
         # Fully connected layers
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
+        #x = self.relu(self.fc3(x))
 
         # Output processing
         if self.config['output_type'] == 'softmax':
