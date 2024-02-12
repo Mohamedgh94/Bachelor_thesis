@@ -810,7 +810,7 @@ def cross_validate(dataset, model, config, k=5):
 
 def run_cross_validation(configuration):
     
-    dataset = IMUDataset('/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv')
+    dataset = IMUDataset('/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv')
     model = CNNLSTM(1, configuration["hidden_size"], configuration["num_classes"],configuration)
     results = cross_validate(dataset, model, configuration, k=5)
     for fold, (train_loss, val_loss) in enumerate(results):
