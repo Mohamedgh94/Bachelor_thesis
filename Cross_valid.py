@@ -775,46 +775,52 @@ def mobiact_main():
 
 def cross_validate(dataset, model, config, k=5):
     kfold = KFold(n_splits=k, shuffle=True, random_state=42)
-    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device(f'cuda:{config["GPU"]}')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     results = []
+
+    # Prepare the separate test dataset
+    test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv")
+    test_loader = DataLoader(test_dataset, batch_size=config["batch_size"], shuffle=False)
 
     for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
         print(f'FOLD {fold}')
         print('--------------------------------')
 
-        # Split dataset
+        # Split dataset into training and validation subsets
         train_subsampler = Subset(dataset, train_ids)
-        test_subsampler = Subset(dataset, test_ids)
+        valid_subsampler = Subset(dataset, test_ids)
         
         train_loader = DataLoader(train_subsampler, batch_size=config["batch_size"], shuffle=True)
-        valid_loader = DataLoader(test_subsampler, batch_size=config["batch_size"], shuffle=False)
+        valid_loader = DataLoader(valid_subsampler, batch_size=config["batch_size"], shuffle=False)
         
-        # Reinitialize model and optimizer
-        model = CNNLSTM(1, config['hidden_size'], config['num_classes'], config).to(device)
+        # Initialize the model and optimizer for each fold
+        model = CNNLSTM(config['input_channels'], config['hidden_size'], config['num_classes'], config).to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
         
-        # Training and validation
+        # Training, validation, and testing
         for epoch in range(config["epochs"]):
             train_loss = train(model, train_loader, optimizer, device, config)
             val_loss = validate(model, valid_loader, device, config)
             print(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
         
-        # Optionally save model - ensure to modify the path to include fold information
-        # torch.save(model.state_dict(), f'model_fold_{fold}.pth')
-        
-        # Append fold results
-        results.append((train_loss, val_loss))
-    
-    return results    
+        # After training and validation, test the model
+        test_loss = test(model, test_loader, device, config)
+        print(f"Fold {fold}, Test Loss: {test_loss}")
 
-def run_cross_validation(configuration):
+        # Append fold results including test loss
+        results.append((train_loss, val_loss, test_loss))
+        
+    return results
+
+def run_cross_validation(configuration,logger):
     
     dataset = IMUDataset('/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv')
     model = CNNLSTM(1, configuration["hidden_size"], configuration["num_classes"],configuration)
     results = cross_validate(dataset, model, configuration, k=5)
-    for fold, (train_loss, val_loss) in enumerate(results):
-        print(f"Fold {fold}, Train Loss: {train_loss}, Val Loss: {val_loss}")
+    for fold, (train_loss, val_loss,test_loss) in enumerate(results):
+        print(f"Fold {fold}, Train Loss: {train_loss}, Val Loss: {val_loss} ,test_loss: {test_loss}")
+        logger.info(f'Fold {fold}, Train Loss: {train_loss}, Val Loss: {val_loss},test_loss: {test_loss}')
 
 if __name__ == "__main__":
 
@@ -826,5 +832,7 @@ if __name__ == "__main__":
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
                            gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
-    run_cross_validation(config)
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Cross_validation Experiment')   
+    experiment_logger.info('Finished Cross_validation experiment setup')
+    run_cross_validation(config,experiment_logger)
     
