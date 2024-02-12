@@ -46,8 +46,7 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        feature_vector = feature_vector.reshape(1, 4, 6)  # Adjust the reshape dimensions as necessary
-
+        feature_vector = feature_vector.reshape(1, 5, 9)  
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
@@ -65,45 +64,6 @@ class IMUDataset(Dataset):
         combined_categories = {key: list(values) for key, values in combined_categories.items()}
         return combined_categories
     
-    
-    
-"""
-import pandas as pd
-import torch
-from torch.utils.data import Dataset
-
-class IMUDataset(Dataset):
-    def __init__(self, csv_file):
-        # Read the CSV file
-        self.dataframe = pd.read_csv(csv_file)
-        # Assuming the last 5 columns are labels
-        self.labels = self.dataframe.iloc[:, -5:].values
-        # Assuming all other columns are features
-        self.features = self.dataframe.iloc[:, :-5].values
-        self.label_categories = {}
-        for column in self.dataframe.columns[-5:]:
-            self.label_categories[column] = self.dataframe[column].unique()
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        feature_vector = self.features[idx]
-        # Assuming each row is a feature vector for a single time step
-        # Reshape for 2D Conv: [channels, height, width] where height = time_steps, width = 1
-        # Here, 'channels' corresponds to the number of features
-        feature_vector = feature_vector.reshape(-1, 1, 1)  # Reshape to [features, 1, 1]
-        label_vector = self.labels[idx]
-        label_dict = {
-            'person_id': torch.tensor(label_vector[0], dtype=torch.long),
-            'age': torch.tensor(label_vector[1], dtype=torch.long),
-            'height': torch.tensor(label_vector[2], dtype=torch.long),
-            'weight': torch.tensor(label_vector[3], dtype=torch.long),
-            'gender': torch.tensor(label_vector[4], dtype=torch.long),
-        }
-        return torch.tensor(feature_vector, dtype=torch.float32), label_dict
-
-"""
 
 ##############
 ##############
@@ -126,19 +86,19 @@ class CNNLSTM(nn.Module):
         self.dropout1 = nn.Dropout(0.25)
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.dropout2 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.3)
         self.relu = nn.ReLU()
-        self.pool = nn.MaxPool2d(kernel_size=(1, 1), stride=(1, 1))
+        self.pool = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
         self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.dropout3 = nn.Dropout(0.25)
+        self.dropout3 = nn.Dropout(0.3)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
-        self.fc_age = nn.Linear(hidden_size, 1)
-        self.fc_height = nn.Linear(hidden_size, 1)
-        self.fc_weight = nn.Linear(hidden_size, 1)
+        self.fc_age = nn.Linear(hidden_size, 2)
+        self.fc_height = nn.Linear(hidden_size, 2)
+        self.fc_weight = nn.Linear(hidden_size, 2)
         self.fc_gender = nn.Linear(hidden_size, 2)
 
         self.softmax = nn.Softmax()
@@ -273,7 +233,8 @@ def test(model, test_loader, device, config):
             # Calculating metrics
             try:
                 accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
-                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
+                precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average=None)
+                #precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
                 #cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
 
                 metrics = {
@@ -494,31 +455,6 @@ def save_results(config, metrics):
     print("Results saved to XML:", xmlstr)
 
 
-""" def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
-    
-    # set up the logging
-    logging_format = '[%(asctime)-19s, %(name)s, %(levelname)s] %(message)s'
-    if filename != None:
-        logging.basicConfig(filename=filename,level=logging.DEBUG,
-                            format=logging_format,
-                            filemode='w')
-    else:
-        logging.basicConfig(level=logging_level,
-                            format=logging_format,
-                            filemode='w')
-        
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    # add the handler to the root logger
-    logging.getLogger('').addHandler(console)   
-
-
-    return """
-
 import logging
 import os
 
@@ -701,7 +637,7 @@ def sisFall_main():
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
-                            gpudevice_idx= 1,epochs=15)
+                            gpudevice_idx= 0,epochs=15)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -735,7 +671,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
     #mobiact_main()
