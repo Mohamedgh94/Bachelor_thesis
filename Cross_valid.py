@@ -773,55 +773,62 @@ def mobiact_main():
 
     run_network(config,experiment_logger)
 
-def cross_validate(dataset, model, config, k=5):
-    kfold = KFold(n_splits=k, shuffle=True, random_state=42)
+
+# Assuming train, validate, and test functions are already defined and imported
+# from your previous code snippets
+import itertools
+import torch.optim as optim
+def setup_experiment_logger(log_filename='hyperparam_tuning.log'):
+    logging.basicConfig(filename=log_filename, level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logger = logging.getLogger()
+    return logger
+
+def cross_validate_with_hyperparameter_tuning(train_dataset_path, valid_dataset_path, test_dataset_path, base_config, hyperparams):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    results = []
+    train_dataset = IMUDataset(train_dataset_path)
+    valid_dataset = IMUDataset(valid_dataset_path)
+    test_dataset = IMUDataset(test_dataset_path)
 
-    # Prepare the separate test dataset
-    test_dataset = IMUDataset("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv")
-    test_loader = DataLoader(test_dataset, batch_size=config["batch_size"], shuffle=False)
+    hyperparam_combinations = list(itertools.product(*(hyperparams[hp] for hp in hyperparams)))
+    best_combination = None
+    best_accuracy = 0
 
-    for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
-        print(f'FOLD {fold}')
-        print('--------------------------------')
+    for combination in hyperparam_combinations:
+        try:
+            current_config = base_config.copy()
+            for hp_name, hp_value in zip(hyperparams.keys(), combination):
+                current_config[hp_name] = hp_value
 
-        # Split dataset into training and validation subsets
-        train_subsampler = Subset(dataset, train_ids)
-        valid_subsampler = Subset(dataset, test_ids)
+            logging.info(f'Current hyperparams: {current_config}')
+
+            train_loader = DataLoader(train_dataset, batch_size=current_config["batch_size"], shuffle=True)
+            valid_loader = DataLoader(valid_dataset, batch_size=current_config["batch_size"], shuffle=False)
+            test_loader = DataLoader(test_dataset, batch_size=current_config["batch_size"], shuffle=False)
+
+            model = CNNLSTM(current_config["input_channels"], current_config['hidden_size'], current_config['num_classes'], current_config).to(device)
+            optimizer = optim.Adam(model.parameters(), lr=current_config["learning_rate"])
+
+            # Training and validation
+            for epoch in range(current_config["epochs"]):
+                train_loss, train_accuracy = train(model, train_loader, optimizer, device, current_config)
+                val_loss, val_accuracy = validate(model, valid_loader, device, current_config)
+                logging.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}, Training Accuracy: {train_accuracy}, Validation Accuracy: {val_accuracy}")
+
+            # Testing
+            test_accuracy = test(model, test_loader, device, current_config)
+            logging.info(f"Test Accuracy: {test_accuracy}")
+
+            if test_accuracy > best_accuracy:
+                best_accuracy = test_accuracy
+                best_combination = current_config
         
-        train_loader = DataLoader(train_subsampler, batch_size=config["batch_size"], shuffle=True)
-        valid_loader = DataLoader(valid_subsampler, batch_size=config["batch_size"], shuffle=False)
-        
-        # Initialize the model and optimizer for each fold
-        model = CNNLSTM(1, config['hidden_size'], config['num_classes'], config).to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
-        
-        # Training, validation, and testing
-        for epoch in range(config["epochs"]):
-            train_loss = train(model, train_loader, optimizer, device, config)
-            val_loss = validate(model, valid_loader, device, config)
-            print(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
-        
-        # After training and validation, test the model
-        test_loss = test(model, test_loader, device, config)
-        print(f"Fold {fold}, Test Loss: {test_loss}")
+        except Exception as e:
+            print(f"Error with parameters {current_config}: {str(e)}")
+            continue
 
-        # Append fold results including test loss
-        results.append((train_loss, val_loss, test_loss))
-        
-    return results
-
-def run_cross_validation(configuration,logger):
-    
-    dataset = IMUDataset('/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv')
-    model = CNNLSTM(1, configuration["hidden_size"], configuration["num_classes"],configuration)
-    results = cross_validate(dataset, model, configuration, k=5)
-    for fold, (train_loss, val_loss,test_loss) in enumerate(results):
-        print(f"Fold {fold}, Train Loss: {train_loss}, Val Loss: {val_loss} ,test_loss: {test_loss}")
-        logger.info(f'Fold {fold}, Train Loss: {train_loss}, Val Loss: {val_loss},test_loss: {test_loss}')
-
+    logging.info(f'Best hyperparameters: {best_combination} with test accuracy: {best_accuracy}')
+    return best_combination
 if __name__ == "__main__":
 
     #main()
@@ -829,10 +836,26 @@ if __name__ == "__main__":
 
     #sisFall_main()
     #mobiact_main()
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
+    base_config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
                            gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Cross_validation Experiment')   
-    experiment_logger.info('Finished Cross_validation experiment setup')
-    run_cross_validation(config,experiment_logger)
+    
+    #run_cross_validation(config,experiment_logger)
+    hyperparams = {
+        "batch_size": [32, 64, 128],
+        "learning_rate": [1e-3, 1e-4, 1e-5],
+        "num_conv_layers": [2, 3, 4],  # Number of Convolutional Layers
+        "num_filters": [32, 64, 128],  # Number of Filters per Convolutional Layer
+        "kernel_size": [(3, 3), (5, 5)],
+        "lstm_hidden_size": [64, 128, 256],  # Hidden Size of LSTM Units
+        "num_lstm_layers": [1, 2, 3],  # Number of LSTM Layers
+        "dropout": [0.0, 0.25, 0.5],
+        "activation_function": ['relu', 'tanh'],
+    }
+
+    logger = setup_experiment_logger()
+    train_dataset_path = '/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv'
+    valid_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv'
+    test_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv'
+    best_config = cross_validate_with_hyperparameter_tuning(train_dataset_path,valid_dataset_path,test_dataset_path, base_config, hyperparams)
     
