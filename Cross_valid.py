@@ -836,7 +836,7 @@ if __name__ == "__main__":
 
     #sisFall_main()
     #mobiact_main()
-    base_config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
+    base_config = configuration(dataset_idx=0, dataset_paths = 'SisFall',output_idx=1, 
                            gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=15)
     
