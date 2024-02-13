@@ -806,7 +806,7 @@ def cross_validate_with_hyperparameter_tuning(train_dataset_path, valid_dataset_
             valid_loader = DataLoader(valid_dataset, batch_size=current_config["batch_size"], shuffle=False)
             test_loader = DataLoader(test_dataset, batch_size=current_config["batch_size"], shuffle=False)
 
-            model = CNNLSTM(current_config["input_channels"], current_config['hidden_size'], current_config['num_classes'], current_config).to(device)
+            model = CNNLSTM(1, current_config['hidden_size'], current_config['num_classes'], current_config).to(device)
             optimizer = optim.Adam(model.parameters(), lr=current_config["learning_rate"])
 
             # Training and validation
