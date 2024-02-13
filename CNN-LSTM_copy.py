@@ -386,7 +386,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 256,
+        'hidden_size' : 128,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
@@ -574,10 +574,10 @@ def run_network(configuration,logger):
             print(f'Epoch {epoch+1} trainng time {trainng_time}')
             logger.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
 
-            early_stopping(val_loss)
-            if early_stopping.early_stop:
-                print("Early stopping triggered")
-                break
+            #early_stopping(val_loss)
+            #if early_stopping.early_stop:
+            #    print("Early stopping triggered")
+            #    break
 
         plot_learning_curve(train_losses, val_losses)
         model_save_path = f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
@@ -661,9 +661,9 @@ def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
-                            gpudevice_idx= 2,epochs=15)
+                            gpudevice_idx= 1,epochs=15)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identity')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
