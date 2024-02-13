@@ -349,10 +349,10 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisCat_test_data.csv"),
-        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_train_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"),
+        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
                     )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
@@ -636,7 +636,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
-                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 0,epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
