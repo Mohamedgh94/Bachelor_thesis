@@ -660,7 +660,7 @@ def sisFall_main():
     return
 def mobiact_main():
     
-    config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
+    config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=10)
      
@@ -675,5 +675,5 @@ if __name__ == "__main__":
     #main()
     #uniMib_main()
 
-    sisFall_main()
-    #mobiact_main()
+    #sisFall_main()
+    mobiact_main()
