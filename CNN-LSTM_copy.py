@@ -349,7 +349,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/SisAtt_test_data.csv"),
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
                     #"/data/malghaja/Bachelor_thesis/MobiAct/SisAtt_test_data.csv"
@@ -675,5 +675,5 @@ if __name__ == "__main__":
     #main()
     #uniMib_main()
 
-    #sisFall_main()
-    mobiact_main()
+    sisFall_main()
+    #mobiact_main()
