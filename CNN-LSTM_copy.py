@@ -637,8 +637,8 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
+                           usage_mod_idx= 2 , learning_rates_idx=2,batch_size_idx=0 ,input_size_idx= 1,
                             gpudevice_idx= 0,epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -675,5 +675,5 @@ if __name__ == "__main__":
     #main()
     #uniMib_main()
 
-    #sisFall_main()
-    mobiact_main()
+    sisFall_main()
+    #mobiact_main()
