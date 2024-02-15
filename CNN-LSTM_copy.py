@@ -352,8 +352,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
-                    #"/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
+                    #"/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
                     )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
@@ -611,9 +611,9 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 0,
-                            epochs=15)
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
+                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                            epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -625,7 +625,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
@@ -638,7 +638,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
-                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=0 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             gpudevice_idx= 0,epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -649,7 +649,7 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_identification_experiment')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_identification')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
@@ -661,10 +661,10 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                           usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
-                            gpudevice_idx= 2,epochs=10)
+                           usage_mod_idx= 2 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
+                            gpudevice_idx= 1,epochs=10)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_on_sisFall_testdata')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_ident')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
@@ -673,7 +673,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
     #sisFall_main()
-    mobiact_main()
+    #mobiact_main()
