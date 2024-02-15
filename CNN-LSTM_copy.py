@@ -352,8 +352,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
-                    #"/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
+                    #"/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
                     )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
@@ -661,10 +661,10 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=10)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_Attributes')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_on_sisFall_testdata')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
