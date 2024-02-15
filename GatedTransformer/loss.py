@@ -34,7 +34,7 @@ class LossFunction:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from IMUDataset import num_person_ids,num_ages,num_heights,num_weights,num_genders
+#from IMUDataset import num_person_ids,num_ages,num_heights,num_weights,num_genders
 class MultiTaskLossFunction:
     def __init__(self):
         self.loss_fns = {

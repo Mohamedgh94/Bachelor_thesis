@@ -46,6 +46,8 @@ class GatedTransformer(nn.Module):
         return outputs
  """
 
+""" 
+ """
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -70,7 +72,7 @@ class GatedTransformer(nn.Module):
         self.gender_classifier = nn.Linear(d_model, 2)
 
         # # Gating mechanism (if applicable)
-        # self.gate = nn.Linear(num_genders + num_person_ids, d_model)
+        #self.gate = nn.Linear(d_model)
 
     def forward(self, x):
         x = self.embedding(x)
@@ -85,7 +87,7 @@ class GatedTransformer(nn.Module):
         x = x.squeeze(0)  # Remove the sequence length dimension
 
         # Apply gating mechanism (if applicable)
-        # x = self.gate(x)
+        #x = self.gate(x)
 
         # Output raw logits for classification tasks
         age_logits = self.age_classifier(x)
