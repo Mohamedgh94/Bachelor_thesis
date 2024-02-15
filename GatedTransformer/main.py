@@ -96,7 +96,7 @@ class Main:
 if __name__ == "__main__":
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
                            gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
-                            epochs=15)
+                            epochs=10)
     
     model = GatedTransformer(input_dim=24, d_model=512, num_heads=16, d_ff=1024, num_layers=6)
     loss_fn = MultiTaskLossFunction()
