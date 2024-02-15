@@ -662,7 +662,7 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                           usage_mod_idx= 2 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 1,epochs=10)
      
     experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_ident')   
@@ -674,7 +674,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
     #sisFall_main()
-    #mobiact_main()
+    mobiact_main()
