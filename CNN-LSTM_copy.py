@@ -46,7 +46,8 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        feature_vector = feature_vector.reshape(1, 5, 9)  
+        #feature_vector = feature_vector.reshape(1, 5, 9) 
+        feature_vector = feature_vector.reshape(1, 6, 4)  
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
