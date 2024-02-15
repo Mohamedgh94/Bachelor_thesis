@@ -767,7 +767,7 @@ def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
-                            gpudevice_idx= 2,epochs=15)
+                            gpudevice_idx= 2,epochs=10)
      
     experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_testdata')   
     experiment_logger.info('Finished Mobiact experiment setup')
