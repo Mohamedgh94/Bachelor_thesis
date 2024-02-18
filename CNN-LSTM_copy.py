@@ -638,8 +638,8 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
-                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -650,7 +650,7 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_identification_Ex')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_sunday')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
@@ -661,11 +661,11 @@ def sisFall_main():
     return
 def mobiact_main():
     
-    config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                           usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
+    config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 1,epochs=10)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_ident')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_sunday')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
