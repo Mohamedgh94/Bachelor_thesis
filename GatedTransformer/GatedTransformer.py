@@ -57,15 +57,17 @@ from gatingMechanism import GatingMechanism
 from multiHeadAttention import MultiHeadAttention
 
 class GatedTransformer(nn.Module):
-    def __init__(self, input_dim, d_model, num_heads, d_ff, num_layers, dropout_rate=0.1):
+    def __init__(self,input_dim, d_model, num_heads, d_ff, num_layers,config,num_classes,dropout_rate=0.1):
         super(GatedTransformer, self).__init__()
+        self.config = config
         self.embedding = nn.Linear(input_dim, d_model)
         self.dropout = nn.Dropout(dropout_rate)
         self.layer_norm = nn.LayerNorm(d_model)
-
+        self.positional_encoding = PositionalEncoding(d_model)
         self.encoders = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff, dropout_rate) for _ in range(num_layers)])
 
-        # Task-specific output layers
+        
+        self.person_ids_classifier = nn.Linear(d_model,num_classes)
         self.age_classifier = nn.Linear(d_model, 2)
         self.height_classifier = nn.Linear(d_model, 2)
         self.weight_classifier = nn.Linear(d_model, 2)
@@ -75,7 +77,11 @@ class GatedTransformer(nn.Module):
         #self.gate = nn.Linear(d_model)
 
     def forward(self, x):
+        print (f'initializing data shape : {x.shape}')
         x = self.embedding(x)
+        print (f'data shape after embedding : {x.shape}')
+        #x = self.positional_encoding(x)
+        print (f'data shape after pos_encod : {x.shape}')
         x = self.dropout(x)  # Apply dropout after embedding
         x = self.layer_norm(x)  # Apply layer normalization
 
@@ -86,19 +92,27 @@ class GatedTransformer(nn.Module):
 
         x = x.squeeze(0)  # Remove the sequence length dimension
 
-        # Apply gating mechanism (if applicable)
-        #x = self.gate(x)
+        if self.config['output_type'] == 'softmax':
+            person_id_output = F.softmax(self.person_ids_classifier(x),dim=1) 
+            return person_id_output
+        elif self.config['output_type'] == 'attribute':
+            age = torch.sigmoid(self.age_classifier(x))
+            height = torch.sigmoid(self.height_classifier(x))
+            weight = torch.sigmoid(self.weight_classifier(x))
+            gender = torch.sigmoid(self.gender_classifier(x))
+            return age,height,weight,gender
+        
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-torch.log(torch.tensor(10000.0)) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
 
-        # Output raw logits for classification tasks
-        age_logits = self.age_classifier(x)
-        height_logits = self.height_classifier(x)
-        weight_logits = self.weight_classifier(x)
-        gender_logits = self.gender_classifier(x)
-
-        outputs = {
-            'age': torch.sigmoid(age_logits),
-            'height': torch.sigmoid(height_logits),
-            'weight': torch.sigmoid(weight_logits),
-            'gender': torch.sigmoid(gender_logits)
-        }
-        return outputs
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return x

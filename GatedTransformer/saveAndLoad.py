@@ -166,11 +166,12 @@ import pandas as pd
 import numpy as np
 import time
 from loss import MultiTaskLossFunction 
-
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_recall_fscore_support
 class SaveAndLoadModel:
-    def __init__(self, model, optimizer_class, epochs, model_path="model.pth", device=None):
+    def __init__(self, model, optimizer_class,config ,epochs, model_path="model.pth", device=None):
         self.model = model
-        self.loss_fn = MultiTaskLossFunction()
+        self.config = config
+        self.loss_fn = MultiTaskLossFunction(self.config)
         self.optimizer = optimizer_class(self.model.parameters())
         self.epochs = epochs
         self.model_path = model_path
@@ -214,8 +215,8 @@ class SaveAndLoadModel:
         training_end_time = time.time()
         print(f'Training completed in {training_end_time - trainings_start_time}s')
      """
-    
-    def train(self, train_loader, epochs=10):
+    """
+     def train(self, train_loader, epochs=10):
         multi_task_loss_fn = MultiTaskLossFunction()  # Initialize correctly for classification tasks
         scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=0.1)  # Example scheduler
         trainings_start_time = time.time()
@@ -274,9 +275,85 @@ class SaveAndLoadModel:
 
         avg_loss = total_loss / len(valid_loader)
         print(f"Validation Avg Loss: {avg_loss}")
-        return avg_loss
+        return avg_loss """
+    
 
-    def test(self, test_loader):
+    def train(self, train_loader, epochs=10):
+        multi_task_loss_fn = MultiTaskLossFunction(self.config)  # Initialize with config
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=0.1)
+        trainings_start_time = time.time()
+
+        self.model.train()
+        total_loss = 0
+        correct_predictions = 0
+        total_predictions = 0
+
+        for batch in train_loader:
+                inputs, labels = batch
+                inputs = inputs.to(self.device)
+                #labels = {task: labels.to(self.device) for task, labels in labels.items()}
+                self.optimizer.zero_grad()
+
+                #outputs = self.model(inputs)
+
+                if self.config['output_type'] == 'softmax':
+                    labels = labels.to(self.device)
+                    outputs = self.model(inputs)
+                    loss = multi_task_loss_fn(outputs, labels)
+                    _, predicted = torch.max(outputs.data, 1)
+                    correct_predictions += (predicted == labels).sum().item()
+                    total_predictions += labels.size(0)
+                elif self.config['output_type'] == 'attribute':
+                    labels = {task: labels.to(self.device) for task, labels in labels.items()}
+                    outputs = self.model(inputs)
+                    loss = multi_task_loss_fn(outputs, labels)  # Adjust for dictionary handling if needed
+                # For attribute accuracy calculation, adjust as per your criteria
+
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                self.optimizer.step()
+
+                total_loss += loss.item()
+
+        scheduler.step()
+        train_loss = total_loss / len(train_loader)
+        
+
+        training_end_time = time.time()
+        print(f'Training completed in {training_end_time - trainings_start_time}s')
+        return train_loss
+    def validate(self, valid_loader):
+        multi_task_loss_fn = MultiTaskLossFunction(self.config)
+        self.model.eval()
+        total_loss = 0
+        correct_predictions = 0
+        total_predictions = 0
+
+        with torch.no_grad():
+            for inputs, labels in valid_loader:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                outputs = self.model(inputs)
+
+                loss = multi_task_loss_fn(outputs, labels)  # Compute loss appropriately
+                total_loss += loss.item()
+
+                if self.config['output_type'] == 'softmax':
+                    _, predicted = torch.max(outputs.data, 1)
+                    correct_predictions += (predicted == labels).sum().item()
+                    total_predictions += labels.size(0)
+            # For attribute accuracy calculation in validation, adjust as per your criteria
+
+        val_loss = total_loss / len(valid_loader)
+        print(f"Validation Avg Loss: {val_loss}")
+        if self.config['output_type'] == 'softmax':
+            accuracy = correct_predictions / total_predictions
+            print(f"Validation Accuracy: {accuracy:.4f}")
+
+        return val_loss
+    
+    
+    """ def test(self, test_loader):
         self.model.eval()
         all_outputs = {}
         all_labels = {}
@@ -307,10 +384,8 @@ class SaveAndLoadModel:
             plt.xlabel('Predicted')
             plt.ylabel('True')
             plt.show()    
-            
-        
         print(metrics)
-        return metrics , all_labels, all_outputs
+        return metrics , all_labels, all_outputs """
     def train_and_validate(self, train_loader, valid_loader):
         self.train(train_loader, self.epochs)
         self.validate(valid_loader)
@@ -325,3 +400,100 @@ class SaveAndLoadModel:
     def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
+
+
+
+
+    
+    
+    def test(model, test_loader, device, config):
+        try:
+            output_type = config['output_type']
+            print(f"Testing model with output type: {output_type}")
+            model.eval()
+            metrics = {}
+
+            if output_type == 'softmax':
+                
+                person_id_preds, person_id_targets = [], []
+                with torch.no_grad():
+                    for features, labels in test_loader:
+                        features, labels = features.to(device), labels['person_id'].to(device)
+                        predictions = model(features)
+                        person_id_preds.extend(predictions.argmax(dim=1).tolist())
+                        person_id_targets.extend(labels.tolist())
+                try:
+                    accuracy_person_id = accuracy_score(person_id_targets, person_id_preds)
+                    precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average=None)
+                    #precision_person_id, recall_person_id, f1_person_id, _ = precision_recall_fscore_support(person_id_targets, person_id_preds, average='weighted')
+                    #cm_person_id = confusion_matrix(person_id_targets, person_id_preds)
+
+                    metrics = {
+                    'accuracy_person_id': accuracy_person_id,
+                    'precision_person_id': precision_person_id,
+                    'recall_person_id': recall_person_id,
+                    'f1_person_id': f1_person_id,
+                    #'confusion_matrix_person_id': cm_person_id
+                    }
+                    num_classes = len(set(person_id_targets)) # Assuming your classes are labeled from 0 to num_classes-1
+                    for i in range(num_classes):
+                        print(f"Class {i}: Precision = {precision_person_id[i]}, Recall = {recall_person_id[i]}, F1 = {recall_person_id[i]}")        
+                except Exception as e:
+                    print(f"Error calculating metrics for softmax output: {e}") 
+                
+            elif output_type == 'attribute':
+                
+                # Initialize prediction and target lists for each attribute
+                age_preds, age_targets = [], []
+                height_preds, height_targets = [], []
+                weight_preds, weight_targets = [], []
+                gender_preds, gender_targets = [], []
+
+                with torch.no_grad():
+                    for features, labels in test_loader:
+                        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+                        try:
+                            age_pred, height_pred, weight_pred, gender_pred = model(features)
+                            age_targets.extend(labels['age'].tolist())
+                            height_targets.extend(labels['height'].tolist())
+                            weight_targets.extend(labels['weight'].tolist())
+                            gender_targets.extend(labels['gender'].tolist())
+
+                            age_preds.extend(age_pred.argmax(dim=1).tolist())
+                            height_preds.extend(height_pred.argmax(dim=1).tolist())
+                            weight_preds.extend(weight_pred.argmax(dim=1).tolist())
+                            gender_preds.extend(gender_pred.argmax(dim=1).tolist())
+                        except Exception as e:
+                            print(f"Error processing batch in attributes output: {e}")
+
+        # Calculating metrics for each attribute
+                try:
+                    accuracy_age = accuracy_score(age_targets, age_preds)
+                    accuracy_height = accuracy_score(height_targets, height_preds)
+                    accuracy_weight = accuracy_score(weight_targets, weight_preds)
+                    accuracy_gender = accuracy_score(gender_targets, gender_preds)
+
+                    precision_age, recall_age, f1_age, _ = precision_recall_fscore_support(age_targets, age_preds, average='binary')
+                    precision_height, recall_height, f1_height, _ = precision_recall_fscore_support(height_targets, height_preds, average='binary')
+                    precision_weight, recall_weight, f1_weight, _ = precision_recall_fscore_support(weight_targets, weight_preds, average='binary')
+                    precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='weighted')
+                    metrics = {
+                        'accuracy_age': accuracy_age, 'precision_age': precision_age, 'recall_age': recall_age, 'f1_age': f1_age,
+                        'accuracy_height': accuracy_height, 'precision_height': precision_height, 'recall_height': recall_height, 'f1_height': f1_height,
+                        'accuracy_weight': accuracy_weight, 'precision_weight': precision_weight, 'recall_weight': recall_weight, 'f1_weight': f1_weight,
+                        'accuracy_gender': accuracy_gender, 'precision_gender': precision_gender, 'recall_gender': recall_gender, 'f1_gender': f1_gender
+                    }
+                    
+                    print("Successfully calculated attributes output metrics.")
+                except Exception as e:
+                    print(f"Error calculating metrics for attributes output: {e}")
+            else:
+                print(f"Unsupported output type: {output_type}")
+
+            return metrics
+
+        except Exception as e:
+            print(f"Unexpected error during test function execution: {e}")
+            return {}
+
+        

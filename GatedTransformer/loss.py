@@ -34,6 +34,38 @@ class LossFunction:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+class MultiTaskLossFunction(nn.Module):
+    def __init__(self, config):
+        super(MultiTaskLossFunction, self).__init__()
+        self.config = config
+        self.id_loss_fn = nn.CrossEntropyLoss()
+        self.attribute_loss_fn = nn.BCEWithLogitsLoss()
+
+        
+    def forward(self, logits, targets):
+        if self.config['output_type'] == 'softmax':
+            person_id_pred = logits[0]
+            person_id_target = targets['person_id']
+            loss = F.cross_entropy(person_id_pred, person_id_target)
+        elif self.config['output_type'] == 'attribute':
+           
+        # Assuming the predictions are ordered as age, height, weight, gender
+            age_pred, height_pred, weight_pred, gender_pred = logits[0:]
+            age_target, height_target, weight_target, gender_target = targets['age'], targets['height'], targets['weight'], targets['gender']
+
+            loss_age = F.cross_entropy(age_pred, age_target)
+            loss_height = F.cross_entropy(height_pred, height_target)
+            loss_weight = F.cross_entropy(weight_pred, weight_target)
+            loss_gender = F.cross_entropy(gender_pred, gender_target)
+
+            # Combine losses for attributes
+            loss = loss_age + loss_height + loss_weight + loss_gender
+        return loss
+
+""" import torch
+import torch.nn as nn
+import torch.nn.functional as F
 #from IMUDataset import num_person_ids,num_ages,num_heights,num_weights,num_genders
 class MultiTaskLossFunction:
     def __init__(self):
@@ -50,4 +82,4 @@ class MultiTaskLossFunction:
             labels = labels_dict[task].long()  # Ensure labels are long type for CrossEntropyLoss
             loss = self.loss_fns[task](output, labels)
             total_loss += loss
-        return total_loss
+        return total_loss """
