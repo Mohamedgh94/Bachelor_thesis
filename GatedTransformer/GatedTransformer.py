@@ -77,11 +77,11 @@ class GatedTransformer(nn.Module):
         #self.gate = nn.Linear(d_model)
 
     def forward(self, x):
-        print (f'initializing data shape : {x.shape}')
+        #print (f'initializing data shape : {x.shape}')
         x = self.embedding(x)
-        print (f'data shape after embedding : {x.shape}')
+        #print (f'data shape after embedding : {x.shape}')
         #x = self.positional_encoding(x)
-        print (f'data shape after pos_encod : {x.shape}')
+        #print (f'data shape after pos_encod : {x.shape}')
         x = self.dropout(x)  # Apply dropout after embedding
         x = self.layer_norm(x)  # Apply layer normalization
 
