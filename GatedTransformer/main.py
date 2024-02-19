@@ -20,9 +20,12 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
-        'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
+        # 'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv",
+        #            "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
+        #            "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
+        'Unimib' : ("/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
+                    "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
+                    "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisCat_valid_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisCat_test_data.csv"),
@@ -284,7 +287,7 @@ def sisFall_main():
 
 def mobiact_main():
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
+                        gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_MobiAct_identification')    
     experiment_logger.info('Finished MobiAct experiment setup')
@@ -297,9 +300,9 @@ def mobiact_main():
    
 if __name__ == "__main__":
     
-    uniMib_main()
+    #uniMib_main()
     #sisFall_main()
-    #mobiact_main()
+    mobiact_main()
 
 
 
