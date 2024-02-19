@@ -26,12 +26,14 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         # 'Unimib' : ("/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
         #             "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
         #             "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv"),
-        'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisCat_test_data.csv"),
-        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_train_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_test_data.csv"
+        'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv",
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
+        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
+                    #"/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
+                    
                     )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
