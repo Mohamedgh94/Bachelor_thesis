@@ -330,27 +330,36 @@ class SaveAndLoadModel:
         total_predictions = 0
 
         with torch.no_grad():
-            for inputs, labels in valid_loader:
+            for batch in valid_loader:
+                inputs, labels = batch
                 inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-                outputs = self.model(inputs)
-
-                loss = multi_task_loss_fn(outputs, labels)  # Compute loss appropriately
-                total_loss += loss.item()
-
+                
                 if self.config['output_type'] == 'softmax':
+                    labels = labels.to(self.device)
+                    outputs = self.model(inputs)
+                    loss = multi_task_loss_fn(outputs, labels)
                     _, predicted = torch.max(outputs.data, 1)
                     correct_predictions += (predicted == labels).sum().item()
                     total_predictions += labels.size(0)
-            # For attribute accuracy calculation in validation, adjust as per your criteria
+                elif self.config['output_type'] == 'attribute':
+                    labels = {task: labels[task].to(self.device) for task in labels}  
+                    outputs = self.model(inputs)
+                    loss = multi_task_loss_fn(outputs, labels) 
 
-        val_loss = total_loss / len(valid_loader)
+                total_loss += loss.item()
+
+                
+
+        val_loss = total_loss / len(valid_loader.dataset)  
         print(f"Validation Avg Loss: {val_loss}")
+
         if self.config['output_type'] == 'softmax':
             accuracy = correct_predictions / total_predictions
             print(f"Validation Accuracy: {accuracy:.4f}")
 
+
         return val_loss
+
     
     
     """ def test(self, test_loader):
