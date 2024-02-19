@@ -256,10 +256,10 @@ class Main:
             execute_testing()
             
 def uniMib_main():
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
+                        gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
                             epochs=5)
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_Unimib_identification')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_Unimib_IDs')    
     experiment_logger.info('Finished UniMib experiment setup')
     #model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=16, d_ff=1024, num_layers=6,config = config,num_classes=config['num_classes'] ,dropout_rate=0.1)
     model = GatedTransformer(input_dim=config["input_size"],d_model=256, num_heads=8, d_ff=512, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.2)
@@ -297,8 +297,8 @@ def mobiact_main():
    
 if __name__ == "__main__":
     
-    #uniMib_main()
-    sisFall_main()
+    uniMib_main()
+    #sisFall_main()
     #mobiact_main()
 
 
