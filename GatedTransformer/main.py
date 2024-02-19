@@ -241,7 +241,7 @@ class Main:
 
         def execute_testing():
             model_load_path = f"GTN_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
-            if configuration["usage_mode"] == 'test':
+            if configuration["usage_mod"] == 'test':
                 model.load_state_dict(torch.load(model_load_path))
                 model.eval()
 
