@@ -415,11 +415,11 @@ class SaveAndLoadModel:
 
     
     
-    def test(model, test_loader, device, config):
+    def test(self, test_loader):
         try:
-            output_type = config['output_type']
+            output_type = self.config['output_type']
             print(f"Testing model with output type: {output_type}")
-            model.eval()
+            self.model.eval()
             metrics = {}
 
             if output_type == 'softmax':
@@ -427,8 +427,8 @@ class SaveAndLoadModel:
                 person_id_preds, person_id_targets = [], []
                 with torch.no_grad():
                     for features, labels in test_loader:
-                        features, labels = features.to(device), labels['person_id'].to(device)
-                        predictions = model(features)
+                        features, labels = features.to(self.device), labels['person_id'].to(self.device)
+                        predictions = self.model(features)
                         person_id_preds.extend(predictions.argmax(dim=1).tolist())
                         person_id_targets.extend(labels.tolist())
                 try:
@@ -460,9 +460,9 @@ class SaveAndLoadModel:
 
                 with torch.no_grad():
                     for features, labels in test_loader:
-                        features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+                        features, labels = features.to(self.device), {k: v.to(self.device) for k, v in labels.items()}
                         try:
-                            age_pred, height_pred, weight_pred, gender_pred = model(features)
+                            age_pred, height_pred, weight_pred, gender_pred = self.model(features)
                             age_targets.extend(labels['age'].tolist())
                             height_targets.extend(labels['height'].tolist())
                             weight_targets.extend(labels['weight'].tolist())
