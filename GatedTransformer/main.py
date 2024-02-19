@@ -300,9 +300,9 @@ def mobiact_main():
    
 if __name__ == "__main__":
     
-    #uniMib_main()
+    uniMib_main()
     #sisFall_main()
-    mobiact_main()
+    #mobiact_main()
 
 
 
