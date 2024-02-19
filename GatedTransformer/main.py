@@ -260,7 +260,7 @@ class Main:
             
 def uniMib_main():
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                        gpudevice_idx=2,usage_mod_idx= 2 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                        gpudevice_idx=0,usage_mod_idx= 2 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_Unimib_IDs')    
     experiment_logger.info('Finished UniMib experiment setup')
