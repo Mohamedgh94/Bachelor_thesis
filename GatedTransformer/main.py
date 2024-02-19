@@ -208,9 +208,9 @@ class Main:
                                 num_heads=16,
                                 d_ff=1024,
                                 num_layers=6,
-                                config=configuration,  # Assuming your class needs this for other purposes
+                                config=configuration,  
                                 num_classes=configuration['num_classes'],
-                                dropout_rate=0.1)  # Assuming a dropout rate of 0.1, adjust if needed
+                                dropout_rate=0.1)  
 
         loss_fn = MultiTaskLossFunction(configuration)
 
@@ -271,7 +271,7 @@ def uniMib_main():
 
 def sisFall_main():
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
-                        gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                        gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_SisFall_identification')    
     experiment_logger.info('Finished SisFall experiment setup')
@@ -284,7 +284,7 @@ def sisFall_main():
 
 def mobiact_main():
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_MobiAct_identification')    
     experiment_logger.info('Finished MobiAct experiment setup')
