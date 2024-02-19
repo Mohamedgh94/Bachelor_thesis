@@ -71,8 +71,8 @@ class GatedTransformer(nn.Module):
         self.age_classifier = nn.Linear(d_model, 2)
         self.height_classifier = nn.Linear(d_model, 2)
         self.weight_classifier = nn.Linear(d_model, 2)
-        self.gender_classifier = nn.Linear(d_model, 2)
-        #self.gender_classifier = nn.Linear(d_model, 3)
+        #self.gender_classifier = nn.Linear(d_model, 2)
+        self.gender_classifier = nn.Linear(d_model, 3)
         # # Gating mechanism (if applicable)
         #self.gate = nn.Linear(d_model)
 
