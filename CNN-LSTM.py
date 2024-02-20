@@ -1,5 +1,4 @@
 import os
-from networkx import configuration_model
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,22 +12,18 @@ import time
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import seaborn as sns
-
 import datetime
 
-#logging.basicConfig(filename=' cnn_lstm.log', level=logging.INFO,
-#                    format='%(asctime)s - %(levelname)s - %(message)s')
-#logging.basicConfig(filename=f"{configuration['daset_name']}cnn_lstm.log', level=logging.INFO,
-#                    format='%(asctime)s - %(levelname)s - %(message)s")
+
 
 
 
 
 class IMUDataset(Dataset):
-    def __init__(self, csv_file):
-
+    def __init__(self, csv_file, transform=None):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
+        self.transform = transform
         # Assuming the last 5 columns are labels
         self.labels = self.dataframe.iloc[:, -6:-1].values
         # Assuming all other columns are features
@@ -50,7 +45,12 @@ class IMUDataset(Dataset):
             'weight': torch.tensor(label_vector[3], dtype=torch.long),
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
-        feature_vector = feature_vector.reshape(1, -1)
+        # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
+        feature_vector = feature_vector.reshape(1, 5, 9) 
+        #feature_vector = feature_vector.reshape(1, 6, 4)  
+        if self.transform:
+            feature_vector = self.transform(feature_vector)
+
         return torch.tensor(feature_vector, dtype=torch.float32), label_dict
         #feature_vector = feature_vector.reshape(1, -1)
         #print("Feature vector shape:", feature_vector.shape)
@@ -65,89 +65,148 @@ class IMUDataset(Dataset):
         combined_categories = {key: list(values) for key, values in combined_categories.items()}
         return combined_categories
     
-    
-    
-
 
 ##############
-##############
+import torch.nn as nn
+import torch.nn.functional as F
+import logging
+
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes, config):
+    def __init__(self, input_channels, hidden_size, num_classes, config):
         super(CNNLSTM, self).__init__()
         self.config = config
-        
-        # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=1, out_channels=64, kernel_size=3, stride=1, padding=0)
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=0)
-        self.conv3 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride = 1,padding=0)
-        self.conv3 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride = 1,padding=0)
-        self.conv4 = nn.Conv1d(in_channels = 64, out_channels=64,kernel_size=3,stride=1,padding=0)
-        # Pooling layersstr
-        self.pool1 = nn.MaxPool1d(kernel_size=2, stride=2)
-        #self.pool2 = nn.MaxPool1d(kernel_size=2, stride=2)
-
-        # Activation and Dropout
+        # Convolutional and LSTM layers remain unchanged
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.5)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.dropout2 = nn.Dropout(0.3)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.2)
-        
-        # LSTM layers
-        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        #self.lstm2 = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        
-        # Fully connected layers
+        self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.dropout3 = nn.Dropout(0.3)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        #self.fc3 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
+
+        # Output layers adjustment
+        self.fc_person_id = nn.Linear(hidden_size, num_classes)
+        self.fc_attributes = nn.Linear(hidden_size, 8) 
+        self.fc_attributes_Mobiact = nn.Linear(hidden_size, 9)  
+        self.softmax = nn.Softmax(dim=1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        # Convolutional and LSTM layers processing remain unchanged
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.dropout1(x)
+        x = self.relu(self.conv3(x))
+        x = self.relu(self.conv4(x))
+        x = self.dropout2(x)
+        x = self.pool(x)
+        
+        x = x.permute(0, 2, 1, 3)
+        x = x.reshape(x.size(0), x.size(1)*x.size(3), -1)
+        
+        x, _ = self.lstm(x)
+        x = self.dropout3(x)
+        x = x[:, -1, :]
+        
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
+        
+        if self.config['output_type'] == 'softmax':
+            person_id_output = self.softmax(self.fc_person_id(x))
+            return person_id_output
+        elif self.config['output_type'] == 'attribute':
+            if self.config['dataset'] == 'MobiAct':
+                attributes = self.sigmoid(self.fc_attributes_Mobiact(x))
+            else:
+                attributes = self.sigmoid(self.fc_attributes(x))
+            return attributes
+
+
+
+##############
+
+import torch.nn as nn
+import torch.nn.functional as F
+import logging
+
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+""" class CNNLSTM(nn.Module):
+    def __init__(self, input_channels, hidden_size, num_classes, config):
+        super(CNNLSTM, self).__init__()
+        self.config = config
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.5)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.dropout2 = nn.Dropout(0.3)
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
+        self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
+        self.dropout3 = nn.Dropout(0.3)
+        self.fc1 = nn.Linear(hidden_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         
-        # Output layers for attributes
         self.fc_age = nn.Linear(hidden_size, 2)
         self.fc_height = nn.Linear(hidden_size, 2)
         self.fc_weight = nn.Linear(hidden_size, 2)
-        self.fc_gender = nn.Linear(hidden_size, 2)
+        self.fc_gender = nn.Linear(hidden_size, 3)
 
-        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
+        self.softmax = nn.Softmax()
+        
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        # Convolutional and pooling layers
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
+        x = self.dropout1(x)
         x = self.relu(self.conv3(x))
         x = self.relu(self.conv4(x))
-        x = self.pool1(x)
-        x = self.dropout(x)
-
-        # Prepare for LSTM: [batch, seq_len, features]
-        x = x.permute(0, 2, 1)
-
-        # LSTM layers
-        x, _ = self.lstm1(x)
-        #x, _ = self.lstm2(x)
-        x = self.dropout(x)
-        x = x[:, -1, :]  # Get the last time step's output
-
-        # Fully connected layers
+        x = self.dropout2(x)
+        x = self.pool(x)
+        
+        x = x.permute(0, 2, 1, 3)  # Prepare for LSTM: [batch, seq_len, channels, width]
+        x = x.reshape(x.size(0), x.size(1)*x.size(3), -1)  # Flatten for LSTM: [batch, seq_len, features]
+        
+        x, _ = self.lstm(x)
+        x = self.dropout3(x)
+        x = x[:, -1, :]  # Last time step
+        
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
-        #x = self.relu(self.fc3(x))
-
-        # Output processing
+        x = self.relu(self.fc3(x))
+        
         if self.config['output_type'] == 'softmax':
-            person_id_output = torch.softmax(self.fc_person_id(x), dim=1)
+            person_id_output = F.softmax(self.fc_person_id(x),dim=1)
             return person_id_output
         elif self.config['output_type'] == 'attribute':
             age = torch.sigmoid(self.fc_age(x))
             height = torch.sigmoid(self.fc_height(x))
             weight = torch.sigmoid(self.fc_weight(x))
             gender = torch.sigmoid(self.fc_gender(x))
-            return age, height, weight, gender
-
+            return age, height, weight, gender """
         
+        
+
 ########################################################################
-
-    
-
 def combined_loss(predictions, targets, config):
     output_type = config['output_type']
     if output_type == 'softmax':
@@ -217,6 +276,14 @@ def validate(model, valid_loader, device,config):
     return val_loss
 
 #################################################
+def split_attributes(attributes_output):
+    age_output = attributes_output[:, 0:2]
+    height_output = attributes_output[:, 2:4]
+    weight_output = attributes_output[:, 4:6]
+    gender_output = attributes_output[:, 6:9]
+    return age_output, height_output, weight_output, gender_output
+
+
 
 
 from sklearn.metrics import  accuracy_score, precision_recall_fscore_support
@@ -276,18 +343,24 @@ def test(model, test_loader, device, config):
 
             with torch.no_grad():
                 for features, labels in test_loader:
-                    features, labels = features.to(device), {k: v.to(device) for k, v in labels.items()}
+                    features = features.to(device)
+                    labels = {k: v.to(device) for k, v in labels.items()}
+                    attributes_output = model(features)
                     try:
-                        age_pred, height_pred, weight_pred, gender_pred = model(features)
+                        # Use the split_attributes function to separate the combined attributes output
+                        age_output, height_output, weight_output, gender_output = split_attributes(attributes_output)
+
+                        # Convert model outputs to predictions (for binary attributes, consider using a threshold, e.g., 0.5)
+                        age_preds.extend(torch.sigmoid(age_output).round().tolist())
+                        height_preds.extend(torch.sigmoid(height_output).round().tolist())
+                        weight_preds.extend(torch.sigmoid(weight_output).round().tolist())
+                        gender_preds.extend(torch.sigmoid(gender_output).round().tolist())
+
+                        # Append true labels for each attribute
                         age_targets.extend(labels['age'].tolist())
                         height_targets.extend(labels['height'].tolist())
                         weight_targets.extend(labels['weight'].tolist())
                         gender_targets.extend(labels['gender'].tolist())
-
-                        age_preds.extend(age_pred.argmax(dim=1).tolist())
-                        height_preds.extend(height_pred.argmax(dim=1).tolist())
-                        weight_preds.extend(weight_pred.argmax(dim=1).tolist())
-                        gender_preds.extend(gender_pred.argmax(dim=1).tolist())
                     except Exception as e:
                         print(f"Error processing batch in attributes output: {e}")
 
@@ -301,7 +374,7 @@ def test(model, test_loader, device, config):
                 precision_age, recall_age, f1_age, _ = precision_recall_fscore_support(age_targets, age_preds, average='binary')
                 precision_height, recall_height, f1_height, _ = precision_recall_fscore_support(height_targets, height_preds, average='binary')
                 precision_weight, recall_weight, f1_weight, _ = precision_recall_fscore_support(weight_targets, weight_preds, average='binary')
-                precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='binary')
+                precision_gender, recall_gender, f1_gender, _ = precision_recall_fscore_support(gender_targets, gender_preds, average='weighted')
                 metrics = {
                     'accuracy_age': accuracy_age, 'precision_age': precision_age, 'recall_age': recall_age, 'f1_age': f1_age,
                     'accuracy_height': accuracy_height, 'precision_height': precision_height, 'recall_height': recall_height, 'f1_height': f1_height,
@@ -357,12 +430,13 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv",
                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
-        'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisCat_test_data.csv"),
-        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_train_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiCat_test_data.csv"
+        'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv",
+                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
+        'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
+                    "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
+                    #"/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
                     )
     }
     folder_exp = 'data/malghaja/Bachelor_thesis/folder_exp'
@@ -396,7 +470,7 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 256,
+        'hidden_size' : 128,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
@@ -465,30 +539,6 @@ def save_results(config, metrics):
     print("Results saved to XML:", xmlstr)
 
 
-""" def setup_experiment_logger(logging_level=logging.DEBUG, filename=None):
-    
-    # set up the logging
-    logging_format = '[%(asctime)-19s, %(name)s, %(levelname)s] %(message)s'
-    if filename != None:
-        logging.basicConfig(filename=filename,level=logging.DEBUG,
-                            format=logging_format,
-                            filemode='w')
-    else:
-        logging.basicConfig(level=logging_level,
-                            format=logging_format,
-                            filemode='w')
-        
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    # set a format which is simpler for console use
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-    # tell the handler to use this format
-    console.setFormatter(formatter)
-    # add the handler to the root logger
-    logging.getLogger('').addHandler(console)   
-
-
-    return """
 
 import logging
 import os
@@ -608,10 +658,10 @@ def run_network(configuration,logger):
             print(f'Epoch {epoch+1} trainng time {trainng_time}')
             logger.info(f"Epoch {epoch+1}, Training Loss: {train_loss}, Validation Loss: {val_loss}")
 
-            early_stopping(val_loss)
-            if early_stopping.early_stop:
-                print("Early stopping triggered")
-                break
+            #early_stopping(val_loss)
+            #if early_stopping.early_stop:
+            #    print("Early stopping triggered")
+            #    break
 
         plot_learning_curve(train_losses, val_losses)
         model_save_path = f"CNN-LSTM_{configuration['dataset']}_lr{configuration['learning_rate']}_bs{configuration['batch_size']}_model.pth"
@@ -644,9 +694,9 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
-                            epochs=15)
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
+                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                            epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -658,7 +708,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification_experiment')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
@@ -670,9 +720,9 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 1,
-                            gpudevice_idx= 1,epochs=15)
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
+                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                            gpudevice_idx= 2,epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -682,7 +732,7 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_identification_experiment')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_sunday')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
@@ -694,10 +744,10 @@ def sisFall_main():
 def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
-                            gpudevice_idx= 2,epochs=15)
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
+                            gpudevice_idx= 1,epochs=10)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_identification_testdata')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_sunday')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
@@ -706,7 +756,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
-    #mobiact_main()
+    sisFall_main()
+   #mobiact_main()
