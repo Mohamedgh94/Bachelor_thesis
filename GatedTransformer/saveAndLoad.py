@@ -297,17 +297,23 @@ class SaveAndLoadModel:
                 #outputs = self.model(inputs)
 
                 if self.config['output_type'] == 'softmax':
-                    labels = labels.to(self.device)
+                    # print(type(labels))
+                    # print(f"IDS in the batch: {labels['person_id']}")
+                    #print(labels.values(), labels.keys())
+                    labels = labels['person_id'].to(self.device)
+                    #labels = labels.to(self.device)
                     outputs = self.model(inputs)
+                    #print(outputs.shape)
                     loss = multi_task_loss_fn(outputs, labels)
                     _, predicted = torch.max(outputs.data, 1)
                     correct_predictions += (predicted == labels).sum().item()
                     total_predictions += labels.size(0)
                 elif self.config['output_type'] == 'attribute':
                     labels = {task: labels.to(self.device) for task, labels in labels.items()}
+                    #print(labels.values(), labels.keys())
                     outputs = self.model(inputs)
-                    loss = multi_task_loss_fn(outputs, labels)  # Adjust for dictionary handling if needed
-                # For attribute accuracy calculation, adjust as per your criteria
+                    loss = multi_task_loss_fn(outputs, labels) 
+                
 
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)

@@ -45,8 +45,12 @@ class MultiTaskLossFunction(nn.Module):
         
     def forward(self, logits, targets):
         if self.config['output_type'] == 'softmax':
-            person_id_pred = logits[0]
-            person_id_target = targets['person_id']
+            #print(f"Targets type: {type(targets)}")
+            #print(targets)
+            #print(f'logits:{logits.shape}')
+            person_id_pred = logits
+            person_id_target = targets
+            #print(f"Logits shape: {logits.shape}, Targets shape: {person_id_target.shape}")
             loss = F.cross_entropy(person_id_pred, person_id_target)
         elif self.config['output_type'] == 'attribute':
            
