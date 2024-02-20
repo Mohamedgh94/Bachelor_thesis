@@ -341,7 +341,7 @@ class SaveAndLoadModel:
                 inputs = inputs.to(self.device)
                 
                 if self.config['output_type'] == 'softmax':
-                    labels = labels.to(self.device)
+                    labels = labels['person_id'].to(self.device)
                     outputs = self.model(inputs)
                     loss = multi_task_loss_fn(outputs, labels)
                     _, predicted = torch.max(outputs.data, 1)
