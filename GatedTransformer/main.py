@@ -178,8 +178,8 @@ class Main:
         self.loss_fn = loss_fn
         self.config = config
 
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.config['learning_rate'])
-        self.model_saver = SaveAndLoadModel(self.model,optimizer_class=optim.Adam, epochs=self.config['epochs'], config = config,model_path= f"GTN_{config['dataset']}_lr{config['learning_rate']}_bs{config['batch_size']}_model.pth" , device=self.device)
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.config['learning_rate'])
+        self.model_saver = SaveAndLoadModel(self.model,optimizer_class=optim.AdamW, epochs=self.config['epochs'], config = config,model_path= f"GTN_{config['dataset']}_lr{config['learning_rate']}_bs{config['batch_size']}_model.pth" , device=self.device)
         # self.train_loader = DataLoader(IMUDataset(self.config['train_path']), batch_size=self.config['batch_size'], shuffle=True)
         # self.valid_loader = DataLoader(IMUDataset(self.config['valid_path']), batch_size=self.config['batch_size'], shuffle=False)
         # self.test_loader = DataLoader(IMUDataset(self.config['test_path']), batch_size=self.config['batch_size'], shuffle=False)
@@ -302,9 +302,9 @@ def mobiact_main():
    
 if __name__ == "__main__":
     
-    uniMib_main()
+    #uniMib_main()
     #sisFall_main()
-    #mobiact_main()
+    mobiact_main()
 
 
 
