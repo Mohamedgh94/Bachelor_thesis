@@ -295,16 +295,16 @@ def mobiact_main():
     experiment_logger.info('Finished MobiAct experiment setup')
     #model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=8, d_ff=1024, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.3)
     #model = GatedTransformer(input_dim=config["input_size"],d_model=256, num_heads=8, d_ff=512, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.1)
-    model = GatedTransformer(input_dim=config["input_size"],d_model=64, num_heads=4, d_ff=256, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.2)
+    model = GatedTransformer(input_dim=config["input_size"],d_model=128, num_heads=4, d_ff=256, num_layers=6,config = config,num_classes=config['num_classes'] ,dropout_rate=0.2)
     loss_fn = MultiTaskLossFunction(config)
     controller = Main(model, loss_fn, config)
     controller.run_network(config,experiment_logger)    
    
 if __name__ == "__main__":
     
-    uniMib_main()
+    #uniMib_main()
     #sisFall_main()
-    #mobiact_main()
+    mobiact_main()
 
 
 
