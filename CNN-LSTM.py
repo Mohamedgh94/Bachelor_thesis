@@ -46,8 +46,8 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        feature_vector = feature_vector.reshape(1, 5, 9) 
-        #feature_vector = feature_vector.reshape(1, 6, 4)  
+        #feature_vector = feature_vector.reshape(1, 5, 9) 
+        feature_vector = feature_vector.reshape(1, 6, 4)  
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
@@ -81,11 +81,11 @@ class CNNLSTM(nn.Module):
         super(CNNLSTM, self).__init__()
         self.config = config
         # Convolutional and LSTM layers remain unchanged
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.dropout1 = nn.Dropout(0.5)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.dropout2 = nn.Dropout(0.3)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
@@ -97,7 +97,7 @@ class CNNLSTM(nn.Module):
 
         # Output layers adjustment
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
-        self.fc_attributes = nn.Linear(hidden_size, 8) 
+        self.fc_attributes = nn.Linear(hidden_size, 4) 
         self.fc_attributes_Mobiact = nn.Linear(hidden_size, 9)  
         self.softmax = nn.Softmax(dim=1)
         self.sigmoid = nn.Sigmoid()
@@ -208,26 +208,42 @@ import torch.nn.functional as F
 
 ########################################################################
 def combined_loss(predictions, targets, config):
+    bce_loss = nn.BCELoss()
     output_type = config['output_type']
     if output_type == 'softmax':
+        #print(predictions.shape)
         # Assuming the first element in predictions is for person_id
         person_id_pred = predictions[0]
         person_id_target = targets['person_id']
         loss = F.cross_entropy(person_id_pred, person_id_target)
     elif output_type == 'attribute':
         # Assuming the predictions are ordered as age, height, weight, gender
-        age_pred, height_pred, weight_pred, gender_pred = predictions[0:]
+        #print(predictions.shape)
+        # print(predictions)
+        #print(targets.keys())
+        # print(targets['age'])
+        #age_pred, height_pred, weight_pred, gender_pred = predictions[0:]
+        age_pred = predictions[:, 0]
+        height_pred = predictions[:, 1]
+        weight_pred = predictions[:, 2]
+        gender_pred = predictions[:, 3]
         age_target, height_target, weight_target, gender_target = targets['age'], targets['height'], targets['weight'], targets['gender']
 
-        loss_age = F.cross_entropy(age_pred, age_target)
-        loss_height = F.cross_entropy(height_pred, height_target)
-        loss_weight = F.cross_entropy(weight_pred, weight_target)
-        loss_gender = F.cross_entropy(gender_pred, gender_target)
+        loss_age = bce_loss(age_pred, age_target.float())
+        loss_height = bce_loss(height_pred, height_target.float())
+        loss_weight = bce_loss(weight_pred, weight_target.float())
+        
+        if config['dataset'] == 'MobiAct':
+            # Use CrossEntropyLoss for multi-class gender classification
+            loss_gender = F.cross_entropy(gender_pred, gender_target)
+        else:
+            # Use BCELoss for binary gender classification, ensure target is float
+            loss_gender = bce_loss(gender_pred, gender_target.float())
 
         # Combine losses for attributes
-        loss = loss_age + loss_height + loss_weight + loss_gender
+        total_loss = loss_age + loss_height + loss_weight + loss_gender
 
-    return loss
+    return total_loss
 
    
 
@@ -428,8 +444,11 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
         'Unimib': ("/data/malghaja/Bachelor_thesis/UniMib/UniAtt_train_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
-                   "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
+                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv",
+                    "/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv"),
+        # 'Unimib' : ("/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
+        #              "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv",
+        #              "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"),
@@ -695,7 +714,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=1 ,input_size_idx= 0,
+                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -708,7 +727,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_identification')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_Attr')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
@@ -756,7 +775,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
    #mobiact_main()
