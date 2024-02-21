@@ -293,10 +293,10 @@ def validate(model, valid_loader, device,config):
 
 #################################################
 def split_attributes(attributes_output):
-    age_output = attributes_output[:, 0:2]
-    height_output = attributes_output[:, 2:4]
-    weight_output = attributes_output[:, 4:6]
-    gender_output = attributes_output[:, 6:9]
+    age_output = attributes_output[:,0]
+    height_output = attributes_output[:,1]
+    weight_output = attributes_output[:, 2]
+    gender_output = attributes_output[:,3]
     return age_output, height_output, weight_output, gender_output
 
 
@@ -714,7 +714,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=2,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
