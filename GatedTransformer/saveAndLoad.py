@@ -280,7 +280,7 @@ class SaveAndLoadModel:
 
     def train(self, train_loader, epochs=10):
         multi_task_loss_fn = MultiTaskLossFunction(self.config)  # Initialize with config
-        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=0.1)
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=10, gamma=0.1)
         trainings_start_time = time.time()
 
         self.model.train()

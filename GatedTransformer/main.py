@@ -262,12 +262,12 @@ class Main:
             
 def uniMib_main():
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 0,
+                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_Unimib_IDs')    
     experiment_logger.info('Finished UniMib experiment setup')
     #model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=16, d_ff=1024, num_layers=6,config = config,num_classes=config['num_classes'] ,dropout_rate=0.1)
-    model = GatedTransformer(input_dim=config["input_size"],d_model=256, num_heads=8, d_ff=512, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.3)
+    model = GatedTransformer(input_dim=config["input_size"],d_model=64, num_heads=4, d_ff=256, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.2)
 
     loss_fn = MultiTaskLossFunction(config)
     controller = Main(model, loss_fn, config)
@@ -289,13 +289,13 @@ def sisFall_main():
 
 def mobiact_main():
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
-                        gpudevice_idx=2,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                        gpudevice_idx=1,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_MobiAct_identification')    
     experiment_logger.info('Finished MobiAct experiment setup')
-    model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=8, d_ff=1024, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.3)
+    #model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=8, d_ff=1024, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.3)
     #model = GatedTransformer(input_dim=config["input_size"],d_model=256, num_heads=8, d_ff=512, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.1)
-
+    model = GatedTransformer(input_dim=config["input_size"],d_model=64, num_heads=4, d_ff=256, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.2)
     loss_fn = MultiTaskLossFunction(config)
     controller = Main(model, loss_fn, config)
     controller.run_network(config,experiment_logger)    
