@@ -276,9 +276,9 @@ def uniMib_main():
 
 def sisFall_main():
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                        gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                        gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
                             epochs=5)
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_SisFall_identification')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_SisFall_identification2')    
     experiment_logger.info('Finished SisFall experiment setup')
     #model = GatedTransformer(input_dim=config["input_size"],d_model=512, num_heads=16, d_ff=1024, num_layers=6,config = config,num_classes=config['num_classes'] ,dropout_rate=0.1)
     model = GatedTransformer(input_dim=config["input_size"],d_model=64, num_heads=4, d_ff=256, num_layers=4,config = config,num_classes=config['num_classes'] ,dropout_rate=0.3)
