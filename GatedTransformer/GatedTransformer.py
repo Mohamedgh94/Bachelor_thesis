@@ -57,7 +57,7 @@ from gatingMechanism import GatingMechanism
 from multiHeadAttention import MultiHeadAttention
 
 class GatedTransformer(nn.Module):
-    def __init__(self,input_dim, d_model, num_heads, d_ff, num_layers,config,num_classes,dropout_rate=0.1):
+    def __init__(self,input_dim, d_model, num_heads, d_ff, num_layers,config,num_classes,dropout_rate):
         super(GatedTransformer, self).__init__()
         self.config = config
         self.embedding = nn.Linear(input_dim, d_model)
