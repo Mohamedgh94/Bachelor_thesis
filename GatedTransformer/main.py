@@ -254,6 +254,7 @@ class Main:
             print("Test Metrics:")
             for metric, value in test_metrics.items():
                 print(f"{metric}: {value}")
+            save_results(configuration, test_metrics)    
         if configuration["usage_mod"] in ['train', 'train and test']:
             execute_training()
 
@@ -275,8 +276,8 @@ def uniMib_main():
     
 
 def sisFall_main():
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=1 ,input_size_idx= 1,
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
+                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=1 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_SisFall_identification2')    
     experiment_logger.info('Finished SisFall experiment setup')
@@ -289,7 +290,7 @@ def sisFall_main():
 
 def mobiact_main():
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
-                        gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                        gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
                             epochs=5)
     experiment_logger, log_filename  = setup_experiment_logger(experiment_name='GTN_MobiAct_identification')    
     experiment_logger.info('Finished MobiAct experiment setup')
@@ -302,8 +303,8 @@ def mobiact_main():
    
 if __name__ == "__main__":
     
-    uniMib_main()
-    #sisFall_main()
+    #uniMib_main()
+    sisFall_main()
     #mobiact_main()
 
 
