@@ -98,7 +98,7 @@ class CNNLSTM(nn.Module):
         # Output layers adjustment
         self.fc_person_id = nn.Linear(hidden_size, num_classes)
         self.fc_attributes = nn.Linear(hidden_size, 4) 
-        self.fc_attributes_Mobiact = nn.Linear(hidden_size, 9)  
+        self.fc_attributes_Mobiact = nn.Linear(hidden_size, 4)  
         self.softmax = nn.Softmax(dim=1)
         self.sigmoid = nn.Sigmoid()
 
@@ -451,8 +451,8 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         #              "/Users/mohamadghajar/Documents/BAC/Bachelor_thesis/test_data.csv"),
         'SisFall': ("/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv",
-                    "/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
-                    #"/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
+                    #"/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv"
+                    "/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv"
                     ),
         'MobiAct': ("/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_train_data.csv",
                     "/data/malghaja/Bachelor_thesis/MobiAct/Mobiatt_valid_data.csv",
@@ -716,7 +716,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=2,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=10)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
