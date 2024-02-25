@@ -288,6 +288,7 @@ def sisFall_main():
     controller = Main(model, loss_fn, config)
     controller.run_network(config,experiment_logger)
 
+
 def mobiact_main():
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=1, 
                         gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
