@@ -83,14 +83,14 @@ class CNNLSTM(nn.Module):
         # Convolutional and LSTM layers remain unchanged
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
         self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.dropout1 = nn.Dropout(0.2)
+        self.dropout1 = nn.Dropout(0.3)
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
         self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.dropout2 = nn.Dropout(0.2)
+        self.dropout2 = nn.Dropout(0.4)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
         self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.dropout3 = nn.Dropout(0.2)
+        self.dropout3 = nn.Dropout(0.3)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
@@ -120,8 +120,8 @@ class CNNLSTM(nn.Module):
         x = x[:, -1, :]
         
         x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
+        #x = self.relu(self.fc2(x))
+        #x = self.relu(self.fc3(x))
         
         if self.config['output_type'] == 'softmax':
             person_id_output = self.softmax(self.fc_person_id(x))
@@ -715,9 +715,9 @@ def uniMib_main():
     Run experiment for UniMib dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=1, 
-                           gpudevice_idx=2,usage_mod_idx= 2 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
-                            epochs=10)
+    config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
+                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                            epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -777,7 +777,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
    #mobiact_main()
