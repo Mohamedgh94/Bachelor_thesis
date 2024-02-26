@@ -46,8 +46,8 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        feature_vector = feature_vector.reshape(1, 5, 9) 
-        #feature_vector = feature_vector.reshape(1, 6, 4)  
+        #feature_vector = feature_vector.reshape(1, 5, 9) 
+        feature_vector = feature_vector.reshape(1, 6, 4)  
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
@@ -81,11 +81,11 @@ class CNNLSTM(nn.Module):
         super(CNNLSTM, self).__init__()
         self.config = config
         # Convolutional and LSTM layers remain unchanged
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.dropout1 = nn.Dropout(0.3)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
         self.dropout2 = nn.Dropout(0.4)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
@@ -106,7 +106,7 @@ class CNNLSTM(nn.Module):
         # Convolutional and LSTM layers processing remain unchanged
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
-        x = self.dropout1(x)
+        #x = self.dropout1(x)
         x = self.relu(self.conv3(x))
         x = self.relu(self.conv4(x))
         x = self.dropout2(x)
@@ -716,7 +716,7 @@ def uniMib_main():
     """
 
     config = configuration(dataset_idx=0, dataset_paths = 'Unimib',output_idx=0, 
-                           gpudevice_idx=2,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
+                           gpudevice_idx=0,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -729,7 +729,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_Attr')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_ID')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
@@ -777,7 +777,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    #uniMib_main()
+    uniMib_main()
 
-    sisFall_main()
+    #sisFall_main()
    #mobiact_main()
