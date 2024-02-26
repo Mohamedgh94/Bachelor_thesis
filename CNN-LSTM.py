@@ -741,9 +741,9 @@ def sisFall_main():
     Run experiment for SisFall dataset with predefined parameters.
     """
 
-    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
+    config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
-                            gpudevice_idx= 2,epochs=5)
+                            gpudevice_idx= 1,epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
@@ -753,7 +753,7 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_attr')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_IDs')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
