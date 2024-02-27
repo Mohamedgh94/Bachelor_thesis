@@ -766,9 +766,9 @@ def mobiact_main():
     
     config = configuration(dataset_idx=2, dataset_paths = 'MobiAct',output_idx=0, 
                            usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
-                            gpudevice_idx= 1,epochs=10)
+                            gpudevice_idx= 2,epochs=5)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_sunday')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_IDs')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
@@ -777,7 +777,7 @@ def mobiact_main():
 if __name__ == "__main__":
 
     #main()
-    uniMib_main()
+    #uniMib_main()
 
-    #sisFall_main()
+    sisFall_main()
    #mobiact_main()
