@@ -106,7 +106,7 @@ class CNNLSTM(nn.Module):
         # Convolutional and LSTM layers processing remain unchanged
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
-        #x = self.dropout1(x)
+        x = self.dropout1(x)
         x = self.relu(self.conv3(x))
         x = self.relu(self.conv4(x))
         x = self.dropout2(x)
