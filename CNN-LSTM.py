@@ -46,8 +46,8 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        #feature_vector = feature_vector.reshape(1, 5, 9) 
-        feature_vector = feature_vector.reshape(1, 6, 4)  
+        feature_vector = feature_vector.reshape(1, 5, 9) 
+        #feature_vector = feature_vector.reshape(1, 6, 4)  
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
@@ -81,16 +81,16 @@ class CNNLSTM(nn.Module):
         super(CNNLSTM, self).__init__()
         self.config = config
         # Convolutional and LSTM layers remain unchanged
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.dropout1 = nn.Dropout(0.3)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.dropout1 = nn.Dropout(0.4)
+        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
         self.dropout2 = nn.Dropout(0.4)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
         self.lstm = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=2, batch_first=True)
-        self.dropout3 = nn.Dropout(0.3)
+        self.dropout3 = nn.Dropout(0.4)
         self.fc1 = nn.Linear(hidden_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
@@ -742,7 +742,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 1,epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
