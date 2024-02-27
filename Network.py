@@ -729,7 +729,7 @@ def uniMib_main():
 
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
-    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_ID')    
+    experiment_logger, log_filename  = setup_experiment_logger(experiment_name='Unimib_atr')    
     experiment_logger.info('Finished UniMib experiment setup')
 
     run_network(config,experiment_logger)
