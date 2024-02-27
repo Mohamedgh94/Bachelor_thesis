@@ -742,7 +742,7 @@ def sisFall_main():
     """
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=0, 
-                           usage_mod_idx= 2 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
+                           usage_mod_idx= 1 , learning_rates_idx=0,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 1,epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
