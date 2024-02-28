@@ -82,10 +82,10 @@ class CNNLSTM(nn.Module):
         self.config = config
         # Convolutional and LSTM layers remain unchanged
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3, 2), stride=1, padding=(1, 0))
         self.dropout1 = nn.Dropout(0.4)
-        self.conv3 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
-        self.conv4 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv3 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=(3, 2), stride=1, padding=(1, 0))
+        self.conv4 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=(3, 2), stride=1, padding=(1, 0))
         self.dropout2 = nn.Dropout(0.4)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1))
@@ -120,8 +120,8 @@ class CNNLSTM(nn.Module):
         x = x[:, -1, :]
         
         x = self.relu(self.fc1(x))
-        #x = self.relu(self.fc2(x))
-        #x = self.relu(self.fc3(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
         
         if self.config['output_type'] == 'softmax':
             person_id_output = self.softmax(self.fc_person_id(x))
@@ -743,7 +743,7 @@ def sisFall_main():
 
     config = configuration(dataset_idx=1, dataset_paths = 'SisFall',output_idx=1, 
                            usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=0 ,input_size_idx= 1,
-                            gpudevice_idx= 1,epochs=5)
+                            gpudevice_idx= 0,epochs=5)
     #print(config)
     #timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     #log_filename = f"{config['folder_exp']}logger_{timestamp}.txt"
