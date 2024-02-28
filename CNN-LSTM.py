@@ -753,7 +753,7 @@ def sisFall_main():
     # if not os.path.exists(dir_name):
     #     os.makedirs(dir_name)
 
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_att')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='SisFall_att1')   
     experiment_logger.info('Finished UniMib experiment setup')
     # setup_experiment_logger(logging_level=logging.DEBUG, filename=log_filename)
     # #setup_experiment_logger(logging_level=logging.DEBUG, filename=config['folder_exp'] + "logger.txt")
