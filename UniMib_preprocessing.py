@@ -199,7 +199,7 @@ def extract_features(segment):
         features.append(np.sqrt(np.mean(segment[col]**2)))  # RMS
         
     
-    # Cross-sensor correlation features
+    """ # Cross-sensor correlation features
     for i in range(len(sensor_cols)):
         for j in range(i+1, len(sensor_cols)):
             corr, _ = pearsonr(segment[sensor_cols[i]], segment[sensor_cols[j]])
@@ -209,7 +209,7 @@ def extract_features(segment):
     for col in sensor_cols:
         derivative = np.diff(segment[col])  # First derivative
         features.append(np.mean(derivative))
-        features.append(np.std(derivative))
+        features.append(np.std(derivative)) """
 
     feature_names = [
         f'{col}_{stat}' for col in sensor_cols 
@@ -217,7 +217,7 @@ def extract_features(segment):
     ]
     
 
-    # Adding correlation feature names
+    """ # Adding correlation feature names
     correlation_feature_names = [
         f'{sensor_cols[i]}_{sensor_cols[j]}_corr' for i in range(len(sensor_cols)) 
         for j in range(i+1, len(sensor_cols))
@@ -228,7 +228,7 @@ def extract_features(segment):
     derivative_feature_names = [
         f'{col}_derivative_{stat}' for col in sensor_cols for stat in ['mean', 'std']
     ]
-    feature_names.extend(derivative_feature_names)
+    feature_names.extend(derivative_feature_names) """
     
     return pd.Series(features, index=feature_names).astype('float32')
 
