@@ -283,17 +283,20 @@ def split_and_save_data(X, y,z):
         # Use the indices to filter X
         X_train = X.iloc[train_indices]
         y_train = y.iloc[train_indices]
+        z_train = z.iloc[train_indices]
         X_valid = X.iloc[valid_indices]
         y_valid = y.iloc[valid_indices]
+        z_valid = z.iloc[valid_indices]
         X_test = X.iloc[test_indices]
         y_test = y.iloc[test_indices]
+        z_test = z.iloc[test_indices]
 
-        train_data = pd.concat([X_train, y_train], axis=1)
-        valid_data = pd.concat([X_valid, y_valid], axis=1)
-        test_data = pd.concat([X_test, y_test], axis=1)
-        train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
+        train_data = pd.concat([X_train, y_train,z_train], axis=1)
+        valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+        test_data = pd.concat([X_test, y_test,z_test], axis=1)
+        #train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
+        #valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
+        #test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
         train_data.to_csv('Unimib_train_data.csv', index=False)
         valid_data.to_csv('Unimib_valid_data.csv', index=False)
         test_data.to_csv('Unimib_test_data.csv', index=False)
