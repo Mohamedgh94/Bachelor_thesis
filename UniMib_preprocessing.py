@@ -297,9 +297,9 @@ def split_and_save_data(X, y,z):
         #train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
         #valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
         #test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        train_data.to_csv('Unimib_train_data.csv', index=False)
-        valid_data.to_csv('Unimib_valid_data.csv', index=False)
-        test_data.to_csv('Unimib_test_data.csv', index=False)
+        #train_data.to_csv('Unimib_train_data.csv', index=False)
+        #valid_data.to_csv('Unimib_valid_data.csv', index=False)
+        #test_data.to_csv('Unimib_test_data.csv', index=False)
         print('Splitting complete.')
         
     except Exception as e:
@@ -326,7 +326,7 @@ def main():
         all_data = remove_original_sensor_data(all_data) 
         all_data = rearrange_columns(all_data)
         #xxy = all_data.to_csv('ta.csv', index=False)
-        
+        print(all_data.shape)
         print(all_data['gender'].value_counts())
         all_data['gender'] = all_data['gender'].str.strip().str.upper()
         print(all_data['gender'].value_counts())
