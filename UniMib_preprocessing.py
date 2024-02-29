@@ -246,7 +246,7 @@ def rearrange_columns(df):
 
 def split_and_save_data(X, y,z):
     """Split the data into train, validation, and test sets and save them."""
-    try:
+    """ try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
@@ -265,8 +265,8 @@ def split_and_save_data(X, y,z):
         valid_data.to_csv('valid_data.csv', index=False)
         test_data.to_csv('test_data.csv', index=False)
     except Exception as e:
-        print(f"Error in split_and_save_data: {e}")
-    """ try:
+        print(f"Error in split_and_save_data: {e}") """
+    try:
         # Concatenate the labels into a single string for stratification
         # y_stratify = y.apply(lambda x: '_'.join(x.map(str)), axis=1)
         print('Splitting data...')
@@ -300,7 +300,7 @@ def split_and_save_data(X, y,z):
         print('Splitting complete.')
         
     except Exception as e:
-        print(f"Error in split_and_save_data: {e}") """
+        print(f"Error in split_and_save_data: {e}") 
 
 
 def main():
