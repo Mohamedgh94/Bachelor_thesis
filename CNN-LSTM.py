@@ -768,7 +768,7 @@ def mobiact_main():
                            usage_mod_idx= 1 , learning_rates_idx=2,batch_size_idx=2 ,input_size_idx= 1,
                             gpudevice_idx= 2,epochs=5)
      
-    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_IDs')   
+    experiment_logger, log_filename = setup_experiment_logger(experiment_name='Mobiact_att')   
     experiment_logger.info('Finished Mobiact experiment setup')
 
     run_network(config,experiment_logger)
