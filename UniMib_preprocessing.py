@@ -336,6 +336,7 @@ def main():
         print('Normalizing and encoding...')
         print(all_data.columns)
         all_data = normalize_and_encode(all_data)
+        print(all_data.shape)
         print('Normalization and encoding complete.')
         #print(all_data['gender'].value_counts())
         X = all_data.iloc[:, :-6]
