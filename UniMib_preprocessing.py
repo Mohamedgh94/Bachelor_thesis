@@ -292,8 +292,11 @@ def split_and_save_data(X, y,z):
         z_test = z.iloc[test_indices]
 
         train_data = pd.concat([X_train, y_train,z_train], axis=1)
+        print(train_data.shape)
         valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+        print(valid_data.shape)
         test_data = pd.concat([X_test, y_test,z_test], axis=1)
+        print(test_data.shape)
         #train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
         #valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
         #test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
