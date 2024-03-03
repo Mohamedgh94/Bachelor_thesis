@@ -47,9 +47,12 @@ def binarize_data(df):
     df = df.drop(cols_to_drop, axis=1)
     print(df.columns)
     return df
-binarize_data(train_data)
-binarize_data(valid_data)
-binarize_data(test_data)
+train_data = binarize_data(train_data)
+train_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/Unirep_train_data.csv')
+valid_data = binarize_data(valid_data)
+valid_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/Unirep_valid_data.csv')
+test_data =binarize_data(test_data)
+test_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/Unirep_test_data.csv')
 # print(test_data['gender'].value_counts())
 # Define the categorization function
 """ def categorize_age(age):
