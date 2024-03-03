@@ -6,10 +6,51 @@ age_class_counts = data['age'].value_counts()
 
 print(f'gender,{test_class_counts}, age_class_counts , {age_class_counts}')
 """ # Read the datasets
-# train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/SisFall/Sis_train_data.csv')
-# valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/SisFall/Sis_valid_data.csv')
-test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/MobiAct/MobiAtt_test_data.csv')
-print(test_data['gender'].value_counts())
+train_data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniMib/Unimib_train_data.csv')
+valid_data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniMib/Unimib_valid_data.csv')
+test_data = pd.read_csv('/data/malghaja/Bachelor_thesis/UniMib/Unimib_test_data.csv')
+def binarize_data(df):
+    # Define bins
+    age_bins = [0, 25, 40, float('inf')]
+    weight_bins = [0, 65, 75, float('inf')]
+    height_bins = [0, 165, 175, float('inf')]
+
+    # Binarize and print value counts for Age
+    df['age_<30'] = (df['Age'] < age_bins[1]).astype(int)
+    df['age_30-60'] = ((df['Age'] >= age_bins[1]) & (df['Age'] <= age_bins[2])).astype(int)
+    df['age_>60'] = (df['Age'] > age_bins[2]).astype(int)
+    print("Age Bins Value Counts:")
+    print("age_<30:", df['age_<30'].value_counts())
+    print("age_30-60:", df['age_30-60'].value_counts())
+    print("age_>60:", df['age_>60'].value_counts())
+
+    # Binarize and print value counts for Weight
+    df['weight_<65'] = (df['Weight'] < weight_bins[1]).astype(int)
+    df['weight_65-75'] = ((df['Weight'] >= weight_bins[1]) & (df['Weight'] <= weight_bins[2])).astype(int)
+    df['weight_>75'] = (df['Weight'] > weight_bins[2]).astype(int)
+    print("Weight Bins Value Counts:")
+    print("weight_<65:", df['weight_<65'].value_counts())
+    print("weight_65-75:", df['weight_65-75'].value_counts())
+    print("weight_>75:", df['weight_>75'].value_counts())
+
+    # Binarize and print value counts for Height
+    df['height_<165'] = (df['Height'] < height_bins[1]).astype(int)
+    df['height_165-175'] = ((df['Height'] >= height_bins[1]) & (df['Height'] <= height_bins[2])).astype(int)
+    df['height_>175'] = (df['Height'] > height_bins[2]).astype(int)
+    print("Height Bins Value Counts:")
+    print("height_<165:", df['height_<165'].value_counts())
+    print("height_165-175:", df['height_165-175'].value_counts())
+    print("height_>175:", df['height_>175'].value_counts())
+    print(df.columns)
+    df.columns = df.columns.str.strip()
+    cols_to_drop = ['age', 'height', 'weight']
+    df = df.drop(cols_to_drop, axis=1)
+    print(df.columns)
+    return df
+binarize_data(train_data)
+binarize_data(valid_data)
+binarize_data(test_data)
+# print(test_data['gender'].value_counts())
 # Define the categorization function
 """ def categorize_age(age):
     return '0' if age < 40 else '1'
@@ -34,9 +75,9 @@ test_data['height'] = test_data['height'].apply(categorize_height)
 test_data['weight'] = test_data['weight'].apply(categorize_weight)
 
 # Optionally, save the modified datasets
-train_data.to_csv('/data/malghaja/Bachelor_thesis/SisFall/SisAtt_train_data.csv', index=False)
-valid_data.to_csv('/data/malghaja/Bachelor_thesis/SisFall/SisAtt_valid_data.csv', index=False)
-test_data.to_csv('/data/malghaja/Bachelor_thesis/SisFall/SisAtt_test_data.csv', index=False) 
+train_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/SisAtt_train_data.csv', index=False)
+valid_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/SisAtt_valid_data.csv', index=False)
+test_data.to_csv('/data/malghaja/Bachelor_thesis/UniMib/SisAtt_test_data.csv', index=False) 
 
  """
 """ import pandas as pd
