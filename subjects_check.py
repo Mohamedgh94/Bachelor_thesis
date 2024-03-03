@@ -16,28 +16,28 @@ def binarize_data(df):
     height_bins = [0, 165, 175, float('inf')]
 
     # Binarize and print value counts for Age
-    df['age_<30'] = (df['Age'] < age_bins[1]).astype(int)
-    df['age_30-60'] = ((df['Age'] >= age_bins[1]) & (df['Age'] <= age_bins[2])).astype(int)
-    df['age_>60'] = (df['Age'] > age_bins[2]).astype(int)
+    df['age_<25'] = (df['age'] < age_bins[1]).astype(int)
+    df['age_25_40'] = ((df['age'] >= age_bins[1]) & (df['age'] <= age_bins[2])).astype(int)
+    df['age_>40'] = (df['age'] > age_bins[2]).astype(int)
     print("Age Bins Value Counts:")
-    print("age_<30:", df['age_<30'].value_counts())
-    print("age_30-60:", df['age_30-60'].value_counts())
-    print("age_>60:", df['age_>60'].value_counts())
+    print("age_<30:", df['age_<25'].value_counts())
+    print("age_30-60:", df['age_25_40'].value_counts())
+    print("age_>60:", df['age_>40'].value_counts())
 
-    # Binarize and print value counts for Weight
-    df['weight_<65'] = (df['Weight'] < weight_bins[1]).astype(int)
-    df['weight_65-75'] = ((df['Weight'] >= weight_bins[1]) & (df['Weight'] <= weight_bins[2])).astype(int)
-    df['weight_>75'] = (df['Weight'] > weight_bins[2]).astype(int)
-    print("Weight Bins Value Counts:")
+    # Binarize and print value counts for weight
+    df['weight_<65'] = (df['weight'] < weight_bins[1]).astype(int)
+    df['weight_65-75'] = ((df['weight'] >= weight_bins[1]) & (df['weight'] <= weight_bins[2])).astype(int)
+    df['weight_>75'] = (df['weight'] > weight_bins[2]).astype(int)
+    print("weight Bins Value Counts:")
     print("weight_<65:", df['weight_<65'].value_counts())
     print("weight_65-75:", df['weight_65-75'].value_counts())
     print("weight_>75:", df['weight_>75'].value_counts())
 
-    # Binarize and print value counts for Height
-    df['height_<165'] = (df['Height'] < height_bins[1]).astype(int)
-    df['height_165-175'] = ((df['Height'] >= height_bins[1]) & (df['Height'] <= height_bins[2])).astype(int)
-    df['height_>175'] = (df['Height'] > height_bins[2]).astype(int)
-    print("Height Bins Value Counts:")
+    # Binarize and print value counts for height
+    df['height_<165'] = (df['height'] < height_bins[1]).astype(int)
+    df['height_165-175'] = ((df['height'] >= height_bins[1]) & (df['height'] <= height_bins[2])).astype(int)
+    df['height_>175'] = (df['height'] > height_bins[2]).astype(int)
+    print("height Bins Value Counts:")
     print("height_<165:", df['height_<165'].value_counts())
     print("height_165-175:", df['height_165-175'].value_counts())
     print("height_>175:", df['height_>175'].value_counts())
@@ -103,11 +103,11 @@ def print_dataset_info(dataset, dataset_name):
     print(f'{dataset_name} Data subjects:')
     for person_id in dataset['person_id'].unique():
         person_data = dataset[dataset['person_id'] == person_id].iloc[0]
-        #print(f"Person ID: {person_id}, Age: {person_data['age']}, Height: {person_data['height']}, Weight: {person_data['weight']}, Gender: {person_data['gender']}")
+        #print(f"Person ID: {person_id}, Age: {person_data['age']}, height: {person_data['height']}, weight: {person_data['weight']}, Gender: {person_data['gender']}")
     
     print(f"{dataset_name} Age Distribution:\n{dataset['age'].value_counts()}")
-    print(f"{dataset_name} Height Distribution:\n{dataset['height'].value_counts()}")
-    print(f"{dataset_name} Weight Distribution:\n{dataset['weight'].value_counts()}")
+    print(f"{dataset_name} height Distribution:\n{dataset['height'].value_counts()}")
+    print(f"{dataset_name} weight Distribution:\n{dataset['weight'].value_counts()}")
     print(f"{dataset_name} Gender Distribution:\n{dataset['gender'].value_counts()}\n")
 
 # Load data
