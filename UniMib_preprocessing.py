@@ -1,3 +1,4 @@
+import gc
 import scipy.io
 import pandas as pd
 import numpy as np
@@ -182,6 +183,26 @@ def normalize_and_encode(all_data):
         print(f"Error in normalize_and_encode: {e}")
         raise e 
 
+def transform_data_with_fitted_models(data, scaler, gender_le, person_id_le):
+    try:
+        sensor_cols = data.iloc[:, :-6].columns
+        data[sensor_cols] = data[sensor_cols].astype(float)
+        
+        # Transform sensor data with the fitted StandardScaler
+        data[sensor_cols] = scaler.transform(data[sensor_cols])
+
+        # Normalize and encode gender with the fitted LabelEncoder
+        data['gender'] = data['gender'].str.strip().str.upper()
+        data['gender'] = gender_le.transform(data['gender'])
+
+        # Transform person_id with the fitted LabelEncoder
+        data['person_id'] = person_id_le.transform(data['person_id'])
+
+        return data
+    except Exception as e:
+        print(f"Error in transform_data_with_fitted_models: {e}")
+        raise e
+
 import numpy as np
 import pandas as pd
 from scipy.fft import fft
@@ -277,13 +298,17 @@ def split_and_save_data(X, y,z):
 
         # Filter y based on the train, validation, and test ids and get indices for X
         train_indices = y.index[y['person_id'].isin(train_ids)].tolist()
+        print (len(train_indices))
         valid_indices = y.index[y['person_id'].isin(valid_ids)].tolist()
         test_indices = y.index[y['person_id'].isin(test_ids)].tolist()
 
         # Use the indices to filter X
         X_train = X.iloc[train_indices]
+        print(f'x_train : {X_train.shape}')
         y_train = y.iloc[train_indices]
+        print(f'y_train : {y_train.shape}')
         z_train = z.iloc[train_indices]
+        print(f'z_train : {z_train.shape}')
         X_valid = X.iloc[valid_indices]
         y_valid = y.iloc[valid_indices]
         z_valid = z.iloc[valid_indices]
@@ -291,18 +316,31 @@ def split_and_save_data(X, y,z):
         y_test = y.iloc[test_indices]
         z_test = z.iloc[test_indices]
 
-        train_data = pd.concat([X_train, y_train,z_train], axis=1)
+        train_data = pd.concat([X_train, y_train, z_train], axis=1)
+        train_data = normalize_and_encode(train_data)
         print(train_data.shape)
-        valid_data = pd.concat([X_valid, y_valid,z_valid], axis=1)
+        print(train_data['person_id'].value_counts())
+        # Save the transformed train data before deleting it
+        train_data.to_csv('Unimib_train_data.csv', index=False)
+        del train_data, X_train, y_train, z_train
+        gc.collect()
+        valid_data = pd.concat([X_valid, y_valid, z_valid], axis=1)
+        valid_data = normalize_and_encode(valid_data)
         print(valid_data.shape)
-        test_data = pd.concat([X_test, y_test,z_test], axis=1)
+        print(valid_data['person_id'].value_counts())
+        # Save the transformed valid data before deleting it
+        valid_data.to_csv('Unimib_valid_data.csv', index=False)
+        del valid_data, X_valid, y_valid, z_valid
+        gc.collect()
+        test_data = pd.concat([X_test, y_test, z_test], axis=1)
+        test_data = normalize_and_encode(test_data)
         print(test_data.shape)
-        #train_data = train_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        #valid_data = valid_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        #test_data = test_data.sample(frac=1,random_state=1).reset_index(drop=True)
-        #train_data.to_csv('Unimib_train_data.csv', index=False)
-        #valid_data.to_csv('Unimib_valid_data.csv', index=False)
-        #test_data.to_csv('Unimib_test_data.csv', index=False)
+        print(test_data['person_id'].value_counts())
+        # Save the transformed test data before deleting it
+        test_data.to_csv('Unimib_test_data.csv', index=False)
+        del test_data, X_test, y_test, z_test
+        gc.collect()
+
         print('Splitting complete.')
         
     except Exception as e:
@@ -335,8 +373,11 @@ def main():
         print(all_data['gender'].value_counts())
         print('Normalizing and encoding...')
         print(all_data.columns)
-        all_data = normalize_and_encode(all_data)
-        print(all_data.shape)
+        #all_data = normalize_and_encode(all_data)
+        # all_data['person_id'] = all_data['person_id'].copy()
+        # all_data = normalize_and_encode(all_data)
+        # print(all_data.shape)
+        print(all_data['person_id'].unique())
         print('Normalization and encoding complete.')
         #print(all_data['gender'].value_counts())
         X = all_data.iloc[:, :-6]
@@ -351,3 +392,4 @@ def main():
 if __name__ == '__main__':
     main()        
    
+
