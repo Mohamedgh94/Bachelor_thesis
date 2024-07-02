@@ -66,9 +66,6 @@ class IMUDataset(Dataset):
         return combined_categories
     
 
-##############
-##############
-
 import torch.nn as nn
 import torch.nn.functional as F
 import logging
@@ -208,6 +205,14 @@ def validate(model, valid_loader, device,config):
     return val_loss
 
 #################################################
+def split_attributes(attributes_output):
+    age_output = attributes_output[:, 0:2]
+    height_output = attributes_output[:, 2:4]
+    weight_output = attributes_output[:, 4:6]
+    gender_output = attributes_output[:, 6:9]
+    return age_output, height_output, weight_output, gender_output
+
+
 
 
 from sklearn.metrics import  accuracy_score, precision_recall_fscore_support

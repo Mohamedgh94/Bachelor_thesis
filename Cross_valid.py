@@ -23,6 +23,7 @@ class IMUDataset(Dataset):
     def __init__(self, csv_file, transform=None):
         # Read the CSV file
         self.dataframe = pd.read_csv(csv_file)
+        self.dataframe = self.dataframe.iloc[:, 1:]
         self.transform = transform
         # Assuming the last 5 columns are labels
         self.labels = self.dataframe.iloc[:, -6:-1].values
@@ -46,7 +47,8 @@ class IMUDataset(Dataset):
             'gender': torch.tensor(label_vector[4], dtype=torch.long),
         }
         # Reshape the feature vector into a 2D matrix (1x4x6 for a single channel)
-        feature_vector = feature_vector.reshape(1, 5, 9)  
+        # feature_vector = feature_vector.reshape(1, 5, 9)  
+        feature_vector = feature_vector.reshape(1, 6, 4)
         if self.transform:
             feature_vector = self.transform(feature_vector)
 
@@ -81,84 +83,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import logging
 
-""" class CNNLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes, config):
-        super(CNNLSTM, self).__init__()
-
-        self.config = config
-        # Convolutional layers
-        self.conv1 = nn.Conv1d(in_channels=input_size, out_channels=64, kernel_size=3, stride=1, padding=1)
-        self.relu = nn.ReLU()
-        
-        self.conv2 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
-        self.relu2 = nn.ReLU()
-        
-        self.conv3 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
-        self.relu3 = nn.ReLU()
-        
-        self.conv4 = nn.Conv1d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
-        self.relu4 = nn.ReLU()
-        self.dropout1 = nn.Dropout(0.3)
-        
-        # Pooling layer
-        self.pool = nn.MaxPool1d(kernel_size=1, stride=1)
-
-        # LSTM layer
-        # Adjust the input size of the LSTM layer based on the pooling operation and the number of output channels of the last conv layer
-        self.lstm1 = nn.LSTM(input_size=64, hidden_size=hidden_size, num_layers=1, batch_first=True)
-        self.dropout2 = nn.Dropout(0.3)
-        # Fully connected layers
-        self.fc1 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc1 = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc2 = nn.ReLU()
-        self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.relu_fc3 = nn.ReLU()
-        
-        # Output layers
-        self.fc_person_id = nn.Linear(hidden_size, num_classes)
-        self.fc_age = nn.Linear(hidden_size, 2)
-        self.fc_height = nn.Linear(hidden_size, 2)
-        self.fc_weight = nn.Linear(hidden_size, 2)
-        self.fc_gender = nn.Linear(hidden_size, 2)
-
-        logging.info(f"Initialized CNN-LSTM model with architecture: {self}")
-
-    def forward(self, x):
-        x = x.permute(0, 2, 1)
-
-        # Convolutional layers
-        x = self.relu(self.conv1(x))
-        x = self.relu2(self.conv2(x))
-        x = self.relu3(self.conv3(x))
-        x = self.dropout1(self.relu4(self.conv4(x)))
-        
-        # Apply pooling layer
-        x = self.pool(x)
-
-        x = x.permute(0, 2, 1)  # Rearrange dimensions for LSTM input
-        x, _ = self.lstm1(x)  # LSTM layer
-        x = self.dropout2(x)
-        x = x[:, -1, :]  # Get the last time step's output
-
-        # Fully connected layers
-        x = self.relu_fc1(self.fc1(x))
-        x = self.relu_fc2(self.fc2(x))
-        x = self.relu_fc3(self.fc3(x))
-
-        # Output layer decisions based on config
-        if self.config['output_type'] == 'softmax':
-            person_id_output = torch.softmax(self.fc_person_id(x), dim=1)
-            return person_id_output
-        elif self.config['output_type'] == 'attribute':
-            age = torch.sigmoid(self.fc_age(x))
-            height = torch.sigmoid(self.fc_height(x))
-            weight = torch.sigmoid(self.fc_weight(x))
-            gender = torch.sigmoid(self.fc_gender(x))
-            return age, height, weight, gender """
 
 class CNNLSTM(nn.Module):
-    def __init__(self, input_channels, hidden_size, num_classes, config):
+    def __init__(self, input_channels, hidden_size, num_classes,kernel_size,num_conv_layers,dropout, activation_function,config):
         super(CNNLSTM, self).__init__()
         self.config = config
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(3, 1), stride=1, padding=(1, 0))
@@ -421,7 +348,8 @@ def load_model(self):
         self.model.load_state_dict(torch.load(self.model_path))
         print(f"Model loaded from {self.model_path}")
 now = datetime.datetime.now()
-def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs):
+def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_rates_idx, batch_size_idx,input_size_idx,gpudevice_idx,epochs,num_conv_layers_idx,num_filters_idx,
+                  kernel_size_idx,lstm_hidden_size_idx,num_lstm_layers_idx,dropout_idx,activation_function_idx):
     dataset = {0 : 'Unimib', 1 : 'SisFall', 2 : 'MobiAct' }
     num_classes = {'Unimib': 30, 'SisFall': 38, 'MobiAct': 67}  
     dataset_paths = {
@@ -447,6 +375,13 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
     usage_mod = { 0 : 'tarin', 1: 'train and test', 2 : 'test' }
     epochs = epochs
     train_path, valid_path, test_path = dataset_paths[dataset[dataset_idx]]
+    num_conv_layers =[2, 3, 4],  # Number of Convolutional Layers
+    num_filters= [32, 64, 128],  # Number of Filters per Convolutional Layer
+    kernel_size = [(3, 1), (3, 2),(2,3)],
+    hidden_size = [64, 128, 256],  # Hidden Size of LSTM Units
+    num_lstm_layers=  [1, 2, 3],  # Number of LSTM Layers
+    dropout = [0.0, 0.25, 0.5],
+    activation_function= ['relu', 'tanh'],
     config= {
         "dataset": dataset[dataset_idx],
         "train_path": train_path,
@@ -461,13 +396,20 @@ def configuration(dataset_idx,dataset_paths,output_idx, usage_mod_idx,learning_r
         "output_type": output[output_idx],
         "batch_size": batch_sizes[batch_size_idx],
         "epochs": epochs,
+        "num_conv_layers": num_conv_layers[num_conv_layers_idx],  # Number of Convolutional Layers
+        "num_filters": num_filters[num_filters_idx],  # Number of Filters per Convolutional Layer
+        "kernel_size": kernel_size[kernel_size_idx],
+        "hidden_size": hidden_size[lstm_hidden_size_idx],  # Hidden Size of LSTM Units
+        "num_lstm_layers": num_lstm_layers[num_lstm_layers_idx],  # Number of LSTM Layers
+        "dropout": dropout[dropout_idx],
+        "activation_function": ['relu', 'tanh'],
         'file_suffix': 'results_yy{}mm{}dd{:02d}.xml'.format(now.year,
                                                                                           now.month,
                                                                                           now.day,
                                                                                           now.hour,
                                                                                           now.minute),
 
-        'hidden_size' : 128,
+        #'hidden_size' : 128,
         'num_classes' : num_classes[dataset[dataset_idx]]
                                                                                   
         #"input_size": input_size,
@@ -806,7 +748,17 @@ def cross_validate_with_hyperparameter_tuning(train_dataset_path, valid_dataset_
             valid_loader = DataLoader(valid_dataset, batch_size=current_config["batch_size"], shuffle=False)
             test_loader = DataLoader(test_dataset, batch_size=current_config["batch_size"], shuffle=False)
 
-            model = CNNLSTM(1, current_config['hidden_size'], current_config['num_classes'], current_config).to(device)
+            model = CNNLSTM(1, 
+                hidden_size=current_config['hidden_size'], 
+                num_classes=current_config['num_classes'], 
+                kernel_size=current_config['kernel_size'],  # Ensure this is correctly passed
+                #num_filters=current_config['num_filters'], 
+                num_conv_layers=current_config['num_conv_layers'], 
+                #hidden_size=current_config['hidden_size'], 
+                #num_lstm_layers=current_config['num_lstm_layers'], 
+                dropout=current_config['dropout'], 
+                activation_function=current_config['activation_function'], 
+                config=current_config).to(device)
             optimizer = optim.Adam(model.parameters(), lr=current_config["learning_rate"])
 
             # Training and validation
@@ -836,7 +788,8 @@ if __name__ == "__main__":
 
     #sisFall_main()
     #mobiact_main()
-    base_config = configuration(dataset_idx=0, dataset_paths = 'SisFall',output_idx=1, 
+    base_config = configuration(dataset_idx=0, dataset_paths = 'SisFall',output_idx=1,num_conv_layers_idx=0,num_filters_idx=0,kernel_size_idx=0,
+                                lstm_hidden_size_idx=0,num_lstm_layers_idx=0,dropout_idx=0,activation_function_idx='relu', 
                            gpudevice_idx=1,usage_mod_idx= 1 , learning_rates_idx=1,batch_size_idx=2 ,input_size_idx= 0,
                             epochs=10)
     
@@ -845,8 +798,8 @@ if __name__ == "__main__":
         "batch_size": [32, 64, 128],
         "learning_rate": [1e-3, 1e-4, 1e-5],
         "num_conv_layers": [2, 3, 4],  # Number of Convolutional Layers
-        "num_filters": [32, 64, 128],  # Number of Filters per Convolutional Layer
-        "kernel_size": [(3, 3), (5, 5)],
+        #"num_filters": [32, 64, 128],  # Number of Filters per Convolutional Layer
+        "kernel_size": [(3, 1), (3, 2)],
         "lstm_hidden_size": [64, 128, 256],  # Hidden Size of LSTM Units
         "num_lstm_layers": [1, 2, 3],  # Number of LSTM Layers
         "dropout": [0.0, 0.25, 0.5],
@@ -854,8 +807,11 @@ if __name__ == "__main__":
     }
 
     logger = setup_experiment_logger()
-    train_dataset_path = '/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv'
-    valid_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv'
-    test_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv'
+    # train_dataset_path = '/data/malghaja/Bachelor_thesis/SisFall/SisCat_train_data.csv'
+    # valid_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_valid_data.csv'
+    # test_dataset_path = '/data/malghaja/Bachelor_thesis/UniMib/UniAtt_test_data.csv'
+    train_dataset_path = '/Users/mohamadghajar/Desktop/py_exampels/UniCat_valid_data.csv'
+    valid_dataset_path = '/Users/mohamadghajar/Desktop/py_exampels/UniCat_valid_data.csv'
+    test_dataset_path = '/Users/mohamadghajar/Desktop/py_exampels/UniCat_valid_data.csv'
     best_config = cross_validate_with_hyperparameter_tuning(train_dataset_path,valid_dataset_path,test_dataset_path, base_config, hyperparams)
     

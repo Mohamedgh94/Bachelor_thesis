@@ -83,8 +83,8 @@ for subject_folder in os.listdir(output_directory):
 empty_folders_check 
 """
 
-#DATA_DIR = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/untitled folder 2'
-DATA_DIR = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
+DATA_DIR = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/untitled folder 2'
+#DATA_DIR = '/data/malghaja/UniMib-Shar/UniMib-Shar_data'
 SUBJECT_IDS = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','17','18','19','20','21','22','23','24','25','26','27','28','29','30']
 
 WINDOW_SIZE = 200
@@ -92,8 +92,8 @@ STRIDE = 50
 SOFT_BIOMETRICS= ['age', 'height', 'weight', 'gender']
 
 def get_person_info(subject_id):
-    file_path = '/data/malghaja/Bachelor_thesis/subjects_info.csv'  
-    #file_path = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/subjects_info.csv' 
+    #file_path = '/data/malghaja/Bachelor_thesis/subjects_info.csv'  
+    file_path = '/Users/mohamadghajar/Downloads/UniMiB-SHAR/subjects_info.csv' 
     person_info = pd.read_csv(file_path)
     
     # Filter the DataFrame based on the Subject_ID
@@ -321,7 +321,7 @@ def split_and_save_data(X, y,z):
         print(train_data.shape)
         print(train_data['person_id'].value_counts())
         # Save the transformed train data before deleting it
-        train_data.to_csv('Unimib_train_data.csv', index=False)
+        #train_data.to_csv('Unimib_train_data.csv', index=False)
         del train_data, X_train, y_train, z_train
         gc.collect()
         valid_data = pd.concat([X_valid, y_valid, z_valid], axis=1)
@@ -337,7 +337,7 @@ def split_and_save_data(X, y,z):
         print(test_data.shape)
         print(test_data['person_id'].value_counts())
         # Save the transformed test data before deleting it
-        test_data.to_csv('Unimib_test_data.csv', index=False)
+        #test_data.to_csv('Unimib_test_data.csv', index=False)
         del test_data, X_test, y_test, z_test
         gc.collect()
 
